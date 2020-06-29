@@ -1,4 +1,0 @@
-discord.py
-quart
-dblpy
-asyncpg
