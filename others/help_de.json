@@ -1,0 +1,262 @@
+{
+  "kick": [
+    "Kickt einen User vom Server.",
+    "\n**__Command:__** {p}kick < **`User`** > [ `Grund` ]",
+    "\n**__Beispiel:__**",
+    " » {p}kick @Plyoxx#0000",
+    " » {p}kick 505433541916622850 Spamming"
+  ],
+  "ban": [
+    "Bannt einen User vom Server.",
+    "\n**__Command:__** {p}ban < **`User`** > [ `Grund` ]",
+    "\n**__Beispiel:__**",
+    " » {p}ban @Plyoxx#0000",
+    " » {p}ban 505433541916622850 Werbung"
+  ],
+  "tempban": [
+    "Bannt einen User temporär vom Server.",
+    "**__Zeiten:__** `h`, `d`, `mon`, `y`",
+    "\n**__Command:__** {p}tempban < **`User`** > < **`Zeit`** > [ `Grund` ]",
+    "\n**__Beispiel:__**",
+    " » {p}tempban @Plyoxx#0000 7d Werbung",
+    " » {p}tempban 505433541916622850 1h Spamming"
+  ],
+  "tempmute": [
+    "Mutet einen User temporär auf dem Server.",
+    "**__Zeiten:__** [ `h`, `d`, `mon`, `y` ]",
+    "\n**__Command:__** {p}tempmute < **`User`** > < **`Zeit`** > [ `Grund` ]",
+    "\n**__Beispiel:__**",
+    " » {p}tempmute @Plyoxx#0000 7d Chatverhalten",
+    " » {p}tempmute 505433541916622850 1h Spamming"
+  ],
+  "clear": [
+    "Löscht eine bestimmte Anzahl von Nachrichten in einem Channel.",
+    "\n**__Command:__** {p}clear < **`Anzahl`** > [ `Grund` ]",
+    "\n**__Beispiel:__**",
+    " {p}clear 50",
+    " {p}clear 50 Spamming"
+  ],
+  "softban": [
+    "Bannt einen User und entbannt ihn danach sofort wieder.",
+    "\n**__Command:__** {p}softban < **`User`** > [ `Grund` ]",
+    "\n**__Beispiel:__**",
+    " » {p}softban @Plyoxx#0000",
+    " » {p}softban 505433541916622850 Spamming"
+  ],
+  "massban": [
+    "Bannt mehrere User vom Server.",
+    "\n**__Argumente:__** [RoboDanny Command Help](https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/mod.py#L777-L808)"
+  ],
+  "warn": [
+    "Warnt einen User und fügt ihn Punkte hinzu.",
+    "\n**__Command:__** {p}warn < **`User`** > < **`Punkte`** > [ `Grund` ]",
+    "\n**__Beispiel:__**",
+    " » {p}warn @Plyoxx#0000 5",
+    " » {p}warn 505433541916622850 8 Links"
+  ],
+  "level": [
+    "Zeigt sein eigenes Level oder das Level eines Users an.",
+    "\n**__Command:__** {p}level [ `User` ]",
+    "\n**__Beispiel:__**",
+    " » {p}level",
+    " » {p}level @Plyoxx#0000"
+  ],
+  "top": [
+    "Zeigt die Top 10 User auf dem Server an.",
+    "\n**__Command:__** {p}top"
+  ],
+  "prefix": [
+    "Ändert den Prefix auf dem Server.",
+    "\n**__Command:__** {p}prefix < **`Prefix`** >",
+    "\n**__Beispiel:__**",
+    " » {p}prefix >",
+    " » {p}prefix *"
+  ],
+  "info": [
+    "Gibt Informationen über einen User oder über sich selbst aus.",
+    "\n**__Command:__** {p}info [ `User` ]",
+    "\n**__Beispiel__**",
+    " » {p}info",
+    " » {p}info @Plyoxx#0000"
+  ],
+  "server": [
+    "Gibt Informationen über einen Server aus.",
+    "\n**__Command:__** {p}server"
+  ],
+  "todayjoined": [
+    "Zeigt die Anzahl der User an, die heute auf dem User gejoint sind.",
+    "\n**__Command:__** {p}todayjoined"
+  ],
+  "someone": [
+    "Gibt einen zufälligen User aus.",
+    "\n**__Command:__** {p}someone"
+  ],
+  "joined": [
+    "Zeigt die Joinposition eines Users oder den User einer Joinposition aus.",
+    "\n**__Command:__** {p}joined [ `User` | `Position` ]",
+    "\n**__Beispiel__**",
+    " » {p}joined",
+    " » {p}joined 1",
+    " » {p}joined @Plyoxx#0000"
+  ],
+  "bot": [
+    "Gibt Informationen über den Bot aus.",
+    "\n**__Command:__** {p}bot"
+  ],
+  "invite": [
+    "Schickt einen Invite, um den Bot auf einen Server einzuladen.",
+    "\n**__Command:__** {p}invite"
+  ],
+  "ping": [
+    "Zeigt die Latenz des Bots zur Discord-API.",
+    "\n**__Command:__** {p}ping"
+  ],
+  "rules": [
+    "Schickt Regeln in den aktuellen Channel.",
+    "\n**__Command:__** {p}rules"
+  ],
+  "rules1": [
+    "Schickt Regeln in den aktuellen Channel.",
+    "\n**__Command:__** {p}rules1"
+  ],
+  "namehistory": [
+    "Gibt die Minecraft-Namehistory eines Spielers aus.",
+    "\n**__Command:__** {p}namehistory < **`Name`** >",
+    "\n**__Beispiel__**",
+    " » {p}namehistory JohannesIBK"
+  ],
+  "color": [
+    "Gibt eine zufällige Farbe aus.",
+    "\n**__Command:__** {p}color"
+  ],
+  "minesweeper": [
+    "Generiert ein Minesweeper-Spiel mit Spoiler-Nachrichten.",
+    "\n**__Command:__** {p}minesweeper",
+    "\n**__Beispiel__**",
+    " » {p}minesweeper"
+  ],
+  "command": [
+    "Managen von den Custom-Commands",
+    "\n**__Command:__**",
+    " » {p}command add < **`Name`** > < **`Content`** >",
+    " » {p}command edit < **`Name`** > < **`Content`** >",
+    " » {p}command delete < **`Name`** >",
+    "\n**__Beispiel__**",
+    " » {p}command add Test Der Command funktioniert!",
+    " » {p}command edit Test Der Command funktioniert! :D",
+    " » {p}command delete Test"
+  ],
+  "activate": [
+    "Aktiviert ein Modul und seine Commands.",
+    "\n**__Command:__**",
+    " » {p}activate games",
+    " » {p}activate leveling",
+    " » {p}activate automoderation",
+    " » {p}activate welcomer"
+  ],
+  "deactivate": [
+    "Deaktiviert ein Modul und seine Commands.",
+    "\n**__Command:__**",
+    " » {p}deactivate games",
+    " » {p}deactivate leveling",
+    " » {p}deactivate automoderation",
+    " » {p}deactivate welcomer"
+  ],
+  "points": [
+    "Erlaubt das Abfragen von Punkten eines bestimmten Users.",
+    "\n**__Command:__** {p}points < **`User`** >",
+    "\n**__Beispiel:__**",
+    " » {p}points @Plyoxx#0000",
+    " » {p}points 505433541916622850"
+  ],
+  "coinflip": [
+    "Schmeißt einen Coin.",
+    "\n**__Command:__** {p}coinflip"
+  ],
+  "thisorthat": [
+    "Wählt eine Option aus.",
+    "\n**__Command:__** {p}thisorthat < **`Fragen`** >",
+    "\n**__Beispiel:__**",
+    " » {p}thisorthat Minecraft | Fortnite | Valorant"
+  ],
+  "ship": [
+    "Passen die zwei User zusammen?",
+    "\n**__Command:__** {p}ship < **`User`** > [ `User` ]",
+    "\n**__Beispiel:__**",
+    " » {p}ship @Plyoxx#0000 @JohannesIBK#9220",
+    " » {p}ship "
+  ],
+  "slot": [
+    "Eine Slotmaschine. Glücksspiel, aber ohne Geld :o",
+    "\n**__Command:__** {p}slot"
+  ],
+  "rolemembers": [
+    "Gibt die Anzahl der User mit dieser Rolle aus.",
+    "\n**__Command:__** {p}rolemembers < **`Rolle`** >",
+    "\n**__Beispiel:__**",
+    " » {p}rolemembers @Admins",
+    " » {p}rolemembers 505807411743948000"
+  ],
+  "bin": [
+    "Wandelt eine Zahl in eine Binärzähl um.",
+    "\n**__Command:__** {p}bin < **`Nummer`** >",
+    "\n**__Beispiel:__**",
+    " » {p}bin 10"
+  ],
+  "hex": [
+    "Wandelt eine Zahl in eine Hexadezimalzahl um.",
+    "\n**__Command:__** {p}hex < **`Nummer`** >",
+    "\n**__Beispiel:__**",
+    " » {p}hex 10"
+  ],
+  "caseing": [
+    "Wandelt den Text in So EiNeN tExT uM.",
+    "\n**__Command:__** {p}caseing < **`Text`** >",
+    "\n**__Beispiel:__**",
+    " » {p}caseing Wie geht es dir? :D"
+  ],
+  "reverse": [
+    ".mu txeT ned therD",
+    "\n**__Command:__** {p}reverse < **`Text`** >",
+    "\n**__Beispiel:__**",
+    " » {p}caseing Dreht den Text um."
+  ],
+  "avatar": [
+    "Schickt den Avatar eines USers in den Channel.",
+    "\n**__Command:__** {p}avatar [ `User` ]",
+    "\n**__Beispiel:__**",
+    " » {p}ship @Plyoxx#0000"
+  ],
+  "resetlevel": [
+    "Resetet das Level eines Users.",
+    "\n**__Command:__** {p}resetlevel < **`User`** >",
+    "\n**__Beispiel:__**",
+    " » {p}resetlevel @Plyoxx#0000"
+  ],
+  "twitchsings": [
+    "Durchsucht die `Twitch Sings`-Songs nach deinen Kriterien.",
+    "\n**__Command:__** {p}twitchsings < **`Argumente`** >",
+    "\n**__Argumente:__**",
+    " » **`--lang`** Sprache des Songs",
+    " » **`--year`** Jahr in dem der Song erschien",
+    " » **`--range`** Jahre mehr oder weniger",
+    " » **`--genre`** Genre des Songs",
+    " » **`--name`** Name des Songs, wenn Abstand: `\"Name des Songs\"`",
+    " » **`--same`** Ob der Name genau dem des Songs entsprechen soll (True|False)",
+    " » **`--count`** Wie viele Songs maximal zurückgegeben werden sollen",
+    " » **`--by`** Von wem der Song sein soll",
+    "\n**__Beispiel:__**",
+    " » {p}twitchsings --by=disney --year=2013 --count=5",
+    " » {p}twitchsings --name=frozen --year=2010 --range=3 --count=2",
+    " » {p}twitchsings --lang=de --by=disney",
+    " » {p}twitchsings --genre=schlager --by=Sia"
+  ],
+  "members": [
+    "Zeigt die Mitgliederanzahl des Discord an.",
+    "\n**__Command:__** {p}members"
+  ],
+  "dice": [
+    "Ein einfacher Würfel.",
+    "\n**__Command:__** {p}dice"
+  ]
+}

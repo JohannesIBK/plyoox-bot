@@ -1,0 +1,7 @@
+
+*.xml
+*.meta
+*.pyc
+*.zip
+*.iml
+*.env
