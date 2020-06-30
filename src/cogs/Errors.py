@@ -115,9 +115,6 @@ class Errors(commands.Cog):
                     embed.add_field(name='Error',
                                     value=f'{type(error).__name__}: {error}')
                     await channel.send(embed=embed)
-
-
-
         else:
             await ctx.send(error)
 

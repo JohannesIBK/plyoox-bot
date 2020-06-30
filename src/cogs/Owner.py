@@ -12,7 +12,7 @@ from discord.ext import commands
 
 import main
 from utils.ext import standards
-from utils.ext.cmds import cmd
+from utils.ext.cmds import cmd, grp
 
 
 class Owner(commands.Cog):
@@ -227,21 +227,21 @@ class Owner(commands.Cog):
 
     @cmd()
     @commands.is_owner()
-    async def sql(self, ctx, type: str, *, sql: str):
-        if type == 'exec':
+    async def sql(self, ctx, pgType: str, *, sql: str):
+        if pgType == 'exec':
             resp = await self.bot.db.execute(sql)
-        elif type == 'fetch':
+        elif pgType == 'fetch':
             resp = await self.bot.db.fetch(sql)
-        elif type == 'fetchrow':
+        elif pgType == 'fetchrow':
             resp = await self.bot.db.fetchrow(sql)
-        elif type == 'fetchval':
+        elif pgType == 'fetchval':
             resp = await self.bot.db.fetchval(sql)
         else:
             return await ctx.send(embed=standards.getErrorEmbed('Keine valider type'))
 
         await ctx.send(embed=discord.Embed(color=standards.normal_color, description=str(resp)))
 
-    @commands.command()
+    @cmd()
     @commands.is_owner()
     async def reloadutils(self, ctx, name: str):
         try:
@@ -254,6 +254,50 @@ class Owner(commands.Cog):
             return await ctx.send(f'```py\n{e}{traceback.format_exc()}\n```')
 
         await ctx.send(f"Reloaded module **{name}**")
+
+    @grp(aliases=['maint'])
+    @commands.is_owner()
+    async def maintenance(self, ctx):
+        if ctx.invoked_subcommand is None:
+            with open('utils/simpleStorage.json', 'r') as file:
+                data = json.load(file)
+
+            await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                               description=f'Maintenance: {data["maintenance"]}'))
+
+    @maintenance.command()
+    async def activate(self, ctx):
+        with open('utils/simpleStorage.json', 'r+') as file:
+            data = json.load(file)
+            file.seek(0)
+            data['maintenance'] = True
+            json.dump(data, file)
+            file.truncate()
+            await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                               description=f'Maintenance: True'))
+        await self.bot.change_presence(
+            activity=discord.Activity(
+                type=discord.ActivityType.playing,
+                name='plyoox.net | ⚠ Wartungen'),
+            status=discord.Status.idle)
+
+
+    @maintenance.command()
+    async def deactivate(self, ctx):
+        with open('utils/simpleStorage.json', 'r+') as file:
+            data = json.load(file)
+            file.seek(0)
+            data['maintenance'] = False
+            json.dump(data, file)
+            file.truncate()
+            await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                               description=f'Maintenance: False'))
+
+        await self.bot.change_presence(
+            activity=discord.Activity(
+                type=discord.ActivityType.listening,
+                name='plyoox.net | +help'),
+            status=discord.Status.online)
 
 
 def setup(bot):

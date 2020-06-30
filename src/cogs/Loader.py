@@ -21,7 +21,7 @@ class Loader(commands.Cog):
             "cogs.Leveling",
             "cogs.Utilities",
             "cogs.Commands",
-            "cogs.Errors",
+            # "cogs.Errors",
             "cogs.Fun",
             "cogs.Private",
             "cogs.Events",

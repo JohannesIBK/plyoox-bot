@@ -160,14 +160,13 @@ class Events(commands.Cog):
 
     @update_stats.before_loop
     async def before_update_stats(self):
-        if self.bot.user.id != 505433541916622850:
+        if self.bot.user.id != 5054335413916622850:
             self.update_stats.cancel()
         await self.bot.wait_until_ready()
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: typing.Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]):
         guild: discord.Guild = channel.guild
-
         muteRoleID = await self.bot.db.fetchval('SELECT muterole from automod.config WHERE sid = $1', guild.id)
         muteRole = guild.get_role(muteRoleID)
         if muteRole is None:
@@ -177,34 +176,25 @@ class Events(commands.Cog):
             if channel.permissions_synced:
                 return
 
-            overwrites = {
-                muteRole: discord.PermissionOverwrite(
-                    send_messages=False,
-                    add_reactions=False
-                ),
-            }
-            await channel.edit(overwrites=overwrites)
+            overwrite = discord.PermissionOverwrite.from_pair(
+                deny=discord.Permissions(permissions=2099776),
+                allow=discord.Permissions(permissions=0))
+            return await channel.set_permissions(muteRole, overwrite=overwrite)
 
         if isinstance(channel, discord.VoiceChannel):
             if channel.permissions_synced:
                 return
 
-            overwrites = {
-                muteRole: discord.PermissionOverwrite(
-                    speak=False
-                ),
-            }
-            await channel.edit(overwrites=overwrites)
+            overwrite = discord.PermissionOverwrite.from_pair(
+                deny=discord.Permissions(permissions=2097664),
+                allow=discord.Permissions(permissions=0))
+            return await channel.set_permissions(muteRole, overwrite=overwrite)
 
         if isinstance(channel, discord.CategoryChannel):
-            overwrites = {
-                muteRole: discord.PermissionOverwrite(
-                    speak=False,
-                    send_messages=False,
-                    add_reactions=False
-                ),
-            }
-            await channel.edit(overwrites=overwrites)
+            overwrite = discord.PermissionOverwrite.from_pair(
+                deny=discord.Permissions(permissions=2099776),
+                allow=discord.Permissions(permissions=0))
+            return await channel.set_permissions(muteRole, overwrite=overwrite)
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role):
@@ -216,9 +206,6 @@ class Events(commands.Cog):
 
         if role.id == joinRole:
             return await self.bot.db.execute("UPDATE config.joining SET role = NULL WHERE sid = $1", guild.id)
-
-        if role.id == configRoles['muterole']:
-            return await self.bot.db.execute("UPDATE automod.config SET muterole = NULL WHERE sid = $1", guild.id)
 
         if levelingRoles is not None:
             if (xpRoles := levelingRoles['noxproles']) is not None:
@@ -233,11 +220,15 @@ class Events(commands.Cog):
                         if lvlRole[0] == role.id:
                             return await self.bot.db.execute("UPDATE config.leveling SET roles = array_remove(roles, $1) WHERE sid = $2", lvlRole, guild.id)
 
-        if (modRoles := configRoles['modroles']) is not None:
-            if role.id in modRoles:
-                for modRole in modRoles:
-                    if role.id == modRole:
-                        return await self.bot.db.execute("UPDATE automod.config SET modroles = array_remove(modroles, $1) WHERE sid = $2", role.id, guild.id)
+        if configRoles is not None:
+            if (modRoles := configRoles['modroles']) is not None:
+                if role.id in modRoles:
+                    for modRole in modRoles:
+                        if role.id == modRole:
+                            return await self.bot.db.execute("UPDATE automod.config SET modroles = array_remove(modroles, $1) WHERE sid = $2", role.id, guild.id)
+
+            if role.id == configRoles['muterole']:
+                return await self.bot.db.execute("UPDATE automod.config SET muterole = NULL WHERE sid = $1", guild.id)
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
@@ -259,7 +250,7 @@ class Events(commands.Cog):
         elif channel.id == logChannel:
             return await self.bot.db.execute("UPDATE automod.config SET logchannel = NULL WHERE sid = $1", guild.id)
 
-        elif lvlChannel == channel.id:
+        elif channel.id == lvlChannel:
             return await self.bot.db.execute("UPDATE config.leveling SET channel = NULL WHERE sid = $1", guild.id)
 
         if noXpChannels is not None:

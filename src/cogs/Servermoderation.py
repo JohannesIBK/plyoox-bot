@@ -128,6 +128,50 @@ class Servermoderation(commands.Cog):
         embed.set_footer(text="by JohannesIBK")
         await ctx.send(embed=embed)
 
+    @cmd()
+    @checks.hasPerms(administrator=True)
+    @commands.cooldown(1, 900, type=commands.BucketType.guild)
+    @commands.bot_has_permissions(manage_channels=True)
+    async def setupMute(self, ctx):
+        guild: discord.Guild = ctx.guild
+
+        muteRoleID: int = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
+        muteRole: discord.Role = guild.get_role(muteRoleID)
+        await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                           description='Die Muterolle muss über der höchsten Rolle sein, die gemuted werden soll.'))
+        await muteRole.edit(permissions=discord.Permissions.none())
+
+        if muteRole is None:
+            return await ctx.send(embed=standards.getErrorEmbed('Der Server hat keine Mute-Rolle!'))
+
+        for channel in guild.channels:
+            if isinstance(channel, discord.TextChannel):
+                if channel.permissions_synced:
+                    continue
+
+                overwrite = discord.PermissionOverwrite.from_pair(
+                    deny=discord.Permissions(2112),
+                    allow=discord.Permissions(0))
+                await channel.set_permissions(muteRole, overwrite=overwrite)
+
+            if isinstance(channel, discord.VoiceChannel):
+                if channel.permissions_synced:
+                    continue
+
+                overwrite = discord.PermissionOverwrite.from_pair(
+                    deny=discord.Permissions(permissions=2097664),
+                    allow=discord.Permissions(permissions=0))
+                await channel.set_permissions(muteRole, overwrite=overwrite)
+
+            if isinstance(channel, discord.CategoryChannel):
+                overwrite = discord.PermissionOverwrite.from_pair(
+                    deny=discord.Permissions(permissions=2099776),
+                    allow=discord.Permissions(permissions=0))
+                await channel.set_permissions(muteRole, overwrite=overwrite)
+
+        await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                           description='Die Muterolle wurde eingestellt.'))
+
 
 def setup(bot):
     bot.add_cog(Servermoderation(bot))

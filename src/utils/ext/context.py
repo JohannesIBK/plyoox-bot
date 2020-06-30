@@ -1,6 +1,7 @@
 import asyncio
 import io
 
+import asyncpg
 import discord
 from discord.ext import commands
 
@@ -17,7 +18,7 @@ class Context(commands.Context):
         if escape_mentions:
             content = discord.utils.escape_mentions(content)
 
-        content.replace("´", "")
+        content.replace("`", "")
 
         if len(content) > 2000:
             fp = io.BytesIO(content.encode())
