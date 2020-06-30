@@ -258,5 +258,9 @@
   "dice": [
     "Ein einfacher Würfel.",
     "\n**__Command:__** {p}dice"
+  ],
+  "setupmute": [
+    "Stellt die Muterolle ein.",
+    "\n**__Command:__** {p}setupmute"
   ]
 }
