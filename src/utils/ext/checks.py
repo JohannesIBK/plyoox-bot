@@ -18,7 +18,19 @@ def isMod():
         if any(role_u in modRoles for role_u in userRoles):
             return True
         else:
-            raise commands.MissingPermissions(["nr"])
+            raise commands.MissingPermissions(['nr'])
+
+    return commands.check(predicate)
+
+
+def isAdmin():
+    async def predicate(ctx):
+        user = ctx.author
+
+        if user.id == ctx.bot.owner_id or user.guild_permissions.administrator:
+            return True
+        else:
+            raise commands.MissingPermissions(['administrator'])
 
     return commands.check(predicate)
 
