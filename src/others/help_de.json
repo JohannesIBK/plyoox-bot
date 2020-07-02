@@ -45,7 +45,26 @@
   ],
   "massban": [
     "Bannt mehrere User vom Server.",
-    "\n**__Argumente:__** [RoboDanny Command Help](https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/mod.py#L777-L808)"
+    "\n**__Command:__** {p}massban [ `Argumente` ]",
+    "\n**__Argumente:__**",
+    "`--channel` Channel, in welchem Nachrichten durchsucht werden",
+    "`--reason` Grund für die Bans",
+    "`--created` Accounts die jünger als `x` Minuten sind",
+    "`--joined` Accounts die vor `x` Minuten gejoint sind",
+    "`--no-avatar` User ohne Avatar (Kein Argument)",
+    "`--no-roles` User ohne Rolle (Kein Argument)",
+    "`--joined-before` User die vor der UserID gejoint sind",
+    "`--joined-after` User die nach der UserID gejoint sind",
+    "`--regex` Regex der Usernamen",
+
+    "`--contains` Was in der Nachricht vorkommt",
+    "`--starts`: Wie die Nachricht startet",
+    "`--ends`: Wie die Nachricht endet",
+    "`--search`: Wieviele Nachrichten durchsucht werden sollen (normal 100 max 2000)",
+    "`--after`: Nachrichten nach der MessageID",
+    "`--before`: Nachrichten vor der MessageID",
+    "`--files`: Ob die Nachricht eine Datei hat (Kein Argument)",
+    "`--embeds`: Ob die Nachricht Embeds hat (Kein Argument)"
   ],
   "warn": [
     "Warnt einen User und fügt ihn Punkte hinzu.",
