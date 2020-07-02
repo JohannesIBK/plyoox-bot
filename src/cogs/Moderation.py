@@ -305,13 +305,13 @@ class Moderation(commands.Cog):
 
     @cmd()
     @commands.guild_only()
-    @checks.hasPerms(administrator=True)
+    @checks.isAdmin()
     @commands.bot_has_permissions(ban_members=True)
     async def massban(self, ctx, *, args):
         # QUELLE: https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/mod.py#L733
 
         parser = Arguments(add_help=False, allow_abbrev=False)
-        parser.add_argument('--channel', '-c')
+        parser.add_argument('--channel', '-c', default=ctx.channel)
         parser.add_argument('--reason', '-r')
         parser.add_argument('--search', type=int, default=100)
         parser.add_argument('--regex')
@@ -369,6 +369,7 @@ class Moderation(commands.Cog):
 
         # member filters
         predicates = [
+            lambda m: m.id != ctx.author.id,
             lambda m: can_execute_action(ctx, ctx.author, m),  # Only if applicable
             lambda m: not m.bot,  # No bots
             lambda m: m.discriminator != '0000',  # No deleted users
@@ -461,8 +462,8 @@ class Moderation(commands.Cog):
 
         embed = standards.getBaseModEmbed(reason, mod=ctx.author)
         embed.title = f'Moderation [MASSBAN]'
-        embed.add_field(name=f'{standards.bughunter_badge} **User**',
-                        value=f'')
+        embed.add_field(name=f'{standards.bughunter_badge} **User:** {count}',
+                        value=f'**Gebannt:** {count}/{len(members)}')
 
         await logs.createCmdLog(ctx, embed)
 
