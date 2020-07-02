@@ -52,7 +52,7 @@ class Commands(commands.Cog):
             await self.command_list(ctx)
 
     @grp(name="command")
-    @checks.hasPerms(administrator=True)
+    @checks.isAdmin()
     async def command_cmd(self, ctx):
         if ctx.invoked_subcommand is None:
             return await ctx.invoke(self.bot.get_command('help'), "command")

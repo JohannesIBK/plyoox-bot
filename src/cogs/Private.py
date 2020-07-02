@@ -70,7 +70,7 @@ class Private(commands.Cog):
         await ctx.send(embed=discord.Embed(color=standards.normal_color, description=f'Status des Channel-Creators wurde auf `{self.state}` gesetzt.'))
 
     @cmd(showHelp=False)
-    @checks.hasPerms(administrator=True)
+    @checks.isAdmin()
     async def addCustomRole(self, ctx, Channel: discord.VoiceChannel, Rolle: discord.Role):
         members = Channel.members
         added = 0
