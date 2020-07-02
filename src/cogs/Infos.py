@@ -140,7 +140,8 @@ class Infos(commands.Cog):
         embed.set_thumbnail(url=user.avatar_url)
 
         embed.description = f'{standards.botdev_emoji} **ID:** {user.id}\n' \
-                            f'{standards.nametag_emoji} **Name:** {user.display_name}'
+                            f'{standards.nametag_emoji} **Name:** {user.display_name}\n' \
+                            f'{standards.mention_emoji} **Erwähnung:** {user.mention}'
 
         embed.add_field(name=f'{standards.date_emoji} **Daten**',
                         value=f'**__Discord__**\n'
