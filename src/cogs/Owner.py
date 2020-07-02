@@ -255,7 +255,7 @@ class Owner(commands.Cog):
 
         await ctx.send(f"Reloaded module **{name}**")
 
-    @grp(aliases=['maint'])
+    @grp(aliases=['maint'], case_insensitive=True)
     @commands.is_owner()
     async def maintenance(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -298,6 +298,22 @@ class Owner(commands.Cog):
                 type=discord.ActivityType.listening,
                 name='plyoox.net | +help'),
             status=discord.Status.online)
+
+    @grp(case_insensitive=True)
+    @commands.is_owner()
+    async def globalban(self, ctx):
+        if ctx.invoked_subcommand is None:
+            return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
+
+    @globalban.command()
+    async def add(self, ctx, user: discord.User, *, Grund: str):
+        await self.bot.db.execute('INSERT INTO extra.globalbans (userid, reason) VALUES ($1, $2)', user.id, Grund)
+        await ctx.send('Der User wurde erfolgreich zur Globalban-Liste hinzugefügt.')
+
+    @globalban.command()
+    async def remove(self, ctx, user: discord.User):
+        await self.bot.db.execute('DELETE FROM extra.globalbans WHERE userid = $1', user.id)
+        await ctx.send('Der User wurde erfolgreich von der Globalban-Liste entfernt.')
 
 
 def setup(bot):
