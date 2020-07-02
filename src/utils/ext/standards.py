@@ -87,7 +87,8 @@ def getBaseModEmbed(reason: str, user: discord.Member = None, mod: discord.Membe
     if user is not None:
         embed.add_field(name=f'{info_emoji} **__User__**',
                         value=f'{nametag_emoji} {user}\n'
-                              f'{botdev_emoji} {user.id}',
+                              f'{botdev_emoji} {user.id}\n'
+                              f'{mention_emoji} {user.mention}',
                         inline=False)
 
     if mod is not None:
