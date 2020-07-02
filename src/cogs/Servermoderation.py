@@ -12,7 +12,7 @@ class Servermoderation(commands.Cog):
         self.bot = bot
 
     @cmd(name="prefix")
-    @checks.hasPerms(administrator=True)
+    @checks.isAdmin()
     async def prefix(self, ctx, prefix: str):
         if len(prefix) > 3:
             return await ctx.send(embed=standards.getErrorEmbed('Der Prefix darf maximal 3 Zeichen lang sein.'))
@@ -23,7 +23,7 @@ class Servermoderation(commands.Cog):
                                            description=f'{standards.yes_emoji} Der Prefix wurde erfolgreich zu `{prefix}` geändert.'))
 
     @grp(case_insensitive=True)
-    @checks.hasPerms(administrator=True)
+    @checks.isAdmin()
     async def activate(self, ctx):
         if ctx.invoked_subcommand is None:
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
@@ -43,6 +43,7 @@ class Servermoderation(commands.Cog):
                                            description='Das Games-Modul wurde erfolgreich aktiviert.'))
 
     @activate.command()
+    @commands.bot_has_permissions(ban_members=True, kick_members=True, manage_roles=True, manage_messages=True)
     async def automod(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET automod = true WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'automod': True})
@@ -50,19 +51,26 @@ class Servermoderation(commands.Cog):
                                            description='Der AutoMod wurde erfolgreich aktiviert."'))
 
     @activate.command()
+    @commands.bot_has_permissions()
     async def welcomer(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET welcomer = true WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=discord.Embed(color=standards.normal_color,
                                            description='Der Welcomer wurde erfolgreich aktiviert."'))
 
+    @activate.command()
+    @commands.bot_has_permissions(ban_members=True)
+    async def globalbans(self, ctx):
+        await ctx.db.execute("UPDATE config.modules SET globalbans = true WHERE sid = $1", ctx.guild.id)
+        await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                           description='Globalbans wurden erfolgreich aktiviert."'))
+
     @grp(case_insensitive=True)
-    @checks.hasPerms(administrator=True)
+    @checks.isAdmin()
     async def deactivate(self, ctx):
         if ctx.invoked_subcommand is None:
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
 
     @deactivate.command(name='leveling')
-    @commands.bot_has_permissions(manage_roles=True)
     async def _leveling(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET leveling = false WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'leveling': False})
@@ -89,15 +97,21 @@ class Servermoderation(commands.Cog):
         await ctx.send(embed=discord.Embed(color=standards.normal_color,
                                            description='Der Welcomer wurde erfolgreich deaktiviert."'))
 
+    @deactivate.command(name='globalbans')
+    async def _globalban(self, ctx):
+        await ctx.db.execute("UPDATE config.modules SET globalbans = false WHERE sid = $1", ctx.guild.id)
+        await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                           description='Globalbans wurden erfolgreich deaktiviert."'))
+
     @cmd()
-    @checks.hasPerms(administrator=True)
+    @checks.isAdmin()
     async def rules(self, ctx):
         await ctx.message.delete()
         msg = rules.rules
         await ctx.send(msg)
 
     @cmd()
-    @checks.hasPerms(administrator=True)
+    @checks.isAdmin()
     async def rules1(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(color=0xc90c0c)
@@ -129,7 +143,7 @@ class Servermoderation(commands.Cog):
         await ctx.send(embed=embed)
 
     @cmd()
-    @checks.hasPerms(administrator=True)
+    @checks.isAdmin()
     @commands.cooldown(1, 900, type=commands.BucketType.guild)
     @commands.bot_has_permissions(manage_channels=True)
     async def setupMute(self, ctx):
@@ -171,6 +185,63 @@ class Servermoderation(commands.Cog):
 
         await ctx.send(embed=discord.Embed(color=standards.normal_color,
                                            description='Die Muterolle wurde eingestellt.'))
+
+    @cmd()
+    @checks.isAdmin()
+    async def lockGuild(self, ctx):
+        guild: discord.Guild = ctx.guild
+
+        await ctx.send('Start')
+
+        for channel in guild.channels:
+            if isinstance(channel, discord.TextChannel):
+                if channel.permissions_synced:
+                    continue
+
+                overwrites = channel.overwrites
+                newOverwrites = {}
+                for overwriteObject, overwrite in overwrites.items():
+                    if not isinstance(overwriteObject, discord.Role):
+                        continue
+
+                    overwrite.read_messages = False
+                    overwrite.send_messages = False
+                    newOverwrites.update({overwriteObject: overwrite})
+                await channel.edit(overwrites=newOverwrites)
+
+            elif isinstance(channel, discord.VoiceChannel):
+                if channel.permissions_synced:
+                    continue
+
+                overwrites = channel.overwrites
+                newOverwrites = {}
+                for overwriteObject, overwrite in overwrites.items():
+                    if not isinstance(overwriteObject, discord.Role):
+                        continue
+
+                    overwrite.view_channel = False
+                    overwrite.speak = False
+                    overwrite.stream = False
+                    newOverwrites.update({overwriteObject: overwrite})
+                await channel.edit(overwrites=newOverwrites)
+
+
+            elif isinstance(channel, discord.CategoryChannel):
+                overwrites = channel.overwrites
+                newOverwrites = {}
+                for overwriteObject, overwrite in overwrites.items():
+                    if not isinstance(overwriteObject, discord.Role):
+                        continue
+
+                    overwrite.read_messages = False
+                    overwrite.view_channel = False
+                    overwrite.send_messages = False
+                    overwrite.speak = False
+                    overwrite.stream = False
+                    newOverwrites.update({overwriteObject: overwrite})
+                await channel.edit(overwrites=newOverwrites)
+
+        await ctx.send('Setup')
 
 
 def setup(bot):
