@@ -21,10 +21,14 @@ def findWord(word):
     return re.compile(r'\b({0})\b'.format(word), flags=re.IGNORECASE).search
 
 
+with open(r"./others/keys/dbl.env", 'r') as file:
+    dblToken = file.read()
+
+
 class Events(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
-        self.dblToken = open(r"./others/keys/dbl.env").read()
+        self.dblToken = dblToken
         self.dblpy = dbl.DBLClient(bot, self.dblToken)
 
         self.update_stats.start()
@@ -200,60 +204,61 @@ class Events(commands.Cog):
     async def on_guild_role_delete(self, role: discord.Role):
         guild: discord.Guild = role.guild
 
-        joinRole = await self.bot.db.fetchval("SELECT role FROM config.joining WHERE sid = $1", guild.id)
-        configRoles = await self.bot.db.fetchrow("SELECT modroles, muterole FROM automod.config WHERE sid = $1", guild.id)
-        levelingRoles = await self.bot.db.fetchrow("SELECT noxproles, roles FROM config.leveling WHERE sid = $1", guild.id)
+        query = 'SELECT welcomer.joinrole, config.modroles, config.muterole, leveling.noxproles, leveling.roles ' \
+                'FROM automod.config LEFT JOIN config.leveling ON config.sid = leveling.sid ' \
+                'LEFT JOIN config.welcomer ON config.sid =  welcomer.sid WHERE config.sid = $1'
+        roles = await self.bot.db.fetchrow(query, role.guild.id)
 
-        if role.id == joinRole:
-            return await self.bot.db.execute("UPDATE config.joining SET role = NULL WHERE sid = $1", guild.id)
+        if roles is None:
+            return
 
-        if levelingRoles is not None:
-            if (xpRoles := levelingRoles['noxproles']) is not None:
-                if role.id in xpRoles:
-                    for xpRole in xpRoles:
-                        if role.id == xpRole:
-                            return await self.bot.db.execute("UPDATE config.leveling SET noxproles = array_remove(noxproles, $1) WHERE sid = $2", guild.id)
+        if role.id == roles['joinrole']:
+            return await self.bot.db.execute("UPDATE config.welcomer SET joinrole = NULL WHERE sid = $1", guild.id)
 
-            if (levelRoles := levelingRoles['roles']) is not None:
-                if role.id in levelRoles:
-                    for lvlRole in levelRoles:
-                        if lvlRole[0] == role.id:
-                            return await self.bot.db.execute("UPDATE config.leveling SET roles = array_remove(roles, $1) WHERE sid = $2", lvlRole, guild.id)
+        if (xpRoles := roles['noxproles']) is not None:
+            if role.id in xpRoles:
+                for xpRole in xpRoles:
+                    if role.id == xpRole:
+                        return await self.bot.db.execute("UPDATE config.leveling SET noxproles = array_remove(noxproles, $1) WHERE sid = $2", xpRole, guild.id)
 
-        if configRoles is not None:
-            if (modRoles := configRoles['modroles']) is not None:
-                if role.id in modRoles:
-                    for modRole in modRoles:
-                        if role.id == modRole:
-                            return await self.bot.db.execute("UPDATE automod.config SET modroles = array_remove(modroles, $1) WHERE sid = $2", role.id, guild.id)
+        if (levelRoles := roles['roles']) is not None:
+            if role.id in levelRoles:
+                for lvlRole in levelRoles:
+                    if lvlRole[0] == role.id:
+                        return await self.bot.db.execute("UPDATE config.leveling SET roles = array_remove(roles, $1) WHERE sid = $2", lvlRole, guild.id)
 
-            if role.id == configRoles['muterole']:
-                return await self.bot.db.execute("UPDATE automod.config SET muterole = NULL WHERE sid = $1", guild.id)
+        if (modRoles := roles['modroles']) is not None:
+            if role.id in modRoles:
+                for modRole in modRoles:
+                    if role.id == modRole:
+                        return await self.bot.db.execute("UPDATE automod.config SET modroles = array_remove(modroles, $1) WHERE sid = $2", role.id, guild.id)
+
+        if role.id == roles['muterole']:
+            return await self.bot.db.execute("UPDATE automod.config SET muterole = NULL WHERE sid = $1", guild.id)
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
         guild: discord.Guild = channel.guild
 
-        joinChannel = await self.bot.db.fetchval("SELECT channel FROM config.joining WHERE sid = $1", guild.id)
-        leaveChannel = await self.bot.db.fetchval("SELECT channel FROM config.leaving WHERE sid = $1", guild.id)
-        logChannel = await self.bot.db.fetchval("SELECT logchannel FROM automod.config WHERE sid = $1", guild.id)
-        lvlChannel = await self.bot.db.fetchval("SELECT channel FROM config.leveling WHERE sid = $1", guild.id)
-        noXpChannels = await self.bot.db.fetchval('SELECT noxpchannels FROM config.leveling WHERE sid = $1', guild.id)
+        query = 'SELECT welcomer.joinchannel, welcomer.leavechannel, leveling.channel AS lvlchannel, ' \
+                'leveling.noxpchannels, config.logchannel FROM automod.config ' \
+                'LEFT JOIN config.leveling ON config.sid = leveling.sid LEFT JOIN config.welcomer ' \
+                'ON config.sid = welcomer.sid WHERE config.sid = $1'
+        channels = await self.bot.db.fetchrow(query, guild.id)
 
+        if channel.id == channels['joinchannel']:
+            return await self.bot.db.execute("UPDATE config.welcomer SET joinchannel = NULL WHERE sid = $1", guild.id)
 
-        if channel.id == joinChannel:
-            return await self.bot.db.execute("UPDATE config.joining SET channel = NULL WHERE sid = $1", guild.id)
+        elif channel.id == channels['leavechannel']:
+            return await self.bot.db.execute("UPDATE config.welcomer SET leavechannel = NULL WHERE sid = $1", guild.id)
 
-        elif channel.id == leaveChannel:
-            return await self.bot.db.execute("UPDATE config.leaving SET channel = NULL WHERE sid = $1", guild.id)
-
-        elif channel.id == logChannel:
+        elif channel.id == channels['logchannel']:
             return await self.bot.db.execute("UPDATE automod.config SET logchannel = NULL WHERE sid = $1", guild.id)
 
-        elif channel.id == lvlChannel:
+        elif channel.id == channels['lvlchannel']:
             return await self.bot.db.execute("UPDATE config.leveling SET channel = NULL WHERE sid = $1", guild.id)
 
-        if noXpChannels is not None:
+        if (noXpChannels := channels['noxpchannels']) is not None:
             if channel.id in noXpChannels:
                 for noXpChannel in noXpChannels:
                     if channel.id == noXpChannel:
@@ -273,7 +278,9 @@ class Events(commands.Cog):
                 await guild.unban(user, reason='Tempban has expired')
             except discord.NotFound:
                 pass
-            await self.bot.db.execute("DELETE FROM automod.punishments WHERE sid = $1 AND userid = $2 and type = $3", guild.id, memberID, punishType)
+            await self.bot.db.execute(
+                "DELETE FROM automod.punishments WHERE sid = $1 AND userid = $2 and type = $3",
+                guild.id, memberID, punishType)
 
         if not punishType:
             muteroleID: int = await self.bot.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
@@ -285,7 +292,9 @@ class Events(commands.Cog):
 
             try:
                 await member.remove_roles(muterole)
-                await self.bot.db.execute("DELETE FROM automod.punishments WHERE sid = $1 AND userid = $2 and type = $3", guild.id, memberID, punishType)
+                await self.bot.db.execute(
+                    "DELETE FROM automod.punishments WHERE sid = $1 AND userid = $2 and type = $3",
+                    guild.id, memberID, punishType)
             except discord.Forbidden:
                 pass
 
@@ -330,14 +339,29 @@ class Events(commands.Cog):
     async def on_member_join(self, member: discord.Member):
         guild: discord.Guild = member.guild
 
-        data = await self.bot.db.fetchrow(
-            "SELECT dm, message, role, channel, welcomer FROM config.joining INNER JOIN config.modules ON joining.sid = modules.sid WHERE joining.sid = $1",
-            guild.id)
+        query = 'SELECT joinrole, joinmessage, joinrole, joinchannel, joindm, modules.welcomer, modules.globalbans FROM config.welcomer ' \
+                'INNER JOIN config.modules ON welcomer.sid = modules.sid WHERE welcomer.sid = $1'
+        data = await self.bot.db.fetchrow(query, guild.id)
 
-        if not data['welcomer']:
+        if not data or not data['welcomer']:
             return
 
-        if (msg := data["message"]) is not None and data["channel"] is not None:
+        if data['globalbans']:
+            banData = await self.bot.db.fetchrow(
+                'SELECT bans.reason, bans.userid, config.logchannel FROM extra.globalbans AS bans, '
+                'automod.config AS config WHERE bans.userid = $1 OR config.sid = $2',
+                member.id)
+            if (reason := banData['reason']) and banData['userid']:
+                await guild.ban(member, reason=banData['reason'])
+                if banData['logchannel']:
+                    embed: discord.Embed = standards.getBaseModEmbed(f'Globalban: {reason}]', member)
+                    embed.title = f'Automoderation [GLOBALBAN]'
+                    logchannel = member.guild.get_channel(banData['logchannel'])
+                    if logchannel is not None:
+                        await logchannel.send(embed=embed)
+                return
+
+        if (msg := data["joinmessage"]) is not None and data["joinchannel"] is not None:
             try:
                 placeholders = re.findall(BRACKET_REGEX, msg)
 
@@ -347,38 +371,43 @@ class Events(commands.Cog):
                     elif placeholder.lower() == '{user}':
                         msg = msg.replace(placeholder, str(member))
 
-                if data['dm']:
+                if data['joindm']:
                     await member.send(msg)
                 else:
-                    channel: discord.TextChannel = guild.get_channel(int(data["channel"]))
+                    channel: discord.TextChannel = guild.get_channel(int(data["joinchannel"]))
                     await channel.send(msg)
             except discord.Forbidden:
                 pass
 
-        if (roleID := data["role"]) is not None:
+        if (roleID := data["join"]) is not None:
             role: discord.Role = guild.get_role(roleID)
             try:
                 await member.add_roles(role)
             except:
                 pass
 
-        punishData = await self.bot.db.fetchval('SELECT type FROM automod.punishments WHERE sid = $1 AND userid = $2 AND type = False', guild.id, member.id)
+        punishData = await self.bot.db.fetchrow(
+            'SELECT punishments.type, config.muterole FROM automod.config INNER JOIN automod.punishments '
+            'ON config.sid=punishments.sid WHERE config.sid = $1 AND punishments.userid = $2 AND punishments.type = False',
+            guild.id, member.id)
 
-        if punishData is not None:
+        if punishData is None:
             return
         else:
-            muteroleID: int = await self.bot.db.execute('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
+            muteroleID: int = punishData['muterole']
             muterole: discord.Role = guild.get_role(muteroleID)
             if muterole is not None:
                 await member.add_roles(muterole)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        data = await self.bot.db.fetchrow(
-            "SELECT message, channel, welcomer FROM config.leaving INNER JOIN config.modules ON leaving.sid = modules.sid WHERE leaving.sid = $1",
-            member.guild.id)
+        guild: discord.Guild = member.guild
 
-        if not data['welcomer']:
+        query = 'SELECT leavechannel, leavemessage, welcomer FROM config.welcomer ' \
+                'INNER JOIN config.modules ON welcomer.sid = modules.sid WHERE welcomer.sid = $1'
+        data = await self.bot.db.fetchrow(query, guild.id)
+
+        if not data or not data['welcomer']:
             return
 
         if (msg := data["message"]) is not None and data["channel"] is not None:
