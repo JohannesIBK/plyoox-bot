@@ -16,12 +16,10 @@ async def gotAddet(bot, guild):
             exec5 AS
                 (INSERT INTO automod.mentions (sid) VALUES ($1)),
             exec6 AS
-                (INSERT INTO config.joining (sid) VALUES ($1)),
+                (INSERT INTO config.welcomer (sid) VALUES ($1)),
             exec7 AS
-                (INSERT INTO config.leaving (sid) VALUES ($1)),
-            exec8 AS
                 (INSERT INTO config.leveling (sid) VALUES ($1)),
-            exec9 AS 
+            exec8 AS 
                 (INSERT INTO automod.links (sid) VALUES ($1))
             INSERT INTO config.modules (sid) VALUES ($1)
         """
