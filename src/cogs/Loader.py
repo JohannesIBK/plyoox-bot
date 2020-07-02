@@ -8,7 +8,6 @@ class Loader(commands.Cog):
         self.bot = bot
         self.loader.start()
 
-    # noinspection PyCallingNonCallable
     @tasks.loop(seconds=1, count=1)
     async def loader(self):
         await self.bot.wait_until_ready()
@@ -21,7 +20,7 @@ class Loader(commands.Cog):
             "cogs.Leveling",
             "cogs.Utilities",
             "cogs.Commands",
-            # "cogs.Errors",
+            "cogs.Errors",
             "cogs.Fun",
             "cogs.Private",
             "cogs.Events",
