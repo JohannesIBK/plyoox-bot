@@ -59,8 +59,7 @@ class Plyoox(commands.AutoShardedBot):
         self.get_all_commands: dict = {}
         self.logger: logging.Logger = logger
         self.remove_command("help")
-        self.loop.run_until_complete(self.create_db_pool())
-        self.loop.run_until_complete(self.create_redis_pool())
+        self.commandsCount = {}
 
     async def on_ready(self):
         self.gamesLoop = asyncio.create_task(setGame(self))
@@ -86,9 +85,23 @@ class Plyoox(commands.AutoShardedBot):
         finally:
             await ctx.release()
 
-    @staticmethod
-    async def on_disconnect():
+    async def on_command(self, ctx):
+        command = ctx.command.parent | ctx.command
+        commandName = command.name.lower()
+
+        if commandName not in self.commandsCount:
+            self.commandsCount[commandName] = 1
+        else:
+            self.commandsCount[commandName] += 1
+
+    async def on_disconnect(self):
         logger.info(time.strftime("Disconnected at: %d.%m.%Y um %H:%M:%S"))
+        with open('utils/simpleStorage.json', 'r+') as file:
+            data = json.load(file)
+            file.seek(0)
+            data['commands'] = json.dumps(self.commandsCount)
+            json.dump(data, file)
+            file.truncate()
 
     @staticmethod
     async def on_resumed():
@@ -143,3 +156,10 @@ class Plyoox(commands.AutoShardedBot):
 
     async def on_error(self, event_method, *args, **kwargs):
         logger.error(traceback.format_exc())
+
+    def run(self, token):
+        try:
+            super().run(token, reconnect=True)
+        finally:
+            self.redis.close()
+            self.db.close()

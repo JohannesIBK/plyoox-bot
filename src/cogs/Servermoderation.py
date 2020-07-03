@@ -188,10 +188,12 @@ class Servermoderation(commands.Cog):
 
     @cmd()
     @checks.isAdmin()
+    @commands.bot_has_permissions(administrator=True)
     async def lockGuild(self, ctx):
         guild: discord.Guild = ctx.guild
 
-        await ctx.send('Start')
+        await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                           description='Channel werden geschlossen...'))
 
         for channel in guild.channels:
             if isinstance(channel, discord.TextChannel):
@@ -241,7 +243,8 @@ class Servermoderation(commands.Cog):
                     newOverwrites.update({overwriteObject: overwrite})
                 await channel.edit(overwrites=newOverwrites)
 
-        await ctx.send('Setup')
+        await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                           description='Channel wurden geschlossen'))
 
 
 def setup(bot):

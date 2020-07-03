@@ -3,6 +3,7 @@ import datetime
 import importlib
 import io
 import json
+import operator
 import textwrap
 import traceback
 from contextlib import redirect_stdout
@@ -314,6 +315,40 @@ class Owner(commands.Cog):
     async def remove(self, ctx, user: discord.User):
         await self.bot.db.execute('DELETE FROM extra.globalbans WHERE userid = $1', user.id)
         await ctx.send('Der User wurde erfolgreich von der Globalban-Liste entfernt.')
+
+    @grp(case_insesitive=True)
+    @commands.is_owner()
+    async def commandCount(self, ctx):
+        pass
+
+    @commandCount.command()
+    async def reverse(self, ctx):
+        commandsCount = self.bot.commandsCount
+        commandsCountSorted = sorted(commandsCount.items(), key=operator.itemgetter(1))
+        commandsCountList = []
+        commandRange = 15 and len(commandsCountSorted)
+
+        for i in range(commandRange):
+            command = commandsCountSorted[i]
+            commandsCountList.append(f'**{command[0]}:** {command[1]}')
+
+        await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                           description='\n'.join(commandsCountList)))
+
+    @commandCount.command()
+    async def top(self, ctx):
+        commandsCount = self.bot.commandsCount
+        commandsCountSorted = sorted(commandsCount.items(), key=operator.itemgetter(1))
+        commandsCountSorted.reverse()
+        commandsCountList = []
+        commandRange = 15 and len(commandsCountSorted)
+
+        for i in range(commandRange):
+            command = commandsCountSorted[i]
+            commandsCountList.append(f'**{command[0]}:** {command[1]}')
+
+        await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                           description='\n'.join(commandsCountList)))
 
 
 def setup(bot):
