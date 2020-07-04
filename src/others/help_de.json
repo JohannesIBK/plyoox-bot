@@ -48,7 +48,7 @@
     "\n**__Command:__** {p}massban [ `Argumente` ]",
     "\n**__Argumente:__**",
     "`--channel` Channel, in welchem Nachrichten durchsucht werden",
-    "`--reason` Grund für die Bans",
+    "`--reason` Grund für die Bans (Benötigt)",
     "`--created` Accounts die jünger als `x` Minuten sind",
     "`--joined` Accounts die vor `x` Minuten gejoint sind",
     "`--no-avatar` User ohne Avatar (Kein Argument)",
@@ -56,7 +56,7 @@
     "`--joined-before` User die vor der UserID gejoint sind",
     "`--joined-after` User die nach der UserID gejoint sind",
     "`--regex` Regex der Usernamen",
-
+    "\n**Alle weiteren Argumente benötigen --channel**",
     "`--contains` Was in der Nachricht vorkommt",
     "`--starts`: Wie die Nachricht startet",
     "`--ends`: Wie die Nachricht endet",
@@ -282,7 +282,7 @@
     "Stellt die Muterolle ein.",
     "\n**__Command:__** {p}setupmute"
   ],
-  "resetPoints": [
+  "resetpoints": [
     "Setzt die Punkte eines Users zurück."
   ]
 }
