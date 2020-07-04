@@ -140,8 +140,7 @@ class Moderation(commands.Cog):
     @checks.isMod()
     @commands.bot_has_permissions(manage_messages=True)
     async def clear(self, ctx, amount: int, *, reason = 'No Reason'):
-        await ctx.message.delete()
-        deleted: int = len(await ctx.channel.purge(limit=amount))
+        deleted: int = len(await ctx.channel.purge(limit=amount + 1))
 
         embed = standards.getBaseModEmbed(reason, mod=ctx.author)
         embed.title = 'Moderation [CLEAR]'
