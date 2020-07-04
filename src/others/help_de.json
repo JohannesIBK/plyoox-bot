@@ -171,7 +171,9 @@
     " » {p}activate games",
     " » {p}activate leveling",
     " » {p}activate automoderation",
-    " » {p}activate welcomer"
+    " » {p}activate welcomer",
+    " » {p}activate globalbans"
+
   ],
   "deactivate": [
     "Deaktiviert ein Modul und seine Commands.",
@@ -179,7 +181,8 @@
     " » {p}deactivate games",
     " » {p}deactivate leveling",
     " » {p}deactivate automoderation",
-    " » {p}deactivate welcomer"
+    " » {p}deactivate welcomer",
+    " » {p}deactivate globalbans"
   ],
   "points": [
     "Erlaubt das Abfragen von Punkten eines bestimmten Users.",
