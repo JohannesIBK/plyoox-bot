@@ -62,7 +62,7 @@ class Servermoderation(commands.Cog):
     async def globalbans(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET globalbans = true WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Globalbans wurden erfolgreich aktiviert."'))
+                                           description='Globalbans wurden erfolgreich aktiviert.'))
 
     @grp(case_insensitive=True)
     @checks.isAdmin()
