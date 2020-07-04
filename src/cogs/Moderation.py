@@ -118,6 +118,9 @@ class Moderation(commands.Cog):
         self.bot.dispatch('punishment_runout', guild, memberID, punishmentType)
 
     async def punishUser(self, user: discord.Member):
+        if user.id == self.bot.user.id:
+            return False
+
         if user.guild_permissions.manage_guild:
             return True
 
@@ -287,6 +290,9 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     async def warn(self, ctx, user: discord.Member, points: int, *, reason: str):
+        if not await self.punishUser(user):
+            return await ctx.send(embed=standards.getErrorEmbed('Du kannst diesen User nicht warnen.'))
+
         if 0 > points <= 20:
             return await ctx.send(embed=standards.getErrorEmbed('Du kannst nur Punkte von 1-20 hinzufügen.'))
         await automod.add_points(ctx, points, reason, user=user)
@@ -297,11 +303,22 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     async def points(self, ctx, user: discord.Member):
+        if not await self.punishUser(user):
+            return await ctx.send(embed=standards.getErrorEmbed('Du kannst diesem User keine Punkte geben.'))
+
         userData = await self.bot.db.fetchval('SELECT points FROM automod.users WHERE key = $1', f'{user.id}{ctx.guild.id}')
         if userData is None:
             return await ctx.send(embed=standards.getErrorEmbed('Der User hat noch nie etwas getan.'))
 
         await ctx.send(embed=discord.Embed(description=f'Der User hat {userData} Punkte.'))
+
+    @cmd()
+    @checks.isMod()
+    async def resetPoints(self, ctx, user: discord.Member):
+        key: str = f'{user.id}{ctx.guild.id}'
+
+        await ctx.bot.db.execute('UPDATE automod.users SET points = 0, time = $1 WHERE key = $2', time.time(), key)
+        await ctx.send(embed=discord.Embed(description=f'Die Punkte des Users wurden zurückgesetzt.'))
 
     @cmd()
     @commands.guild_only()
