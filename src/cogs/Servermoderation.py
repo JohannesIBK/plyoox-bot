@@ -95,7 +95,7 @@ class Servermoderation(commands.Cog):
     async def _welcomer(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET welcomer = false WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Der Welcomer wurde erfolgreich deaktiviert."'))
+                                           description='Der Welcomer wurde erfolgreich deaktiviert.'))
 
     @deactivate.command(name='globalbans')
     async def _globalban(self, ctx):
