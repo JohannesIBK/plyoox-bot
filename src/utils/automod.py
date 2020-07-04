@@ -78,7 +78,7 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
                 muteRole = ctx.guild.get_role(data['muterole'])
                 if muteRole is None:
                     return
-                embed.title = 'Automoderation [TEMPBAN]'
+                embed.title = 'Automoderation [TEMPMUTE]'
                 await punishedUser.add_roles(muteRole)
                 await ctx.db.execute('INSERT INTO automod.punishments (sid, userid, type, time) VALUES ($1, $2, $3, $4)',
                                      ctx.guild.id, punishedUser.id, False, unixTime)
