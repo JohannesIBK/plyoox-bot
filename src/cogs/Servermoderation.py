@@ -186,65 +186,65 @@ class Servermoderation(commands.Cog):
         await ctx.send(embed=discord.Embed(color=standards.normal_color,
                                            description='Die Muterolle wurde eingestellt.'))
 
-    @cmd()
-    @checks.isAdmin()
-    @commands.bot_has_permissions(administrator=True)
-    async def lockGuild(self, ctx):
-        guild: discord.Guild = ctx.guild
-
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Channel werden geschlossen...'))
-
-        for channel in guild.channels:
-            if isinstance(channel, discord.TextChannel):
-                if channel.permissions_synced:
-                    continue
-
-                overwrites = channel.overwrites
-                newOverwrites = {}
-                for overwriteObject, overwrite in overwrites.items():
-                    if not isinstance(overwriteObject, discord.Role):
-                        continue
-
-                    overwrite.read_messages = False
-                    overwrite.send_messages = False
-                    newOverwrites.update({overwriteObject: overwrite})
-                await channel.edit(overwrites=newOverwrites)
-
-            elif isinstance(channel, discord.VoiceChannel):
-                if channel.permissions_synced:
-                    continue
-
-                overwrites = channel.overwrites
-                newOverwrites = {}
-                for overwriteObject, overwrite in overwrites.items():
-                    if not isinstance(overwriteObject, discord.Role):
-                        continue
-
-                    overwrite.view_channel = False
-                    overwrite.speak = False
-                    overwrite.stream = False
-                    newOverwrites.update({overwriteObject: overwrite})
-                await channel.edit(overwrites=newOverwrites)
-
-
-            elif isinstance(channel, discord.CategoryChannel):
-                overwrites = channel.overwrites
-                newOverwrites = {}
-                for overwriteObject, overwrite in overwrites.items():
-                    if not isinstance(overwriteObject, discord.Role):
-                        continue
-
-                    overwrite.read_messages = False
-                    overwrite.view_channel = False
-                    overwrite.send_messages = False
-                    overwrite.speak = False
-                    overwrite.stream = False
-                    newOverwrites.update({overwriteObject: overwrite})
-                await channel.edit(overwrites=newOverwrites)
-
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Channel wurden geschlossen'))
+    # @cmd()
+    # @checks.isAdmin()
+    # @commands.bot_has_permissions(administrator=True)
+    # async def lockGuild(self, ctx):
+    #     guild: discord.Guild = ctx.guild
+    #
+    #     await ctx.send(embed=discord.Embed(color=standards.normal_color,
+    #                                        description='Channel werden geschlossen...'))
+    #
+    #     for channel in guild.channels:
+    #         if isinstance(channel, discord.TextChannel):
+    #             if channel.permissions_synced:
+    #                 continue
+    #
+    #             overwrites = channel.overwrites
+    #             newOverwrites = {}
+    #             for overwriteObject, overwrite in overwrites.items():
+    #                 if not isinstance(overwriteObject, discord.Role):
+    #                     continue
+    #
+    #                 overwrite.read_messages = False
+    #                 overwrite.send_messages = False
+    #                 newOverwrites.update({overwriteObject: overwrite})
+    #             await channel.edit(overwrites=newOverwrites)
+    #
+    #         elif isinstance(channel, discord.VoiceChannel):
+    #             if channel.permissions_synced:
+    #                 continue
+    #
+    #             overwrites = channel.overwrites
+    #             newOverwrites = {}
+    #             for overwriteObject, overwrite in overwrites.items():
+    #                 if not isinstance(overwriteObject, discord.Role):
+    #                     continue
+    #
+    #                 overwrite.view_channel = False
+    #                 overwrite.speak = False
+    #                 overwrite.stream = False
+    #                 newOverwrites.update({overwriteObject: overwrite})
+    #             await channel.edit(overwrites=newOverwrites)
+    #
+    #
+    #         elif isinstance(channel, discord.CategoryChannel):
+    #             overwrites = channel.overwrites
+    #             newOverwrites = {}
+    #             for overwriteObject, overwrite in overwrites.items():
+    #                 if not isinstance(overwriteObject, discord.Role):
+    #                     continue
+    #
+    #                 overwrite.read_messages = False
+    #                 overwrite.view_channel = False
+    #                 overwrite.send_messages = False
+    #                 overwrite.speak = False
+    #                 overwrite.stream = False
+    #                 newOverwrites.update({overwriteObject: overwrite})
+    #             await channel.edit(overwrites=newOverwrites)
+    #
+    #     await ctx.send(embed=discord.Embed(color=standards.normal_color,
+    #                                        description='Channel wurden geschlossen'))
 
 
 def setup(bot):
