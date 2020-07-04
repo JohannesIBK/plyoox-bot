@@ -54,7 +54,7 @@ class Plyoox(commands.AutoShardedBot):
                          max_messages=5000)
 
         self.startTime: float = time.time()
-        self.version: str = 'v2.3.0 '
+        self.version: str = 'v2.4.0 '
         self.owner_id: int = 263347878150406144
         self.get_all_commands: dict = {}
         self.logger: logging.Logger = logger
