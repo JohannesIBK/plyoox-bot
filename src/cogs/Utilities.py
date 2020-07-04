@@ -21,8 +21,7 @@ class Utilities(commands.Cog):
         embed.description = f"{standards.nametag_emoji} {user} ( {user.mention} )\n" \
                             f'{standards.botdev_emoji} {user.id}'
         embed.add_field(name=f'**Informationen**',
-                        value=f'{standards.date_emoji} **Gejoint vor:** {(datetime.datetime.now() - user.joined_at).days} Tagen\n'
-                              f'{standards.botdev_emoji} **ID:** {user.id}')
+                        value=f'{standards.date_emoji} **Gejoint vor:** {(datetime.datetime.now() - user.joined_at).days} Tagen')
         embed.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=embed)
 
