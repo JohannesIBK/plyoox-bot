@@ -80,6 +80,7 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
                     return
                 embed.title = 'Automoderation [TEMPMUTE]'
                 await punishedUser.add_roles(muteRole)
+                await ctx.bot.db.execute("UPDATE automod.users SET points = 0 WHERE key = $1", key)
                 await ctx.db.execute('INSERT INTO automod.punishments (sid, userid, type, time) VALUES ($1, $2, $3, $4)',
                                      ctx.guild.id, punishedUser.id, False, unixTime)
 
