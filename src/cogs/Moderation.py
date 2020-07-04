@@ -311,7 +311,7 @@ class Moderation(commands.Cog):
         # QUELLE: https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/mod.py#L733
 
         parser = Arguments(add_help=False, allow_abbrev=False)
-        parser.add_argument('--channel', '-c', default=ctx.channel)
+        parser.add_argument('--channel', '-c')
         parser.add_argument('--reason', '-r')
         parser.add_argument('--search', type=int, default=100)
         parser.add_argument('--regex')
