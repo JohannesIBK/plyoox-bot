@@ -24,7 +24,7 @@ class Infos(commands.Cog):
         string = ''
 
         for role in roles:
-            if len(string + str(role)) > 1015:
+            if len(string + str(role)) > 970:
                 string += '...'
                 break
             string += f'{role} '
@@ -32,7 +32,7 @@ class Infos(commands.Cog):
         if string == '':
             return '-----'
         else:
-            return "\n" + string[:1015]
+            return string
 
     @staticmethod
     def _getEmojis(emojis):
@@ -161,7 +161,7 @@ class Infos(commands.Cog):
                         inline=False)
 
         embed.add_field(name=f'{standards.folder_emoji} **Server-Daten**',
-                        value=f'{standards.mention_emoji} **Rollen ({len(user.roles) - 1})** {roles}\n\n{standards.staff_emoji} **Permissions:** {user.guild_permissions.value}',
+                        value=f'{standards.mention_emoji} **Rollen ({len(user.roles) - 1})** {roles}',
                         inline=False)
 
         try:
