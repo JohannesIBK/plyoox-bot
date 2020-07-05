@@ -350,7 +350,7 @@ class Events(commands.Cog):
             banData = await self.bot.db.fetchrow(
                 'SELECT bans.reason, bans.userid, config.logchannel FROM extra.globalbans AS bans, '
                 'automod.config AS config WHERE bans.userid = $1 OR config.sid = $2',
-                member.id)
+                member.id, guild.id)
             if (reason := banData['reason']) and banData['userid']:
                 await guild.ban(member, reason=banData['reason'])
                 if banData['logchannel']:
@@ -379,10 +379,13 @@ class Events(commands.Cog):
             except discord.Forbidden:
                 pass
 
-        if (roleID := data["join"]) is not None:
+        print(0)
+        if (roleID := data["joinrole"]) is not None:
+            print(1)
             role: discord.Role = guild.get_role(roleID)
             try:
                 await member.add_roles(role)
+                print(2)
             except:
                 pass
 
@@ -410,7 +413,7 @@ class Events(commands.Cog):
         if not data or not data['welcomer']:
             return
 
-        if (msg := data["message"]) is not None and data["channel"] is not None:
+        if (msg := data["leavemessage"]) is not None and data["leavechannel"] is not None:
             placeholders = re.findall(BRACKET_REGEX, msg)
 
             for placeholder in placeholders:
@@ -418,7 +421,7 @@ class Events(commands.Cog):
                     msg = msg.replace(placeholder, str(member))
 
             try:
-                channel: discord.TextChannel = member.guild.get_channel(int(data["channel"]))
+                channel: discord.TextChannel = member.guild.get_channel(int(data["leavechannel"]))
                 await channel.send(msg)
             except:
                 pass
