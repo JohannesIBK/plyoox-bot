@@ -379,13 +379,10 @@ class Events(commands.Cog):
             except discord.Forbidden:
                 pass
 
-        print(0)
         if (roleID := data["joinrole"]) is not None:
-            print(1)
             role: discord.Role = guild.get_role(roleID)
             try:
                 await member.add_roles(role)
-                print(2)
             except:
                 pass
 

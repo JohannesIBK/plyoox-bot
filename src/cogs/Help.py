@@ -69,8 +69,6 @@ class Help(commands.Cog):
 
             await ctx.send(embed=embed)
 
-
-
         else:
             await ctx.send(embed=standards.getErrorEmbed('Dieser Command exsitiert nicht.'))
 
