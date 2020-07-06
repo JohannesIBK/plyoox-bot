@@ -22,7 +22,7 @@ class Loader(commands.Cog):
             "cogs.Commands",
             "cogs.Errors",
             "cogs.Fun",
-            "cogs.Private",
+            # "cogs.Private",
             "cogs.Events",
             "cogs.Infos"
         ]
