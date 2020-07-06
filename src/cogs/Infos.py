@@ -230,7 +230,7 @@ class Infos(commands.Cog):
         embed.add_field(name="⠀",
                         value=f'[DBL](https://discordbots.org/bot/505433541916622850) | '
                               f'[Dashboard](https://plyoox.net) | '
-                              f'[Invite](https://discordapp.com/oauth2/authorize?client_id={ctx.me.id}&scope=bot&permissions=285600894)'
+                              f'[Invite](https://discordapp.com/oauth2/authorize?client_id={ctx.me.id}&scope=bot&permissions=285600894) | '
                               f'[Source-Code](https://github.com/JohannesIBK/plyoox-bot)')
 
         await ctx.send(embed=embed)
