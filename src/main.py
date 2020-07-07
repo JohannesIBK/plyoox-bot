@@ -86,7 +86,7 @@ class Plyoox(commands.AutoShardedBot):
             await ctx.release()
 
     async def on_command(self, ctx):
-        command = ctx.command.parent | ctx.command
+        command = ctx.command.parent or ctx.command
         commandName = command.name.lower()
 
         if commandName not in self.commandsCount:
