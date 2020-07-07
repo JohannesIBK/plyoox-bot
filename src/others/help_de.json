@@ -300,5 +300,6 @@
     "\n**__Command:__** {p}unmute < **`User`** > [ `Grund` ]",
     "\n**__Beispiel:__**",
     " » {p}unmute @Plyoxx#0000",
-    " » {p}unmute 768781420067028994 Entschuldigung",
+    " » {p}unmute 768781420067028994 Entschuldigung vom User"
+    ]
 }
