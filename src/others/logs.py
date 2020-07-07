@@ -30,15 +30,15 @@ async def createEmbedLog(ctx, modEmbed = None, userEmbed = None,
 
         if ignoreNoLogging:
             try:
-                await member.send(embed=userEmbed)
+                return await member.send(embed=userEmbed)
             except discord.Forbidden:
-                pass
+                return
 
     if userLog and member is not None and userEmbed is not None:
         if not ctx.guild.me.guild_permissions.is_superset(member.guild_permissions):
             return
 
         try:
-            await member.send(embed=userEmbed)
+            return await member.send(embed=userEmbed)
         except discord.Forbidden:
-            pass
+            return
