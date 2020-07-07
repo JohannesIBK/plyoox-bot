@@ -96,7 +96,7 @@ class Events(commands.Cog):
                 return
 
             data = await self.bot.db.fetchrow(
-                'SELECT points, state, links, whitelist FROM automod.links WHERE sid = $1',
+                'SELECT points, state, links, whitelist, iswhitelist FROM automod.links WHERE sid = $1',
                 msg.guild.id)
 
             if not data['state']:
@@ -105,16 +105,22 @@ class Events(commands.Cog):
             if data['whitelist'] is not None and msg.channel.id in data['whitelist']:
                 return
 
-            links = ['discord.gg', 'discord.com', 'discordapp.com', 'plyoox.tydeo.net', 'plyoox.net']
+            links = ['discord.gg', 'discord.com', 'discordapp.com', 'plyoox.net']
             if (linksData := data['links']) is not None:
                 links.extend(linksData)
 
             linksObj = linkRegex.findall(msg.content)
 
-            for linkObj in linksObj:
-                link = linkObj[0].replace(linkObj[1], '')
-                if link not in links:
-                    return await automod.add_points(ctx, data['points'], 'Link')
+            if data['iswhitelist']:
+                for linkObj in linksObj:
+                    link = linkObj[0].replace(linkObj[1], '')
+                    if link not in links:
+                        return await automod.add_points(ctx, data['points'], 'Link')
+            else:
+                for linkObj in linksObj:
+                    link = linkObj[0].replace(linkObj[1], '')
+                    if link in links:
+                        return await automod.add_points(ctx, data['points'], 'Link')
 
         if not msg.clean_content.islower() and len(msg.content) > 15:
             if await checks.ignores_automod(ctx):
