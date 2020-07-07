@@ -287,5 +287,18 @@
   ],
   "resetpoints": [
     "Setzt die Punkte eines Users zurück."
-  ]
+  ],
+  "mute": [
+    "Mutet einen User permanent.",
+    "\n**__Command:__** {p}mute < **`User`** > [ `Grund` ]",
+    "\n**__Beispiel:__**",
+    " » {p}mute @Plyoxx#0000 Spam",
+    " » {p}mute 768781420067028994 Beleidigungen und Spam"
+  ],
+  "unmute": [
+    "Entmutet einen User",
+    "\n**__Command:__** {p}unmute < **`User`** > [ `Grund` ]",
+    "\n**__Beispiel:__**",
+    " » {p}unmute @Plyoxx#0000",
+    " » {p}unmute 768781420067028994 Entschuldigung",
 }

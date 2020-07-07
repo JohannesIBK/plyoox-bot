@@ -164,7 +164,7 @@ class Moderation(commands.Cog):
 
         embed = standards.getBaseModEmbed(reason, user=user, mod=ctx.author)
         embed.title = 'Moderation [BAN]'
-        userEmbed = standards.getUserEmbed(reason, ctx.guild.name, isBan=True)
+        userEmbed = standards.getUserEmbed(reason, ctx.guild.name, punishType=0)
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await user.ban(reason=reason, delete_message_days=1)
@@ -185,7 +185,7 @@ class Moderation(commands.Cog):
 
         embed = standards.getBaseModEmbed(reason, user=user, mod=ctx.author)
         embed.title = 'Moderation [KICK]'
-        userEmbed = standards.getUserEmbed(reason, ctx.guild.name)
+        userEmbed = standards.getUserEmbed(reason, ctx.guild.name, punishType=1)
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await user.kick(reason=reason)
@@ -206,7 +206,7 @@ class Moderation(commands.Cog):
 
         embed = standards.getBaseModEmbed(reason, user=user, mod=ctx.author)
         embed.title = 'Moderation [SOFTBAN]'
-        userEmbed = standards.getUserEmbed(reason, ctx.guild.name)
+        userEmbed = standards.getUserEmbed(reason, ctx.guild.name, punishType=1)
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await user.ban(reason=reason, delete_message_days=1)
@@ -237,15 +237,15 @@ class Moderation(commands.Cog):
         embed.title = f'Moderation [TEMPBAN]'
         embed.add_field(name=f'{standards.date_emoji} **__Dauer__**',
                         value=duration)
-        userEmbed = standards.getUserEmbed(reason, ctx.guild.name, isBan=True, duration=duration)
+        userEmbed = standards.getUserEmbed(reason, ctx.guild.name, punishType=0, duration=duration)
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await user.ban(reason=reason, delete_message_days=1)
         await ctx.send(embed=discord.Embed(color=standards.normal_color,
                                            description=f'{standards.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gebannt.'),
                        delete_after=5)
-        await ctx.db.execute('INSERT INTO automod.punishments (sid, userid, type, time) VALUES ($1, $2, $3, $4)',
-                             ctx.guild.id, user.id, True, unixTime)
+        await ctx.db.execute('INSERT INTO automod.punishments (sid, userid, type, time) VALUES ($1, $2, True, $3)',
+                             ctx.guild.id, user.id, unixTime)
         await ctx.message.delete()
 
     @cmd()
@@ -257,7 +257,6 @@ class Moderation(commands.Cog):
 
         muteRoleID = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', ctx.guild.id)
         muteRole = ctx.guild.get_role(muteRoleID)
-
         if muteRole is None:
             return await ctx.send(embed=standards.getErrorEmbed('Der Server hat keine Muterolle.'))
 
@@ -273,18 +272,70 @@ class Moderation(commands.Cog):
 
         embed = standards.getBaseModEmbed(reason, user=user, mod=ctx.author)
         embed.title = f'Moderation [TEMPMUTE]'
-        embed.add_field(name=f'{standards.date_emoji} **__Dauer__**',
-                        value=duration)
-        userEmbed = standards.getUserEmbed(reason, ctx.guild.name, isBan=True, duration=duration)
+        embed.add_field(name=f'{standards.date_emoji} **__Dauer__**', value=duration)
+        userEmbed = standards.getUserEmbed(reason, ctx.guild.name, punishType=2, duration=duration)
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await user.add_roles(muteRole)
         await ctx.send(embed=discord.Embed(color=standards.normal_color,
                                            description=f'{standards.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gemuted.'),
                        delete_after=5)
-        await ctx.db.execute('INSERT INTO automod.punishments (sid, userid, type, time) VALUES ($1, $2, $3, $4)',
-                             ctx.guild.id, user.id, False, unixTime)
+        await ctx.db.execute('INSERT INTO automod.punishments (sid, userid, type, time) VALUES ($1, $2, False, $3)',
+                             ctx.guild.id, user.id, unixTime)
         await ctx.message.delete()
+
+    @cmd()
+    @checks.isMod()
+    @commands.bot_has_permissions(manage_roles=True)
+    async def mute(self, ctx, user: discord.Member, *, reason = 'No Reason'):
+        if not await self.punishUser(user):
+            return await ctx.send(embed=standards.getErrorEmbed('Du kannst diesen User nicht muten.'))
+
+        muteRoleID = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', ctx.guild.id)
+        muteRole = ctx.guild.get_role(muteRoleID)
+        if muteRole is None:
+            return await ctx.send(embed=standards.getErrorEmbed('Der Server hat keine Muterolle.'))
+
+        if user == ctx.author:
+            return await ctx.send(embed=standards.getErrorEmbed('Du kannst den Command nicht an dir selbst ausführen.'))
+
+        await user.add_roles(muteRole)
+        await ctx.message.delete()
+        embed = standards.getBaseModEmbed(reason, user=user, mod=ctx.author)
+        embed.title = f'Moderation [MUTE]'
+        embed.add_field(name=f'{standards.date_emoji} **__Dauer__**', value='Permanent')
+        userEmbed = standards.getUserEmbed(reason, ctx.guild.name, punishType=2)
+        await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
+
+        await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                           description=f'{standards.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gemuted.'),
+                       delete_after=5)
+
+    @cmd()
+    @checks.isMod()
+    @commands.bot_has_permissions(manage_roles=True)
+    async def unmute(self, ctx, user: discord.Member, *, reason = 'No Reason'):
+        muteRoleID = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', ctx.guild.id)
+        muteRole = ctx.guild.get_role(muteRoleID)
+        if muteRole is None:
+            return await ctx.send(embed=standards.getErrorEmbed('Der Server hat keine Muterolle.'))
+
+        if muteRole in user.roles:
+            await user.remove_roles(muteRole, reason=reason)
+            await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                               description='Der User wurde erfolgreich entmutet.'))
+
+            await ctx.message.delete()
+            embed = standards.getBaseModEmbed(reason, user=user, mod=ctx.author)
+            embed.title = f'Moderation [UNMUTE]'
+            await logs.createEmbedLog(ctx, modEmbed=embed, member=user)
+        else:
+            return await ctx.send(embed=discord.Embed(color=standards.normal_color,
+                                                      description='Der User ist nicht gemutet.'))
+
+        await self.bot.db.execute(
+            "DELETE FROM automod.punishments WHERE sid = $1 AND userid = $2 and type = false",
+            ctx.guild.id, user.id)
 
     @cmd()
     @checks.isMod()

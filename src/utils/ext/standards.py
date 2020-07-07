@@ -65,6 +65,19 @@ avatar_url = 'https://cdn.discordapp.com/avatars/505433541916622850/ccc8ba894dd4
 
 
 # Embeds
+def getEmbed(description: str) -> discord.Embed:
+    """
+    :param description: Message to send
+    :return: discord.Embed
+    """
+
+    embed = discord.Embed(
+        color=normal_color,
+        description=description)
+
+    return embed
+
+
 def getErrorEmbed(errorMessage: str) -> discord.Embed:
     """
     :param errorMessage: Message to send
@@ -101,14 +114,16 @@ def getBaseModEmbed(reason: str, user: discord.Member = None, mod: discord.Membe
     return embed
 
 
-def getUserEmbed(reason: str, guildName: str, duration = 'permanent', isBan = False):
+def getUserEmbed(reason: str, guildName: str, duration = 'permanent', punishType = 1):
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text='Plyoox Moderation', icon_url=avatar_url)
 
-    if isBan:
+    if punishType == 0:
         embed.description = f'Du wurdest `{duration}` vom Server `{guildName}` für `{reason}` ausgeschlossen.'
-    else:
+    elif punishType == 1:
         embed.description = f'Du wurdest vom Server `{guildName}` für `{reason}` gekickt.'
+    elif punishType == 2:
+        embed.description = f'Du wurdest `{duration}` auf dem Server `{guildName}` für `{reason}` gemutet.'
 
     return embed
