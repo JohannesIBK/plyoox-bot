@@ -1,5 +1,8 @@
+import asyncio
+import json
+import random
 import re
-
+import time
 import dbl
 import discord
 import typing
@@ -8,7 +11,7 @@ from discord.ext import commands, tasks
 import main
 from others import db
 from utils import automod
-from utils.ext import standards, checks, context
+from utils.ext import standards as std, checks, context
 
 DISCORD_INVITE = '(discord(app\.com\/invite|\.com(\/invite)?|\.gg)\/?[a-zA-Z0-9-]{2,32})'
 EXTERNAL_LINK = '((https?:\/\/(www\.)?|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})'
@@ -30,9 +33,61 @@ class Events(commands.Cog):
         self.bot = bot
         self.dblToken = dblToken
         self.dblpy = dbl.DBLClient(bot, self.dblToken)
-
+        self.checkTimers.start()
         self.update_stats.start()
-        
+
+    @tasks.loop(minutes=15)
+    async def checkTimers(self):
+        entrys = await self.bot.db.fetch('SELECT * FROM extra.timers WHERE time - extract(EPOCH FROM now()) <= 900;')
+
+        for entry in entrys:
+            timerType = entry['type']
+            endTime = entry['time']
+            guildID = entry['sid']
+            if timerType in [0, 1]:
+                memberID = entry['objid']
+                self.bot.loop.create_task(self.punishTimer(endTime, memberID, guildID, timerType))
+
+            if timerType == 2:
+                messageID = entry['objid']
+                data = entry['data']
+                self.bot.loop.create_task(self.giveawayTimer(endTime, messageID, data))
+
+    @checkTimers.before_loop
+    async def before_printer(self):
+        await self.bot.wait_until_ready()
+
+    async def punishTimer(self, unbanTime: int, memberID: int, guildID: int, punishmentType: str):
+        """
+        :param unbanTime: UNIX Timestamp when user's punishment runs out
+        :param memberID: ID of Member
+        :param guildID: ID of Guild
+        :param punishmentType: Type of punishment
+        :return
+        """
+
+        untilUnban = unbanTime - time.time()
+        if unbanTime > 0:
+            untilUnban = 0
+
+        await asyncio.sleep(untilUnban)
+
+        guild = self.bot.get_guild(guildID)
+        self.bot.dispatch('punishment_runout', guild, memberID, punishmentType)
+
+    async def giveawayTimer(self, endTime: int, messageID: int, data):
+
+        untilEnd = endTime - time.time()
+        if endTime > 0:
+            untilEnd = 0
+
+        await asyncio.sleep(untilEnd)
+
+        data = json.loads(data)
+        channel = self.bot.get_channel(data['channel'])
+        message = await channel.fetch_message(messageID)
+        self.bot.dispatch('giveaway_runout', message, data)
+
     async def automod(self, msg: discord.Message):
         ctx = await self.bot.get_context(msg, cls=context.Context)
 
@@ -175,6 +230,41 @@ class Events(commands.Cog):
         await self.bot.wait_until_ready()
 
     @commands.Cog.listener()
+    async def on_giveaway_runout(self, message: discord.Message, data):
+        channel = message.channel
+        reactions = message.reactions
+        winners = []
+        winnerCount = data['winner']
+        win = data['winType']
+
+        deleted: int = await self.bot.db.fetch('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', message.guild.id, message.id)
+        print(deleted)
+
+        if deleted == 0:
+            return
+
+        for reaction in reactions:
+            if reaction.emoji == '🎉':
+                users = await reaction.users().flatten()
+                users.remove(message.guild.me)
+                if len(users) <= winnerCount:
+                    winners = users
+                else:
+                    for _ in range(winnerCount):
+                        user = random.choice(users)
+                        winners.append(user)
+                        users.remove(user)
+                break
+
+        winnerMention = ' '.join(member.mention for member in winners)
+        await channel.send(f'Gewinner von {data["winType"]} {"ist" if len(winners) == 1 else "sind"}\n{winnerMention}')
+        await message.edit(embed=discord.Embed(color=std.normal_color,
+                                               title=f"🎉 Giveaway",
+                                               description=f'**Gewinn:** {win}\n'
+                                                           f'**Gewinner:** {winnerMention}.\n'
+                                                           f'ID: {message.id}'))
+
+    @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: typing.Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]):
         guild: discord.Guild = channel.guild
         muteRoleID = await self.bot.db.fetchval('SELECT muterole from automod.config WHERE sid = $1', guild.id)
@@ -271,11 +361,11 @@ class Events(commands.Cog):
                         return await self.bot.db.execute("UPDATE config.leveling SET noxpchannels = array_remove(noxpchannels, $1) WHERE sid = $2", noXpChannel, guild.id)
 
     @commands.Cog.listener()
-    async def on_punishment_runout(self, guild: discord.Guild, memberID: int, punishType: bool):
+    async def on_punishment_runout(self, guild: discord.Guild, memberID: int, punishType: int):
         if guild is None:
             return
 
-        if punishType:
+        if punishType == 0:
             user = discord.Object(id=memberID)
             if user is None:
                 return
@@ -285,10 +375,10 @@ class Events(commands.Cog):
             except discord.NotFound:
                 pass
             await self.bot.db.execute(
-                "DELETE FROM automod.punishments WHERE sid = $1 AND userid = $2 and type = $3",
+                "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3",
                 guild.id, memberID, punishType)
 
-        if not punishType:
+        if punishType == 1:
             muteroleID: int = await self.bot.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
             muterole: discord.Role = guild.get_role(muteroleID)
             member: discord.Member = guild.get_member(memberID)
@@ -299,7 +389,7 @@ class Events(commands.Cog):
             try:
                 await member.remove_roles(muterole)
                 await self.bot.db.execute(
-                    "DELETE FROM automod.punishments WHERE sid = $1 AND userid = $2 and type = $3",
+                    "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3",
                     guild.id, memberID, punishType)
             except discord.Forbidden:
                 pass
@@ -310,7 +400,7 @@ class Events(commands.Cog):
 
         bots = len(list(filter(lambda m: m.bot, guild.members)))
         embed = discord.Embed(
-            color=standards.normal_color,
+            color=std.normal_color,
             title="**__SERVER JOINED__**",
         )
         embed.add_field(name="Name", value=guild.name, inline=False)
@@ -329,7 +419,7 @@ class Events(commands.Cog):
 
         bots = len(list(filter(lambda m: m.bot, guild.members)))
         embed = discord.Embed(
-            color=standards.normal_color,
+            color=std.normal_color,
             title="**__SERVER LEAVED__**",
         )
         embed.add_field(name="Name", value=guild.name, inline=False)
@@ -360,7 +450,7 @@ class Events(commands.Cog):
             if (reason := banData['reason']) and banData['userid']:
                 await guild.ban(member, reason=banData['reason'])
                 if banData['logchannel']:
-                    embed: discord.Embed = standards.getBaseModEmbed(f'Globalban: {reason}]', member)
+                    embed: discord.Embed = std.getBaseModEmbed(f'Globalban: {reason}]', member)
                     embed.title = f'Automoderation [GLOBALBAN]'
                     logchannel = member.guild.get_channel(banData['logchannel'])
                     if logchannel is not None:
@@ -393,8 +483,8 @@ class Events(commands.Cog):
                 pass
 
         punishData = await self.bot.db.fetchrow(
-            'SELECT punishments.type, config.muterole FROM automod.config INNER JOIN automod.punishments '
-            'ON config.sid=punishments.sid WHERE config.sid = $1 AND punishments.userid = $2 AND punishments.type = False',
+            'SELECT timers.type, config.muterole FROM automod.config INNER JOIN extra.timers '
+            'ON config.sid=timers.sid WHERE config.sid = $1 AND timers.objid = $2 AND timers.type = 1',
             guild.id, member.id)
 
         if punishData is None:
@@ -438,7 +528,6 @@ class Events(commands.Cog):
             return
 
         await self.automod(msg)
-
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild: discord.Guild, user: discord.Member):

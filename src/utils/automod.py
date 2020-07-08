@@ -70,8 +70,8 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
             if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
                 embed.title = 'Automoderation [TEMPBAN]'
                 await punishedUser.ban(reason="Automoderation: User reached max points.")
-                await ctx.db.execute('INSERT INTO automod.punishments (sid, userid, type, time) VALUES ($1, $2, $3, $4)',
-                                     ctx.guild.id, punishedUser.id, True, unixTime)
+                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',
+                                     ctx.guild.id, punishedUser.id, 0, unixTime)
 
         if action == 4:
             if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
@@ -81,7 +81,7 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
                 embed.title = 'Automoderation [TEMPMUTE]'
                 await punishedUser.add_roles(muteRole)
                 await ctx.bot.db.execute("UPDATE automod.users SET points = 0 WHERE key = $1", key)
-                await ctx.db.execute('INSERT INTO automod.punishments (sid, userid, type, time) VALUES ($1, $2, $3, $4)',
-                                     ctx.guild.id, punishedUser.id, False, unixTime)
+                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',
+                                     ctx.guild.id, punishedUser.id, 1, unixTime)
 
     await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=punishedUser, ignoreNoLogging=True)

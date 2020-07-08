@@ -24,7 +24,8 @@ class Loader(commands.Cog):
             "cogs.Fun",
             # "cogs.Private",
             "cogs.Events",
-            "cogs.Infos"
+            "cogs.Infos",
+            "cogs.Giveaway"
         ]
 
         for cog in cogs:

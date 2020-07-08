@@ -296,10 +296,34 @@
     " » {p}mute 768781420067028994 Beleidigungen und Spam"
   ],
   "unmute": [
-    "Entmutet einen User",
+    "Entmutet einen User.",
     "\n**__Command:__** {p}unmute < **`User`** > [ `Grund` ]",
     "\n**__Beispiel:__**",
     " » {p}unmute @Plyoxx#0000",
     " » {p}unmute 768781420067028994 Entschuldigung vom User"
-    ]
+    ],
+  "slowmode": [
+    "Setzt den Slowmode für einen Channel.",
+    "\n**__Command:__** {p}slowmode [ `Sekunden` ]",
+    "\n**__Beispiel:__**",
+    " » {p}slowmode 5"
+  ],
+  "giveaway": [
+    "Befehle um ein Giveaway zu führen.",
+    "\n**__Command:__**",
+    " » {p}giveaway start < **`Dauer`** > < **`Gewinner`** > < **`Channel`** > < **`Name`** >",
+    " » {p}giveaway stop < **`ID`** >",
+    " » {p}giveaway end < **`ID`** >",
+    "\n**__Infos:__**",
+    " » Dauer in Stunden (h) oder Tagen (d).",
+    " » Gewinner ist die Anzahl der Gewinner.",
+    " » ID ist die MessageID.",
+    " » `{p}giveaway stop` bricht das Giveaway ab.",
+    " » `{p}giveaway end` beendet das Giveaway und wählt Gewinner aus.",
+    "\n**__Beispiele:__**",
+    " » {p}giveaway start 2h 1 #giveaways Coolen Stuff",
+    " » {p}giveaway start 1d 5 #giveaways 1 Monat Premium auf GommeHD.net",
+    " » {p}giveaway end 730526886110888422",
+    " » {p}giveaway stop 730526886110888422"
+  ]
 }
