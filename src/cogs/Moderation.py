@@ -4,6 +4,7 @@ import io
 import re
 import shlex
 import time
+from typing import Union
 
 import discord
 from discord.ext import commands
@@ -81,9 +82,12 @@ class Moderation(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
 
-    async def punishUser(self, user: discord.Member):
+    async def punishUser(self, user: Union[discord.Member, discord.User]):
         if user.id == self.bot.user.id:
             return False
+
+        if user.guild is None:
+            return True
 
         if user.guild_permissions.manage_guild:
             return True
@@ -131,7 +135,7 @@ class Moderation(commands.Cog):
         userEmbed = std.getUserEmbed(reason, ctx.guild.name, punishType=0)
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
-        await user.ban(reason=reason, delete_message_days=1)
+        await ctx.guild.ban(user, reason=reason, delete_message_days=1)
         await ctx.send(embed=discord.Embed(color=std.normal_color,
                                            description=f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gebannt.'),
                        delete_after=5)
@@ -173,7 +177,7 @@ class Moderation(commands.Cog):
         userEmbed = std.getUserEmbed(reason, ctx.guild.name, punishType=1)
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
-        await user.ban(reason=reason, delete_message_days=1)
+        await ctx.guild.ban(user, reason=reason, delete_message_days=1)
         await ctx.guild.unban(user)
         await ctx.send(embed=discord.Embed(color=std.normal_color,
                                            description=f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gekickt.'),
