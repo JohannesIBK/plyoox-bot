@@ -120,7 +120,7 @@ class Servermoderation(commands.Cog):
         embed.add_field(name="__§1.1 | Discord-Guidelines__",
                         value="**»** Die **[Discord Nutzungsbedingungen](https://discordapp.com/terms)** und die **[Discord Community-Richtlinien](https://discordapp.com/guidelines)** müssen befolgt werden. Bei einem Verstoß gegen diese, wird der Account dem Discord Trust and Safety Team gemeldet.")
         embed.add_field(name="__§2.1 | Verhalten auf dem Discord__",
-                        value="**»** Seid gegenüber jeder Person respektvoll. Behandlt jeden so, wie man selbst behandelt werden will.")
+                        value="**»** Seid gegenüber jeder Person respektvoll. Behandelt jeden so, wie ihr selbst behandelt werden wollt.")
         embed.add_field(name="__§2.2 | Verhalten in den Chats__",
                         value="**»** Jeglicher Art von Spam (Mention, Caps, Emoji, …) ist verboten.\n**»** Jegliche Arten von Beleidigungen sind verboten.\n**»** NSFW-Content ist verboten.\n**»** Rassistische, sexistische, radikale, diskriminierende und ethisch inkorrekte Aussagen, Bilder und Videos sind verboten.")
         embed.add_field(name="__§3.1 | Verbreitung von Links, Bildern und Dateien__",
@@ -128,7 +128,7 @@ class Servermoderation(commands.Cog):
         embed.add_field(name="__§3.2 | Verbreitung von Werbung__",
                         value="**»** Jegliche Art von Werbung, ob für einen Eigennutzen oder Nutzen für einen anderen, ist auf dem Discord verboten. Dazu zählt die Verbreitung in Chats, Avataren, Namen und sonstigen Medien.")
         embed.add_field(name="__§3.3 | Verbreitung von privaten Daten__",
-                        value="**»** Private Daten sollte privat bleiben. Telefonnummern, Adressen, E-Mails und Ähnliches sind privat zu halten und nicht öffentlich zu teilen.")
+                        value="**»** Private Daten sollen privat bleiben. Telefonnummern, Adressen, E-Mails und ähnliches sind privat zu halten und nicht öffentlich zu teilen.")
         embed.add_field(name="__§3.4 | Handel und Geschäfte__",
                         value="**»** Der Handel mit jeglichen Dingen ist auf dem Discord untersagt. Geschäfte und Handel sind privat zu regeln. ")
         embed.add_field(name="__§4.1 |  Nickname, Profilbild, Spieleanzeige__",
