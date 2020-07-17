@@ -238,6 +238,9 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def pat(self, ctx, user: discord.Member):
+        if user == ctx.author:
+            return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
+
         gifs: list = self.gifData['pat']
         gif: str = random.choice(gifs)
 
@@ -249,6 +252,9 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def hug(self, ctx, user: discord.Member):
+        if user == ctx.author:
+            return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
+
         gifs: list = self.gifData['hug']
         gif: str = random.choice(gifs)
 
@@ -260,6 +266,9 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def highfive(self, ctx, user: discord.Member):
+        if user == ctx.author:
+            return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
+
         gifs: list = self.gifData['highfive']
         gif: str = random.choice(gifs)
 
