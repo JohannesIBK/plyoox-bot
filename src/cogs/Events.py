@@ -3,9 +3,10 @@ import json
 import random
 import re
 import time
+import typing
+
 import dbl
 import discord
-import typing
 from discord.ext import commands, tasks
 
 import main
@@ -16,6 +17,7 @@ from utils.ext import standards as std, checks, context
 DISCORD_INVITE = '(discord(app\.com\/invite|\.com(\/invite)?|\.gg)\/?[a-zA-Z0-9-]{2,32})'
 EXTERNAL_LINK = '((https?:\/\/(www\.)?|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})'
 BRACKET_REGEX = r'{.*?}'
+CHANNEL_REGEX = r'#\w+'
 discordRegex = re.compile(DISCORD_INVITE, re.IGNORECASE)
 linkRegex = re.compile(EXTERNAL_LINK, re.IGNORECASE)
 
@@ -238,7 +240,6 @@ class Events(commands.Cog):
         win = data['winType']
 
         deleted: int = await self.bot.db.fetch('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', message.guild.id, message.id)
-        print(deleted)
 
         if deleted == 0:
             return
@@ -443,16 +444,15 @@ class Events(commands.Cog):
             return
 
         if data['globalbans']:
-            banData = await self.bot.db.fetchrow(
-                'SELECT bans.reason, bans.userid, config.logchannel FROM extra.globalbans AS bans, '
-                'automod.config AS config WHERE bans.userid = $1 OR config.sid = $2',
-                member.id, guild.id)
-            if (reason := banData['reason']) and banData['userid']:
-                await guild.ban(member, reason=banData['reason'])
-                if banData['logchannel']:
-                    embed: discord.Embed = std.getBaseModEmbed(f'Globalban: {reason}]', member)
+            banData = await self.bot.db.fetchrow('SELECT reason, userid FROM extra.globalbans WHERE userid = $1', member.id)
+            if banData is not None and banData['reason'] and banData['userid']:
+                reason = banData['reason']
+                await guild.ban(member, reason=f"Globalban:\n{reason}")
+                logchannel = await self.bot.db.fetchval('SELECT logchannel FROM automod.config WHERE config.sid = $1', guild.id)
+                if logchannel:
+                    embed: discord.Embed = std.getBaseModEmbed(f'Globalban: {reason}', member)
                     embed.title = f'Automoderation [GLOBALBAN]'
-                    logchannel = member.guild.get_channel(banData['logchannel'])
+                    logchannel = member.guild.get_channel(logchannel)
                     if logchannel is not None:
                         await logchannel.send(embed=embed)
                 return
@@ -460,6 +460,7 @@ class Events(commands.Cog):
         if (msg := data["joinmessage"]) is not None and data["joinchannel"] is not None:
             try:
                 placeholders = re.findall(BRACKET_REGEX, msg)
+                channels = re.findall(CHANNEL_REGEX, msg)
 
                 for placeholder in placeholders:
                     if placeholder.lower() == '{userm}':
@@ -467,10 +468,16 @@ class Events(commands.Cog):
                     elif placeholder.lower() == '{user}':
                         msg = msg.replace(placeholder, str(member))
 
+                for channelMention in channels:
+                    channel = discord.utils.find(lambda c: c.name == channelMention[1:], guild.channels)
+                    if channel is not None:
+                        msg = msg.replace(channelMention, channel.mention)
+
+
                 if data['joindm']:
                     await member.send(msg)
                 else:
-                    channel: discord.TextChannel = guild.get_channel(int(data["joinchannel"]))
+                    channel: discord.TextChannel = guild.get_channel(data["joinchannel"])
                     await channel.send(msg)
             except discord.Forbidden:
                 pass
