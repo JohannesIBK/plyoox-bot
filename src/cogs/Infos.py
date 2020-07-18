@@ -1,9 +1,7 @@
 import datetime
-from typing import Union
-
 import sys
-
 import time
+from typing import Union
 
 import discord
 from discord.ext import commands
@@ -67,10 +65,8 @@ class Infos(commands.Cog):
     @cmd(aliases=["serverinfo", "guild"])
     async def server(self, ctx, guildID: int = None):
         guild: discord.Guild = ctx.guild
-
         if guildID is not None:
             new_guild = self.bot.get_guild(guildID)
-
             if new_guild is not None:
                 if ctx.author.id == self.bot.owner_id:
                     guild = new_guild

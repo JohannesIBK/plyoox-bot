@@ -23,7 +23,6 @@ async def createEmbedLog(ctx, modEmbed = None, userEmbed = None,
 
     if (logging or ignoreNoLogging) and modEmbed is not None:
         logchannel = ctx.guild.get_channel(logchannelID)
-
         if logchannel is not None:
             if ctx.me.permissions_in(logchannel).send_messages:
                 await logchannel.send(embed=modEmbed)
