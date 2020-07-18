@@ -11,19 +11,11 @@ from discord.ext import commands, tasks
 
 import main
 from others import db
-from utils import automod
-from utils.ext import standards as std, checks, context
+from utils.automod import automod
+from utils.ext import standards as std, context
 
-DISCORD_INVITE = '(discord(app\.com\/invite|\.com(\/invite)?|\.gg)\/?[a-zA-Z0-9-]{2,32})'
-EXTERNAL_LINK = '((https?:\/\/(www\.)?|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})'
 BRACKET_REGEX = r'{.*?}'
 CHANNEL_REGEX = r'#\w+'
-discordRegex = re.compile(DISCORD_INVITE, re.IGNORECASE)
-linkRegex = re.compile(EXTERNAL_LINK, re.IGNORECASE)
-
-
-def findWord(word):
-    return re.compile(r'\b({0})\b'.format(word), flags=re.IGNORECASE).search
 
 
 with open(r"./others/keys/dbl.env", 'r') as file:
@@ -89,132 +81,6 @@ class Events(commands.Cog):
         channel = self.bot.get_channel(data['channel'])
         message = await channel.fetch_message(messageID)
         self.bot.dispatch('giveaway_runout', message, data)
-
-    async def automod(self, msg: discord.Message):
-        ctx = await self.bot.get_context(msg, cls=context.Context)
-
-        if not await self.bot.get(msg.guild.id, 'automod'):
-            return
-
-        if await self.bot.get(msg.guild.id, 'state'):
-            words = await self.bot.get(msg.guild.id, 'words')
-            if words:
-                for word in words:
-                    if findWord(word)(msg.content.lower()):
-                        if not await checks.ignores_automod(ctx):
-                            data = await self.bot.db.fetchrow(
-                                'SELECT points, whitelist FROM automod.blacklist WHERE sid = $1', msg.guild.id)
-
-                            if data['whitelist'] is not None and msg.channel.id in data['whitelist']:
-                                return
-
-                            return await automod.add_points(ctx, data['points'], 'Blacklisted Word')
-
-        if discordRegex.findall(msg.content):
-            if await checks.ignores_automod(ctx):
-                return
-
-            data = await self.bot.db.fetchrow(
-                "SELECT state, whitelist, partner, points FROM automod.invites WHERE sid = $1",
-                msg.guild.id)
-
-            if not data['state']:
-                return
-
-            if data['whitelist'] is not None and msg.channel.id in data['whitelist']:
-                return
-
-            whitelistedServers = [msg.guild.id]
-            if (partner := data['partner']):
-                whitelistedServers.extend([int(guildID) for guildID in partner])
-
-            hasInvite: bool = False
-
-            for invite in discordRegex.findall(msg.content):
-                try:
-                    invite = await self.bot.fetch_invite(invite[0])
-                except discord.NotFound:
-                    continue
-
-                except discord.Forbidden:
-                    await automod.add_points(ctx, data['points'], 'Discord-Invite')
-                    hasInvite = True
-                    break
-
-                if invite.guild.id not in whitelistedServers:
-                    hasInvite = True
-                    break
-
-            if hasInvite:
-                return await automod.add_points(ctx, data['points'], 'Discord-Invite')
-
-        elif linkRegex.findall(msg.content):
-            if await checks.ignores_automod(ctx):
-                return
-
-            data = await self.bot.db.fetchrow(
-                'SELECT points, state, links, whitelist, iswhitelist FROM automod.links WHERE sid = $1',
-                msg.guild.id)
-
-            if not data['state']:
-                return
-
-            if data['whitelist'] is not None and msg.channel.id in data['whitelist']:
-                return
-
-            links = ['discord.gg', 'discord.com', 'discordapp.com', 'plyoox.net']
-            if (linksData := data['links']) is not None:
-                links.extend(linksData)
-
-            linksObj = linkRegex.findall(msg.content)
-
-            if data['iswhitelist']:
-                for linkObj in linksObj:
-                    link = linkObj[0].replace(linkObj[1], '')
-                    if link not in links:
-                        return await automod.add_points(ctx, data['points'], 'Link')
-            else:
-                for linkObj in linksObj:
-                    link = linkObj[0].replace(linkObj[1], '')
-                    if link in links:
-                        return await automod.add_points(ctx, data['points'], 'Link')
-
-        if not msg.clean_content.islower() and len(msg.content) > 15:
-            if await checks.ignores_automod(ctx):
-                return
-
-            content = msg.clean_content.replace("Ü", "U").replace("Ä", "A").replace("Ö", "O")
-            lenCaps = len(re.findall(r'[A-Z]', content))
-
-            percent = lenCaps / len(msg.content)
-            if percent > 0.7:
-                data = await self.bot.db.fetchrow("SELECT points, state, whitelist FROM automod.caps WHERE sid = $1", msg.guild.id)
-
-                if not data['state']:
-                    return
-
-                if data['whitelist'] and msg.channel.id in data['whitelist']:
-                    return
-
-                return await automod.add_points(ctx, data['points'], 'Caps')
-
-        if len(msg.mentions) >= 3:
-            if await checks.ignores_automod(ctx):
-                return
-
-            lenMentions = sum(not m.bot and m.id != msg.author.id for m in msg.mentions)
-            data = await self.bot.db.fetchrow(
-                "SELECT state, points, mentions_len, whitelist FROM automod.mentions WHERE sid = $1",
-                msg.guild.id)
-
-            if not data['state']:
-                return
-
-            if data['whitelist'] and msg.channel.id in data['whitelist']:
-                return
-
-            if lenMentions >= data['mentions_len']:
-                return await automod.add_points(ctx, data['points'], 'Mentions')
 
     @tasks.loop(hours=6)
     async def update_stats(self):
@@ -534,7 +400,8 @@ class Events(commands.Cog):
         if not isinstance(msg.author, discord.Member):
             return
 
-        await self.automod(msg)
+        ctx = await self.bot.get_context(msg, cls=context.Context)
+        await automod(ctx)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild: discord.Guild, user: discord.Member):
@@ -554,7 +421,8 @@ class Events(commands.Cog):
         if before.content == after.content:
             return
 
-        await self.automod(after)
+        ctx = await self.bot.get_context(after, cls=context.Context)
+        await automod(ctx)
 
         if (after.edited_at - before.created_at).seconds <= 30:
             await self.bot.process_commands(after)
