@@ -1,4 +1,8 @@
 import datetime
+import string
+from random import random
+from typing import Union
+
 import discord
 
 yes_emoji = "<:yes:703900321465892914>"
@@ -92,7 +96,7 @@ def getErrorEmbed(errorMessage: str) -> discord.Embed:
     return embed
 
 
-def getBaseModEmbed(reason: str, user: discord.Member = None, mod: discord.Member = None):
+def getBaseModEmbed(reason: str, user: Union[discord.Member, discord.User] = None, mod: discord.Member = None):
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text='Plyoox Moderation', icon_url=avatar_url)
@@ -127,3 +131,8 @@ def getUserEmbed(reason: str, guildName: str, duration = 'permanent', punishType
         embed.description = f'Du wurdest `{duration}` auf dem Server `{guildName}` für `{reason}` gemutet.'
 
     return embed
+
+
+def randomString(stringLength=6):
+    letters = string.ascii_letters + string.digits
+    return ''.join(random.choice(letters) for _ in range(stringLength))
