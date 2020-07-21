@@ -1,8 +1,8 @@
 import asyncio
 import json
+import sys
 
 from main import Plyoox as Bot
-import sys
 
 
 def close():
@@ -42,7 +42,7 @@ try:
 
     with open('utils/simpleStorage.json', 'r') as file:
         data = json.load(file)
-        bot.commandsCount = data['commands'] or {}
+        bot.commandsCount = json.loads(data['commands']) or {}
 
     bot.run(token)
 except KeyboardInterrupt:
