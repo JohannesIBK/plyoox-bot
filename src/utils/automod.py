@@ -99,8 +99,8 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
     embed: discord.Embed = std.getBaseModEmbed(f'{modType} [+{addPoints}]', punishedUser)
     userEmbed: discord.Embed = std.getBaseModEmbed(f'{modType} [+{addPoints}]')
     userEmbed.add_field(name=f'{std.folder_emoji} **Server**', value=ctx.guild.name)
-    embed.title = f'Automoderation [LOG]'
-    userEmbed.title = f'Automoderation [LOG]'
+    embed.title = f'AUTOMODERATION [LOG]'
+    userEmbed.title = f'AUTOMODERATION [LOG]'
     if user is not None:
         embed.add_field(name=f'{std.supporter_emoji} **__Moderator__**',
                         value=ctx.author.mention)
@@ -112,23 +112,23 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
 
     if points >= maxPoints:
         if action is None:
-            embed.title = 'Automoderation [LOG]'
+            embed.title = 'AUTOMODERATION [LOG]'
 
         if action == 1:
             if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
-                embed.title = 'Automoderation [KICK]'
+                embed.title = 'AUTOMODERATION [KICK]'
                 await punishedUser.kick(reason="Automoderation: User reached max points.")
                 await ctx.bot.db.execute("UPDATE automod.users SET points = 0 WHERE key = $1", key)
 
         if action == 2:
             if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
-                embed.title = 'Automoderation [BAN]'
+                embed.title = 'AUTOMODERATION [BAN]'
                 await punishedUser.ban(reason="Automoderation: User reached max points.")
                 await ctx.bot.db.execute("UPDATE automod.users SET points = 0 WHERE key = $1", key)
 
         if action == 3:
             if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
-                embed.title = 'Automoderation [TEMPBAN]'
+                embed.title = 'AUTOMODERATION [TEMPBAN]'
                 await punishedUser.ban(reason="Automoderation: User reached max points.")
                 await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',
                                      ctx.guild.id, punishedUser.id, 0, unixTime)
@@ -138,7 +138,7 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
                 muteRole = ctx.guild.get_role(data['muterole'])
                 if muteRole is None:
                     return
-                embed.title = 'Automoderation [TEMPMUTE]'
+                embed.title = 'AUTOMODERATION [TEMPMUTE]'
                 await punishedUser.add_roles(muteRole)
                 await ctx.bot.db.execute("UPDATE automod.users SET points = 0 WHERE key = $1", key)
                 await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',

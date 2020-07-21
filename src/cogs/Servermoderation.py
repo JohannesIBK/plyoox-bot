@@ -3,7 +3,7 @@ from discord.ext import commands
 
 import main
 from utils import rules
-from utils.ext import checks, standards
+from utils.ext import checks, standards as std
 from utils.ext.cmds import grp, cmd
 
 
@@ -15,12 +15,11 @@ class Servermoderation(commands.Cog):
     @checks.isAdmin()
     async def prefix(self, ctx, prefix: str):
         if len(prefix) > 3:
-            return await ctx.send(embed=standards.getErrorEmbed('Der Prefix darf maximal 3 Zeichen lang sein.'))
+            return await ctx.send(embed=std.getErrorEmbed('Der Prefix darf maximal 3 Zeichen lang sein.'))
 
         await ctx.db.execute("UPDATE config.guild SET prefix = $1 WHERE sid = $2", prefix, ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'prefix': prefix})
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description=f'{standards.yes_emoji} Der Prefix wurde erfolgreich zu `{prefix}` geändert.'))
+        await ctx.send(embed=std.getEmbed(f'{std.yes_emoji} Der Prefix wurde erfolgreich zu `{prefix}` geändert.'))
 
     @grp(case_insensitive=True)
     @checks.isAdmin()
@@ -33,36 +32,31 @@ class Servermoderation(commands.Cog):
     async def leveling(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET leveling = true WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'leveling': True})
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Das Levelsystem wurde erfolgreich aktiviert.'))
+        await ctx.send(embed=std.getEmbed('Das Levelsystem wurde erfolgreich aktiviert.'))
 
     @activate.command()
     async def games(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET fun = true WHERE sid = $1", ctx.guild.id)
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Das Games-Modul wurde erfolgreich aktiviert.'))
+        await ctx.send(embed=std.getEmbed('Das Games-Modul wurde erfolgreich aktiviert.'))
 
     @activate.command()
     @commands.bot_has_permissions(ban_members=True, kick_members=True, manage_roles=True, manage_messages=True)
     async def automod(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET automod = true WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'automod': True})
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Der AutoMod wurde erfolgreich aktiviert."'))
+        await ctx.send(embed=std.getEmbed('Der AutoMod wurde erfolgreich aktiviert."'))
 
     @activate.command()
     @commands.bot_has_permissions()
     async def welcomer(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET welcomer = true WHERE sid = $1", ctx.guild.id)
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Der Welcomer wurde erfolgreich aktiviert."'))
+        await ctx.send(embed=std.getEmbed('Der Welcomer wurde erfolgreich aktiviert."'))
 
     @activate.command()
     @commands.bot_has_permissions(ban_members=True)
     async def globalbans(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET globalbans = true WHERE sid = $1", ctx.guild.id)
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Globalbans wurden erfolgreich aktiviert.'))
+        await ctx.send(embed=std.getEmbed('Globalbans wurden erfolgreich aktiviert.'))
 
     @grp(case_insensitive=True)
     @checks.isAdmin()
@@ -74,34 +68,29 @@ class Servermoderation(commands.Cog):
     async def _leveling(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET leveling = false WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'leveling': False})
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Das Levelsystem wurde deaktiviert.'))
+        await ctx.send(embed=std.getEmbed('Das Levelsystem wurde deaktiviert.'))
 
     @deactivate.command(name='games')
     async def _games(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET fun = false WHERE sid = $1", ctx.guild.id)
 
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Das Games-Modul wurde deaktiviert'))
+        await ctx.send(embed=std.getEmbed('Das Games-Modul wurde deaktiviert'))
 
     @deactivate.command(name="automod")
     async def _automod(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET automod = false WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'automod': False})
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Der Automod wurde deaktiviert'))
+        await ctx.send(embed=std.getEmbed('Der Automod wurde deaktiviert'))
 
     @deactivate.command(name='welcomer')
     async def _welcomer(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET welcomer = false WHERE sid = $1", ctx.guild.id)
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Der Welcomer wurde erfolgreich deaktiviert.'))
+        await ctx.send(embed=std.getEmbed('Der Welcomer wurde erfolgreich deaktiviert.'))
 
     @deactivate.command(name='globalbans')
     async def _globalban(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET globalbans = false WHERE sid = $1", ctx.guild.id)
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Globalbans wurden erfolgreich deaktiviert."'))
+        await ctx.send(embed=std.getEmbed('Globalbans wurden erfolgreich deaktiviert."'))
 
     @cmd()
     @checks.isAdmin()
@@ -151,12 +140,10 @@ class Servermoderation(commands.Cog):
 
         muteRoleID: int = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
         muteRole: discord.Role = guild.get_role(muteRoleID)
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Die Muterolle muss über der höchsten Rolle sein, die gemuted werden soll.'))
-        await muteRole.edit(permissions=discord.Permissions.none())
-
         if muteRole is None:
-            return await ctx.send(embed=standards.getErrorEmbed('Der Server hat keine Mute-Rolle!'))
+            return await ctx.send(embed=std.getErrorEmbed('Der Server hat keine Mute-Rolle!'))
+
+        await muteRole.edit(permissions=discord.Permissions.none())
 
         for channel in guild.channels:
             if isinstance(channel, discord.TextChannel):
@@ -183,8 +170,7 @@ class Servermoderation(commands.Cog):
                     allow=discord.Permissions(permissions=0))
                 await channel.set_permissions(muteRole, overwrite=overwrite)
 
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='Die Muterolle wurde eingestellt.'))
+        await ctx.send(embed=std.getEmbed('Die Muterolle wurde eingestellt.'))
 
     # @cmd()
     # @checks.isAdmin()

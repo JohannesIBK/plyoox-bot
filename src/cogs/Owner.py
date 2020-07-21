@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards
+from utils.ext import standards as std
 from utils.ext.cmds import cmd, grp
 
 
@@ -78,7 +78,6 @@ class Owner(commands.Cog):
     @cmd(hidden=True)
     @commands.is_owner()
     async def addRole(self, ctx, Rolle: discord.Role):
-        """Gibt jedem auf dem Server eine Rolle."""
         count = 0
         members = [member for member in ctx.guild.members if len(member.roles) == 1 and not member.bot]
         for member in members:
@@ -93,7 +92,6 @@ class Owner(commands.Cog):
     @cmd(hidden=True)
     @commands.is_owner()
     async def removeRole(self, ctx, Rolle: discord.Role):
-        """Entfernt jeden aus einer Rolle."""
         count = 0
         f_count = 0
         for member in Rolle.members:
@@ -108,20 +106,17 @@ class Owner(commands.Cog):
     @cmd(hidden=True)
     @commands.is_owner()
     async def leave(self, ctx):
-        """Verlässt einen Server"""
         await ctx.guild.leave()
 
     @cmd(hidden=True, aliases=['quit'])
     @commands.is_owner()
     async def shutdown(self, ctx):
-        """Schaltet den Bot aus."""
         await ctx.send("Shutdown")
         await self.bot.logout()
 
     @cmd()
     @commands.is_owner()
     async def permissions(self, ctx):
-        """Listet alle Berechtigungen auf."""
         permissions = ctx.channel.permissions_for(ctx.me)
 
         embed = discord.Embed(title='Permissions', color=0x3498db)
@@ -141,7 +136,6 @@ class Owner(commands.Cog):
     @cmd(hidden=True)
     @commands.is_owner()
     async def toCopy(self, ctx):
-        """Infos zum Kopieren von Servern."""
         embed = discord.Embed(title='Guild Copy Infos', color=0x3498db)
         embed.add_field(name='ServerID', value=f'{ctx.guild.id}')
         embed.add_field(name='Top-Role ID', value=ctx.guild.get_member(self.bot.user.id).top_role.id)
@@ -150,8 +144,6 @@ class Owner(commands.Cog):
     @cmd(pass_context=True, name='eval', aliases=["exec"])
     @commands.is_owner()
     async def _eval(self, ctx, *, body: str):
-        """Evaluates a code"""
-
         def cleanup_code(content):
             if content.startswith('```') and content.endswith('```'):
                 return '\n'.join(content.split('\n')[1:-1])
@@ -216,15 +208,13 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def setVersion(self, ctx, version: str):
         self.bot.version = version
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description=f'Die Version wurde zu {version} geändert.'))
+        await ctx.send(embed=std.getEmbed('Die Version wurde zu {version} geändert.'))
 
     @cmd()
     @commands.is_owner()
     async def reloadLang(self, ctx):
         self.bot.get_cog('Help').helpText = json.load(codecs.open(r'others/help_de.json', encoding='utf-8'))
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description=f'Der Help-Text wurde reloadet.'))
+        await ctx.send(embed=std.getEmbed('Der Help-Text wurde reloadet.'))
 
     @cmd()
     @commands.is_owner()
@@ -238,9 +228,9 @@ class Owner(commands.Cog):
         elif pgType == 'fetchval':
             resp = await self.bot.db.fetchval(sql)
         else:
-            return await ctx.send(embed=standards.getErrorEmbed('Keine valider type'))
+            return await ctx.send(embed=std.getErrorEmbed('Keine valider type'))
 
-        await ctx.send(embed=discord.Embed(color=standards.normal_color, description=str(resp)))
+        await ctx.send(embed=std.getEmbed(str(resp)))
 
     @cmd()
     @commands.is_owner()
@@ -263,8 +253,7 @@ class Owner(commands.Cog):
             with open('utils/simpleStorage.json', 'r') as file:
                 data = json.load(file)
 
-            await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                               description=f'Maintenance: {data["maintenance"]}'))
+            await ctx.send(embed=std.getEmbed(f'Maintenance: {data["maintenance"]}'))
 
     @maintenance.command()
     async def activate(self, ctx):
@@ -274,8 +263,7 @@ class Owner(commands.Cog):
             data['maintenance'] = True
             json.dump(data, file)
             file.truncate()
-            await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                               description=f'Maintenance: True'))
+            await ctx.send(embed=std.getEmbed('Maintenance: True'))
         await self.bot.change_presence(
             activity=discord.Activity(
                 type=discord.ActivityType.playing,
@@ -291,8 +279,7 @@ class Owner(commands.Cog):
             data['maintenance'] = False
             json.dump(data, file)
             file.truncate()
-            await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                               description=f'Maintenance: False'))
+            await ctx.send(embed=std.getEmbed('Maintenance: False'))
 
         await self.bot.change_presence(
             activity=discord.Activity(
@@ -332,8 +319,7 @@ class Owner(commands.Cog):
             command = commandsCountSorted[i]
             commandsCountList.append(f'**{command[0]}:** {command[1]}')
 
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='\n'.join(commandsCountList)))
+        await ctx.send(embed=std.getEmbed('\n'.join(commandsCountList)))
 
     @commandCount.command()
     async def top(self, ctx):
@@ -347,8 +333,7 @@ class Owner(commands.Cog):
             command = commandsCountSorted[i]
             commandsCountList.append(f'**{command[0]}:** {command[1]}')
 
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description='\n'.join(commandsCountList)))
+        await ctx.send(embed=std.getEmbed('\n'.join(commandsCountList)))
 
 
 def setup(bot):

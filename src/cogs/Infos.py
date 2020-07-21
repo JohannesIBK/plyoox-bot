@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards, checks
+from utils.ext import standards as std, checks
 from utils.ext.cmds import cmd
 
 
@@ -18,7 +18,6 @@ class Infos(commands.Cog):
     @staticmethod
     def _getRoles(roles):
         roles = [f'{role.mention}' for role in roles if not role.is_default()]
-
         string = ''
 
         for role in roles:
@@ -35,14 +34,12 @@ class Infos(commands.Cog):
     @staticmethod
     def _getEmojis(emojis):
         emojis = [f'{emoji}' for emoji in emojis]
-
         string = ''
 
         for emoji in emojis:
             if len(string + str(emoji)) > 1015:
                 string += '...'
                 break
-
             string += emoji
 
         if string == '':
@@ -54,13 +51,13 @@ class Infos(commands.Cog):
     def statusEmoji(status):
         status = str(status).lower()
         if status == 'online':
-            return standards.online_emoji
+            return std.online_emoji
         if status == 'offline':
-            return standards.offline_emoji
+            return std.offline_emoji
         if status == 'idle':
-            return standards.idle_emoji
+            return std.idle_emoji
         if status == 'dnd':
-            return standards.dnd_emoji
+            return std.dnd_emoji
 
     @cmd(aliases=["serverinfo", "guild"])
     async def server(self, ctx, guildID: int = None):
@@ -80,32 +77,32 @@ class Infos(commands.Cog):
         dnd_members = len(list(filter(lambda m: m.status == discord.Status.dnd and not m.bot, guild.members)))
         bots = len([m.bot for m in guild.members if m.bot])
 
-        embed = discord.Embed(color=standards.normal_color, title=f'***__Info über {guild.name}__***', inline=False)
+        embed = discord.Embed(color=std.normal_color, title=f'***__Info über {guild.name}__***')
         embed.set_thumbnail(url=guild.icon_url)
-        embed.description = f'{standards.nametag_emoji} **Name:** {guild.name}\n' \
-                            f'{standards.botdev_emoji} **ID**: {guild.id}\n' \
-                            f'{standards.owner_emoji} **Owner:** {guild.owner}\n' \
-                            f'{standards.globe_emoji} **Region:** {guild.region}\n' \
-                            f'{standards.lock_emoji} **Verification:** {guild.verification_level}\n'
+        embed.description = f'{std.nametag_emoji} **Name:** {guild.name}\n' \
+                            f'{std.botdev_emoji} **ID**: {guild.id}\n' \
+                            f'{std.owner_emoji} **Owner:** {guild.owner}\n' \
+                            f'{std.globe_emoji} **Region:** {guild.region}\n' \
+                            f'{std.lock_emoji} **Verification:** {guild.verification_level}\n'
 
-        embed.add_field(name=f'{standards.members_emoji} **Mitglieder** ({guild.member_count})',
-                        value=f'{standards.online_emoji}{online_members} '
-                              f'{standards.idle_emoji}{idle_members} '
-                              f'{standards.dnd_emoji}{dnd_members} '
-                              f'{standards.offline_emoji}{offline_members} '
-                              f'{standards.clyde_emoji}{bots}',
+        embed.add_field(name=f'{std.members_emoji} **Mitglieder** ({guild.member_count})',
+                        value=f'{std.online_emoji}{online_members} '
+                              f'{std.idle_emoji}{idle_members} '
+                              f'{std.dnd_emoji}{dnd_members} '
+                              f'{std.offline_emoji}{offline_members} '
+                              f'{std.clyde_emoji}{bots}',
                         inline=False)
 
-        embed.add_field(name=f'{standards.date_emoji} **Daten**',
+        embed.add_field(name=f'{std.date_emoji} **Daten**',
                         value=f'**Erstellt:** {guild.created_at.strftime("%d.%m.%Y")}\n'
                               f'**Tage seitdem:** {(datetime.datetime.now() - guild.created_at).days}',
                         inline=False)
 
-        embed.add_field(name=f'{standards.mention_emoji} **Rollen ({len(guild.roles) - 1})**',
+        embed.add_field(name=f'{std.mention_emoji} **Rollen ({len(guild.roles) - 1})**',
                         value=roles,
                         inline=False)
 
-        embed.add_field(name=f'{standards.ola_emoji} **Emojis ({len(guild.emojis)})**',
+        embed.add_field(name=f'{std.ola_emoji} **Emojis ({len(guild.emojis)})**',
                         value=emojis,
                         inline=False)
 
@@ -118,28 +115,21 @@ class Infos(commands.Cog):
 
         if user is None:
             user = ctx.message.author
-
         joined_dc = user.created_at.strftime("%d.%m.%Y")
         days_dc = (datetime.datetime.now() - user.created_at).days
-
         joined_guild = user.joined_at.strftime("%d.%m.%Y")
         since_joined_guild = (datetime.datetime.now() - user.joined_at).days
-
         roles = self._getRoles(user.roles)
-
         members = ctx.guild.members
         members.sort(key=sort)
         join_pos = members.index(user) + 1
 
-        embed = discord.Embed(title=f'__***Info über {user}***__',
-                              color=user.color)
+        embed = discord.Embed(title=f'__***Info über {user}***__', color=user.color)
         embed.set_thumbnail(url=user.avatar_url)
-
-        embed.description = f'{standards.botdev_emoji} **ID:** {user.id}\n' \
-                            f'{standards.nametag_emoji} **Name:** {user.display_name}\n' \
-                            f'{standards.mention_emoji} **Erwähnung:** {user.mention}'
-
-        embed.add_field(name=f'{standards.date_emoji} **Daten**',
+        embed.description = f'{std.botdev_emoji} **ID:** {user.id}\n' \
+                            f'{std.nametag_emoji} **Name:** {user.display_name}\n' \
+                            f'{std.mention_emoji} **Erwähnung:** {user.mention}'
+        embed.add_field(name=f'{std.date_emoji} **Daten**',
                         value=f'**__Discord__**\n'
                               f'**Erstellt:** {joined_dc}\n'
                               f'**Tage seitdem:** {days_dc}'
@@ -149,30 +139,24 @@ class Infos(commands.Cog):
                               f'**Tage seitdem:** {since_joined_guild}\n'
                               f'**Join-Position:** {join_pos}',
                         inline=False)
-
-        embed.add_field(name=f"{standards.info_emoji} **Status**",
+        embed.add_field(name=f"{std.info_emoji} **Status**",
                         value=f"**Desktop:** {self.statusEmoji(user.desktop_status)}\n"
                               f"**Handy:** {self.statusEmoji(user.mobile_status)}\n"
                               f'**Web:** {self.statusEmoji(user.web_status)}\n',
                         inline=False)
-
-        embed.add_field(name=f'{standards.folder_emoji} **Server-Daten**',
-                        value=f'{standards.mention_emoji} **Rollen ({len(user.roles) - 1})** {roles}',
+        embed.add_field(name=f'{std.folder_emoji} **Server-Daten**',
+                        value=f'{std.mention_emoji} **Rollen ({len(user.roles) - 1})** {roles}',
                         inline=False)
 
-        try:
-            embed.add_field(name=f'{standards.richPresence_emoji} **Aktivität**', value=user.activity.name,
-                            inline=False)
-        except:
-            pass
+        if user.activity is not None:
+            embed.add_field(name=f'{std.richPresence_emoji} **Aktivität**', value=user.activity.name, inline=False)
 
         await ctx.send(embed=embed)
 
     @cmd()
     async def todayJoined(self, ctx):
         joined = len([user.id for user in ctx.guild.members if (datetime.datetime.now() - user.joined_at).days == 0])
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description=f'Heute {"ist" if joined == 1 else "sind"} {joined} User auf den Server gejoint.'))
+        await ctx.send(embed=std.getEmbed(f'Heute {"ist" if joined == 1 else "sind"} {joined} User auf den Server gejoint.'))
 
     @cmd()
     async def joined(self, ctx, user: Union[discord.Member, int] = None):
@@ -198,13 +182,10 @@ class Infos(commands.Cog):
                 user = all_members[join_pos]
                 days = (datetime.datetime.now() - user.joined_at).days
             except IndexError:
-                return await ctx.send(embed=discord.Embed(color=standards.error_color,
-                                                          title=f"{standards.error_emoji} __**ERROR**__",
-                                                          description='Kein User auf dieser Join Position.'))
+                return await ctx.send(embed=std.getErrorEmbed('Kein User auf dieser Join Position.'))
 
-        embed = discord.Embed(title='Join Position:', color=standards.normal_color)
-        embed.add_field(name=f"{user}",
-                        value=f'Position: {join_pos + 1} (vor {days} Tagen)')
+        embed = discord.Embed(title='Join Position:', color=std.normal_color)
+        embed.add_field(name=f"{user}", value=f'Position: {join_pos + 1} (vor {days} Tagen)')
         embed.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=embed)
 
@@ -213,16 +194,14 @@ class Infos(commands.Cog):
         uptime = datetime.timedelta(seconds=round(time.time() - self.bot.startTime))
         python_version = '{}.{}.{}'.format(*sys.version_info[:3])
 
-        embed = discord.Embed(color=standards.normal_color)
+        embed = std.getEmbed(f'{std.botdev_emoji} **ID:** {ctx.me.id}')
         embed.title = f'{ctx.me}'
-        embed.description = f'{standards.botdev_emoji} **ID:** {ctx.me.id}'
-        embed.add_field(name=f"{standards.owner_emoji} **Owner**", value="JohannesIBK#9220", inline=False)
-        embed.add_field(name=f"{standards.folder_emoji} **Server**", value=str(len(self.bot.guilds)), inline=False)
-        embed.add_field(name=f"{standards.members_emoji} **User**", value=str(len(list(self.bot.get_all_members()))),
-                        inline=False)
-        embed.add_field(name=f"{standards.info_emoji} **Versions**",
+        embed.add_field(name=f"{std.owner_emoji} **Owner**", value="JohannesIBK#9220", inline=False)
+        embed.add_field(name=f"{std.folder_emoji} **Server**", value=str(len(self.bot.guilds)), inline=False)
+        embed.add_field(name=f"{std.members_emoji} **User**", value=str(len(list(self.bot.get_all_members()))), inline=False)
+        embed.add_field(name=f"{std.info_emoji} **Versions**",
                         value=f'**Python:** {python_version}\n**Discord.py:** {discord.__version__}', inline=False)
-        embed.add_field(name=f"{standards.date_emoji} **Uptime**", value=str(uptime), inline=False)
+        embed.add_field(name=f"{std.date_emoji} **Uptime**", value=str(uptime), inline=False)
         embed.add_field(name="⠀",
                         value=f'[DBL](https://discordbots.org/bot/505433541916622850) | '
                               f'[Dashboard](https://plyoox.net) | '
@@ -234,25 +213,21 @@ class Infos(commands.Cog):
     @cmd()
     @checks.hasPerms(manage_guild=True)
     async def roleMembers(self, ctx, role: discord.Role):
-        await ctx.send(embed=discord.Embed(color=standards.normal_color,
-                                           description=f'Die Rolle {role.mention} hat {len(role.members)} Mitglieder.'))
+
+        await ctx.send(embed=std.getEmbed(f'Die Rolle {role.mention} hat {len(role.members)} Mitglieder.'))
 
     @cmd()
     async def avatar(self, ctx, user: discord.User = None):
         if user is None:
             user = ctx.author
-        embed: discord.Embed = discord.Embed(color=standards.normal_color)
+        embed: discord.Embed = discord.Embed(color=std.normal_color)
         embed.set_author(name=user, url=user.avatar_url, icon_url=user.avatar_url)
         embed.set_image(url=user.avatar_url)
         await ctx.send(embed=embed)
 
     @cmd()
     async def members(self, ctx):
-        guild: discord.Guild = ctx.guild
-
-        embed = discord.Embed(color=standards.normal_color,
-                              description=f'Der Discord hat momentan `{guild.member_count}` Mitglieder.')
-        await ctx.send(embed=embed)
+        await ctx.send(embed=std.getEmbed(f'Der Discord hat momentan `{ctx.guild.member_count}` Mitglieder.'))
 
 
 def setup(bot):

@@ -314,6 +314,7 @@ class Moderation(commands.Cog):
         if 0 > points <= 20:
             return await ctx.send(embed=std.getErrorEmbed('Du kannst nur Punkte von 1-20 hinzufügen.'))
         await automod.add_points(ctx, points, reason, user=user)
+        await ctx.message.delete()
         await ctx.send(embed=discord.Embed(color=std.normal_color,
                                            description=f'{std.law_emoji} Dem User {user.mention} wurden {points} Punkte hinzugefügt.'),
                        delete_after=5)
@@ -336,7 +337,8 @@ class Moderation(commands.Cog):
         key: str = f'{user.id}{ctx.guild.id}'
 
         await ctx.bot.db.execute('UPDATE automod.users SET points = 0, time = $1 WHERE key = $2', time.time(), key)
-        await ctx.send(embed=discord.Embed(description=f'Die Punkte des Users wurden zurückgesetzt.'))
+        await ctx.message.delete()
+        await ctx.send(embed=discord.Embed(description=f'Die Punkte des Users wurden zurückgesetzt.'), delete_after=5)
 
     @cmd(aliases=['slow'])
     @checks.isMod()
@@ -346,7 +348,8 @@ class Moderation(commands.Cog):
         if seconds < 0 or seconds > 21600:
             return await ctx.send(embed=std.getErrorEmbed('Die Sekundenanzahl muss zwischen 0 und 21600 (6h) liegen'))
         await ctx.channel.edit(slowmode_delay=seconds)
-        await ctx.send(embed=std.getEmbed(f'Der Slowmode wurde erfolgreich auf {seconds}s gesetzt.'))
+        await ctx.message.delete()
+        await ctx.send(embed=std.getEmbed(f'Der Slowmode wurde erfolgreich auf {seconds}s gesetzt.'), delete_after=5)
 
     @cmd()
     @commands.guild_only()

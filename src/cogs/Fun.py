@@ -111,6 +111,9 @@ class Fun(commands.Cog):
         if user2 is None:
             user2 = ctx.message.author
 
+        if user1 == user2:
+            return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
+
         score = random.randint(0, 100)
         filled_progbar = round(score / 100 * 10)
         counter = f"{'█' * filled_progbar}{' ' * (10 - filled_progbar)}"
@@ -142,7 +145,7 @@ class Fun(commands.Cog):
     @commands.cooldown(rate=3, per=3.0, type=commands.BucketType.user)
     @checks.isActive('fun')
     async def slot(self, ctx):
-        emojis = {"🍎", "🍊", '🍋', '🍉', '🍇', '🍓', '🍒'}
+        emojis = {"🍎", "🍊", '🍉', '🍇', '🍓', '🍒'}
 
         selected = random.sample(emojis, 3)
         rolled = len(set(selected))

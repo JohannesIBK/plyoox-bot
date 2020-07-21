@@ -13,6 +13,7 @@ import main
 from others import db
 from utils.automod import automod
 from utils.ext import standards as std, context
+from utils.ext.formater import formatMessage
 
 BRACKET_REGEX = r'{.*?}'
 CHANNEL_REGEX = r'#\w+'
@@ -52,14 +53,6 @@ class Events(commands.Cog):
         await self.bot.wait_until_ready()
 
     async def punishTimer(self, unbanTime: int, memberID: int, guildID: int, punishmentType: str):
-        """
-        :param unbanTime: UNIX Timestamp when user's punishment runs out
-        :param memberID: ID of Member
-        :param guildID: ID of Guild
-        :param punishmentType: Type of punishment
-        :return
-        """
-
         untilUnban = unbanTime - time.time()
         if unbanTime > 0:
             untilUnban = 0
@@ -125,8 +118,7 @@ class Events(commands.Cog):
 
         winnerMention = ' '.join(member.mention for member in winners)
         await channel.send(f'Gewinner von {data["winType"]} {"ist" if len(winners) == 1 else "sind"}\n{winnerMention}')
-        await message.edit(embed=discord.Embed(color=std.normal_color,
-                                               title=f"🎉 Giveaway",
+        await message.edit(embed=discord.Embed(color=std.normal_color, title=f"🎉 Giveaway",
                                                description=f'**Gewinn:** {win}\n'
                                                            f'**Gewinner:** {winnerMention}.\n'
                                                            f'ID: {message.id}'))
@@ -178,11 +170,8 @@ class Events(commands.Cog):
         if role.id == roles['joinrole']:
             return await self.bot.db.execute("UPDATE config.welcomer SET joinrole = NULL WHERE sid = $1", guild.id)
 
-        if (xpRoles := roles['noxproles']) is not None:
-            if role.id in xpRoles:
-                for xpRole in xpRoles:
-                    if role.id == xpRole:
-                        return await self.bot.db.execute("UPDATE config.leveling SET noxproles = array_remove(noxproles, $1) WHERE sid = $2", xpRole, guild.id)
+        if roles['noxprole'] == role.id:
+            return await self.bot.db.execute("UPDATE config.leveling SET noxproles = NULL WHERE sid = $2", xpRole, guild.id)
 
         if (levelRoles := roles['roles']) is not None:
             if role.id in levelRoles:
@@ -255,21 +244,18 @@ class Events(commands.Cog):
 
             try:
                 await member.remove_roles(muterole)
-                await self.bot.db.execute(
-                    "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3",
-                    guild.id, memberID, punishType)
             except discord.Forbidden:
                 pass
+            await self.bot.db.execute(
+                "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3",
+                guild.id, memberID, punishType)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         await db.gotAddet(self.bot, guild)
 
         bots = len(list(filter(lambda m: m.bot, guild.members)))
-        embed = discord.Embed(
-            color=std.normal_color,
-            title="**__SERVER JOINED__**",
-        )
+        embed = discord.Embed(color=discord.Color.green(), title="**__SERVER JOINED__**")
         embed.add_field(name="Name", value=guild.name, inline=False)
         embed.add_field(name="Member", value=f'User: {len(guild.members)}\nBots: {bots}', inline=False)
         embed.add_field(name="Owner", value=guild.owner, inline=False)
@@ -285,10 +271,7 @@ class Events(commands.Cog):
         await self.bot.redis.delete(guild.id)
 
         bots = len(list(filter(lambda m: m.bot, guild.members)))
-        embed = discord.Embed(
-            color=std.normal_color,
-            title="**__SERVER LEAVED__**",
-        )
+        embed = discord.Embed(color=discord.Color.red(), title="**__SERVER LEAVED__**")
         embed.add_field(name="Name", value=guild.name, inline=False)
         embed.add_field(name="Member", value=f'User: {len(guild.members)}\nBots: {bots}', inline=False)
         embed.add_field(name="Owner", value=guild.owner, inline=False)
@@ -302,9 +285,10 @@ class Events(commands.Cog):
     async def on_member_join(self, member: discord.Member):
         guild: discord.Guild = member.guild
 
-        query = 'SELECT joinrole, joinmessage, joinrole, joinchannel, joindm, modules.welcomer, modules.globalbans FROM config.welcomer ' \
-                'INNER JOIN config.modules ON welcomer.sid = modules.sid WHERE welcomer.sid = $1'
-        data = await self.bot.db.fetchrow(query, guild.id)
+        data = await self.bot.db.fetchrow(
+            'SELECT joinrole, joinmessage, joinrole, joinchannel, joindm, modules.welcomer, modules.globalbans FROM config.welcomer '
+            'INNER JOIN config.modules ON welcomer.sid = modules.sid WHERE welcomer.sid = $1',
+            guild.id)
 
         if not data or not data['welcomer']:
             return
@@ -323,33 +307,23 @@ class Events(commands.Cog):
                         await logchannel.send(embed=embed)
                 return
 
-        if (msg := data["joinmessage"]) is not None and data["joinchannel"] is not None:
-            try:
-                placeholders = re.findall(BRACKET_REGEX, msg)
-                channels = re.findall(CHANNEL_REGEX, msg)
+        if data["joinmessage"] is not None and data["joinchannel"] is not None:
+            channel: discord.TextChannel = guild.get_channel(data["joinchannel"])
+            channels = re.findall(CHANNEL_REGEX, data["joinmessage"])
+            msg = formatMessage(data["joinmessage"], member)
 
-                for placeholder in placeholders:
-                    if placeholder.lower() == '{userm}':
-                        msg = msg.replace(placeholder, member.mention)
-                    elif placeholder.lower() == '{user}':
-                        msg = msg.replace(placeholder, str(member))
+            for channelMention in channels:
+                channel = discord.utils.find(lambda c: c.name == channelMention[1:], guild.channels)
+                if channel is not None:
+                    msg = msg.replace(channelMention, channel.mention)
 
-                for channelMention in channels:
-                    channel = discord.utils.find(lambda c: c.name == channelMention[1:], guild.channels)
-                    if channel is not None:
-                        msg = msg.replace(channelMention, channel.mention)
+            if data['joindm']:
+                await member.send(msg)
+            elif channel is not None:
+                await channel.send(msg)
 
-
-                if data['joindm']:
-                    await member.send(msg)
-                else:
-                    channel: discord.TextChannel = guild.get_channel(data["joinchannel"])
-                    await channel.send(msg)
-            except discord.Forbidden:
-                pass
-
-        if (roleID := data["joinrole"]) is not None:
-            role: discord.Role = guild.get_role(roleID)
+        if data["joinrole"] is not None:
+            role: discord.Role = guild.get_role(data["joinrole"])
             try:
                 await member.add_roles(role)
             except:
@@ -360,37 +334,29 @@ class Events(commands.Cog):
             'ON config.sid=timers.sid WHERE config.sid = $1 AND timers.objid = $2 AND timers.type = 1',
             guild.id, member.id)
 
-        if punishData is None:
-            return
-        else:
+        if punishData is not None:
             muteroleID: int = punishData['muterole']
             muterole: discord.Role = guild.get_role(muteroleID)
             if muterole is not None:
                 await member.add_roles(muterole)
 
+
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
         guild: discord.Guild = member.guild
-
-        query = 'SELECT leavechannel, leavemessage, welcomer FROM config.welcomer ' \
-                'INNER JOIN config.modules ON welcomer.sid = modules.sid WHERE welcomer.sid = $1'
-        data = await self.bot.db.fetchrow(query, guild.id)
+        data = await self.bot.db.fetchrow(
+            'SELECT leavechannel, leavemessage, welcomer FROM config.welcomer INNER JOIN config.modules '
+            'ON welcomer.sid = modules.sid WHERE welcomer.sid = $1',
+            guild.id)
 
         if not data or not data['welcomer']:
             return
 
-        if (msg := data["leavemessage"]) is not None and data["leavechannel"] is not None:
-            placeholders = re.findall(BRACKET_REGEX, msg)
-
-            for placeholder in placeholders:
-                if placeholder.lower() == '{user}':
-                    msg = msg.replace(placeholder, str(member))
-
-            try:
-                channel: discord.TextChannel = member.guild.get_channel(int(data["leavechannel"]))
+        if data["leavemessage"] is not None and data["leavechannel"] is not None:
+            channel = member.guild.get_channel(int(data["leavechannel"]))
+            msg = formatMessage(data['leavemessage'], member)
+            if msg is not None and channel is not None:
                 await channel.send(msg)
-            except:
-                pass
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):

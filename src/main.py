@@ -1,9 +1,6 @@
 import asyncio
 import json
 import logging
-import random
-import traceback
-
 import time
 from logging.handlers import RotatingFileHandler
 
@@ -25,11 +22,24 @@ logger.setLevel(logging.ERROR)
 logger.addHandler(handler)
 # ---------------------------------------------------------------
 
+cogs = [
+    "cogs.Owner",
+    "cogs.Moderation",
+    "cogs.Servermoderation",
+    "cogs.Help",
+    "cogs.Leveling",
+    "cogs.Utilities",
+    "cogs.Commands",
+    "cogs.Errors",
+    "cogs.Fun",
+    "cogs.Events",
+    "cogs.Infos",
+    "cogs.Giveaway"
+]
+
 
 async def getPrefix(bot, msg: discord.Message):
-    userID = bot.user.id
-
-    prefixes = [f'<@!{userID}> ', f'<@{userID}> ']
+    prefixes = [f'<@!{bot.user.id}> ', f'<@{bot.user.id}> ']
     if not msg.guild:
         return prefixes
     else:
@@ -43,7 +53,7 @@ async def setGame(bot):
             activity=discord.Activity(
                 type=discord.ActivityType.listening,
                 name='plyoox.net | +help'),
-            status=random.choice([discord.Status.idle, discord.Status.dnd, discord.Status.online]))
+            status=discord.Status.online)
         await asyncio.sleep(3600)
 
 
@@ -54,10 +64,10 @@ class Plyoox(commands.AutoShardedBot):
                          max_messages=5000)
 
         self.startTime: float = time.time()
-        self.version: str = 'v2.4.0 '
+        self.version: str = 'v2.5.0'
         self.owner_id: int = 263347878150406144
         self.get_all_commands: dict = {}
-        self.logger: logging.Logger = logger
+        self.logger = logger
         self.remove_command("help")
         self.commandsCount = {}
 
@@ -65,15 +75,22 @@ class Plyoox(commands.AutoShardedBot):
         self.gamesLoop = asyncio.create_task(setGame(self))
         self.session = aiohttp.ClientSession(loop=self.loop)
 
-        try:
-            self.load_extension("cogs.Loader")
-        except commands.ExtensionAlreadyLoaded:
-            pass
+        for cog in cogs:
+            try:
+                self.load_extension(cog)
+            except commands.ExtensionAlreadyLoaded:
+                self.reload_extension(cog)
+
+        for cmd in self.commands:
+            self.get_all_commands.update({cmd.name.lower(): cmd})
+            for alias in cmd.aliases:
+                self.get_all_commands.update({alias.lower(): cmd})
 
         logger.info(time.strftime("Started: %d.%m.%Y um %H:%M:%S"))
         print(time.strftime("StartTime: %d.%m.%Y um %H:%M:%S"))
         print(f"Boot-Time: {round(time.time() - self.startTime, 2)}")
         print(f'Server: {len(self.guilds)} [{self.shard_count}]')
+        print(f'{len(cogs)} Cogs loaded.')
 
     async def process_commands(self, message: discord.Message):
         ctx = await self.get_context(message, cls=context.Context)
@@ -102,10 +119,6 @@ class Plyoox(commands.AutoShardedBot):
             data['commands'] = json.dumps(self.commandsCount)
             json.dump(data, file)
             file.truncate()
-
-    @staticmethod
-    async def on_resumed():
-        logger.info(time.strftime("Resumed at: %d.%m.%Y um %H:%M:%S"))
 
     async def get(self, guildID: int, item: str):
         data = await self.redis.get(guildID, encoding='utf-8')
@@ -154,8 +167,8 @@ class Plyoox(commands.AutoShardedBot):
     async def create_redis_pool(self):
         self.redis = await aioredis.create_redis_pool('redis://localhost/')
 
-    async def on_error(self, event_method, *args, **kwargs):
-        logger.error(traceback.format_exc())
+    # async def on_error(self, event_method, *args, **kwargs):
+    #     logger.error(traceback.format_exc())
 
     def run(self, token):
         try:
