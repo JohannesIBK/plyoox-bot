@@ -348,5 +348,9 @@
   "rage": [
     "Wütend? \uD83D\uDE21",
     "\n**__Command:__** {p}rage"
+  ],
+  "levelroles": [
+    "Zeigt alle Rollen, die man mit dem Levelsystem erhalten kann.",
+    "\n**__Command:__** {p}levelroles"
   ]
 }
