@@ -27,6 +27,7 @@ async def managePunishment(ctx, punishment: int, reason: str):
     userEmbed.add_field(name=f'{std.folder_emoji} **Server**', value=ctx.guild.name)
     embed.add_field(name=f'{std.supporter_emoji} **__Moderator__**', value=ctx.author.mention)
     userEmbed.add_field(name=f'{std.list_emoji} **__Message__**', value=msg, inline=False)
+    embed.add_field(name=f'{std.channel_emoji} **__Channel__**', value=ctx.channel.mention)
     embed.add_field(name=f'{std.list_emoji} **__Message__**', value=msg, inline=False)
 
     data = await ctx.bot.db.fetchrow('SELECT bantime, mutetime FROM automod.config WHERE sid = $1', ctx.guild.id)
@@ -104,6 +105,7 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
     if user is not None:
         embed.add_field(name=f'{std.supporter_emoji} **__Moderator__**',
                         value=ctx.author.mention)
+    embed.add_field(name=f'{std.channel_emoji} **__Channel__**', value=ctx.channel.mention)
     embed.add_field(name=f'{std.invite_emoji} **__Punkte__**', value=f'{points}/{maxPoints}', inline=False)
     userEmbed.add_field(name=f'{std.invite_emoji} **__Punkte__**', value=f'{points}/{maxPoints}', inline=False)
     if user is None:
