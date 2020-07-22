@@ -58,6 +58,8 @@ stats_emoji = '\U0001F4CA'
 list_emoji = '\U0001F4C4'
 lock_emoji = '\U0001F512'
 date_emoji = '\U0001F4C5'
+inbox_emoji = '\U0001F4E5'
+outbox_emoji = '\U0001F4E4'
 
 # Colors
 error_color = 0xff0000
