@@ -7,7 +7,7 @@ from discord.ext import commands
 import main
 from utils.ext import checks, standards as std
 from utils.ext.cmds import cmd
-from utils.ext.formater import formatMessage
+from utils.ext.formatter import formatMessage
 
 
 class Leveling(commands.Cog):

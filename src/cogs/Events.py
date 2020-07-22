@@ -13,7 +13,7 @@ import main
 from others import db
 from utils.automod import automod
 from utils.ext import standards as std, context
-from utils.ext.formater import formatMessage
+from utils.ext.formatter import formatMessage
 
 BRACKET_REGEX = r'{.*?}'
 CHANNEL_REGEX = r'#\w+'
