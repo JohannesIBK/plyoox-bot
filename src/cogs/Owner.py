@@ -242,14 +242,14 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def maintenance(self, ctx):
         if ctx.invoked_subcommand is None:
-            with open('utils/simpleStorage.json', 'r') as file:
+            with open('others/simpleStorage.json', 'r') as file:
                 data = json.load(file)
 
             await ctx.send(embed=std.getEmbed(f'Maintenance: {data["maintenance"]}'))
 
     @maintenance.command()
     async def activate(self, ctx):
-        with open('utils/simpleStorage.json', 'r+') as file:
+        with open('others/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
             data['maintenance'] = True
@@ -265,7 +265,7 @@ class Owner(commands.Cog):
 
     @maintenance.command()
     async def deactivate(self, ctx):
-        with open('utils/simpleStorage.json', 'r+') as file:
+        with open('others/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
             data['maintenance'] = False
