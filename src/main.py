@@ -169,10 +169,3 @@ class Plyoox(commands.AutoShardedBot):
 
     # async def on_error(self, event_method, *args, **kwargs):
     #     logger.error(traceback.format_exc())
-
-    def run(self, token):
-        try:
-            super().run(token, reconnect=True)
-        finally:
-            self.redis.close()
-            self.db.close()
