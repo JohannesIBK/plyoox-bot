@@ -133,14 +133,6 @@ class Owner(commands.Cog):
         embed.timestamp = datetime.datetime.utcnow()
         await self.bot.get_user(263347878150406144).send(embed=embed, delete_after=120)
 
-    @cmd(hidden=True)
-    @commands.is_owner()
-    async def toCopy(self, ctx):
-        embed = discord.Embed(title='Guild Copy Infos', color=0x3498db)
-        embed.add_field(name='ServerID', value=f'{ctx.guild.id}')
-        embed.add_field(name='Top-Role ID', value=ctx.guild.get_member(self.bot.user.id).top_role.id)
-        await ctx.send(embed=embed)
-
     @cmd(pass_context=True, name='eval', aliases=["exec"])
     @commands.is_owner()
     async def _eval(self, ctx, *, body: str):
