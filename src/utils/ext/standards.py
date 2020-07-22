@@ -27,7 +27,7 @@ clyde_emoji = '<:clyde:703927804563030076>'
 # Badges
 balance_emoji = '<:balance:703906489538183179>'
 brilliance_emoji = '<:brilliance:703906573738836020>'
-bavery_emoji = '<:bravery:703906586141392897>'
+bravery_emoji = '<:bravery:703906586141392897>'
 booster_emoji = '<:booster:703906501382766612>'
 booster2_emoji = '<:booster2:703906512246145044>'
 booster3_emoji = '<:booster3:703906523092484177>'
@@ -39,6 +39,7 @@ staff_emoji = '<:staff:703906898851790859>'
 botdev_emoji = '<:botdev:703907073402077205>'
 bughunter_badge = '<:bughunter:703906553325158440>'
 nitro_emoji = '<:nitro:703907279795257444>'
+hypesquad_emoji = '<:hypesquad:314068430854684672>'
 
 # Guild
 channel_emoji = '<:channel:703906598879494257>'

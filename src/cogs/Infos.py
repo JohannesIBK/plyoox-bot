@@ -121,6 +121,7 @@ class Infos(commands.Cog):
         since_joined_guild = (datetime.datetime.now() - user.joined_at).days
         roles = self._getRoles(user.roles)
         members = ctx.guild.members
+        flags = user.public_flags
         members.sort(key=sort)
         join_pos = members.index(user) + 1
 
@@ -147,6 +148,15 @@ class Infos(commands.Cog):
         embed.add_field(name=f'{std.folder_emoji} **Server-Daten**',
                         value=f'{std.mention_emoji} **Rollen ({len(user.roles) - 1})** {roles}',
                         inline=False)
+        embed.add_field(name='Flags', value=f'{std.botdev_emoji if flags.verified_bot_developer else ""}'
+                                            f'{std.staff_emoji if flags.staff else ""}'
+                                            f'{std.partner_emoji if flags.partner else ""}'
+                                            f'{std.bughunter_badge if flags.bug_hunter else ""}'
+                                            f'{std.supporter_emoji if flags.early_supporter else ""}'
+                                            f'{std.brilliance_emoji if flags.hypesquad_brilliance else ""}'
+                                            f'{std.bravery_emoji if flags.hypesquad_bravery else ""}'
+                                            f'{std.balance_emoji if flags.hypesquad_balance else ""}'
+                                            f'{std.hypesquad_emoji if flags.hypesquad else ""}')
 
         if user.activity is not None:
             embed.add_field(name=f'{std.richPresence_emoji} **Aktivität**', value=user.activity.name, inline=False)
