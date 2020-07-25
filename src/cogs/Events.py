@@ -1,8 +1,4 @@
-import asyncio
-import json
-import random
 import re
-import time
 import typing
 
 import dbl
@@ -11,8 +7,7 @@ from discord.ext import commands, tasks
 
 import main
 from others import db
-from utils.automod import automod
-from utils.ext import standards as std, context
+from utils.ext import standards as std
 from utils.ext.formatter import formatMessage
 
 BRACKET_REGEX = r'{.*?}'
@@ -28,52 +23,7 @@ class Events(commands.Cog):
         self.bot = bot
         self.dblToken = dblToken
         self.dblpy = dbl.DBLClient(bot, self.dblToken)
-        self.checkTimers.start()
         self.update_stats.start()
-
-    @tasks.loop(minutes=15)
-    async def checkTimers(self):
-        entrys = await self.bot.db.fetch('SELECT * FROM extra.timers WHERE time - extract(EPOCH FROM now()) <= 900;')
-
-        for entry in entrys:
-            timerType = entry['type']
-            endTime = entry['time']
-            guildID = entry['sid']
-            if timerType in [0, 1]:
-                memberID = entry['objid']
-                self.bot.loop.create_task(self.punishTimer(endTime, memberID, guildID, timerType))
-
-            if timerType == 2:
-                messageID = entry['objid']
-                data = entry['data']
-                self.bot.loop.create_task(self.giveawayTimer(endTime, messageID, data))
-
-    @checkTimers.before_loop
-    async def before_printer(self):
-        await self.bot.wait_until_ready()
-
-    async def punishTimer(self, unbanTime: int, memberID: int, guildID: int, punishmentType: str):
-        untilUnban = unbanTime - time.time()
-        if unbanTime > 0:
-            untilUnban = 0
-
-        await asyncio.sleep(untilUnban)
-
-        guild = self.bot.get_guild(guildID)
-        self.bot.dispatch('punishment_runout', guild, memberID, punishmentType)
-
-    async def giveawayTimer(self, endTime: int, messageID: int, data):
-
-        untilEnd = endTime - time.time()
-        if endTime > 0:
-            untilEnd = 0
-
-        await asyncio.sleep(untilEnd)
-
-        data = json.loads(data)
-        channel = self.bot.get_channel(data['channel'])
-        message = await channel.fetch_message(messageID)
-        self.bot.dispatch('giveaway_runout', message, data)
 
     @tasks.loop(hours=6)
     async def update_stats(self):
@@ -89,39 +39,6 @@ class Events(commands.Cog):
         if self.bot.user.id != 5054335413916622850:
             self.update_stats.cancel()
         await self.bot.wait_until_ready()
-
-    @commands.Cog.listener()
-    async def on_giveaway_runout(self, message: discord.Message, data):
-        channel = message.channel
-        reactions = message.reactions
-        winners = []
-        winnerCount = data['winner']
-        win = data['winType']
-
-        deleted: int = await self.bot.db.fetch('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', message.guild.id, message.id)
-
-        if deleted == 0:
-            return
-
-        for reaction in reactions:
-            if reaction.emoji == '🎉':
-                users = await reaction.users().flatten()
-                users.remove(message.guild.me)
-                if len(users) <= winnerCount:
-                    winners = users
-                else:
-                    for _ in range(winnerCount):
-                        user = random.choice(users)
-                        winners.append(user)
-                        users.remove(user)
-                break
-
-        winnerMention = ' '.join(member.mention for member in winners)
-        await channel.send(f'Gewinner von {data["winType"]} {"ist" if len(winners) == 1 else "sind"}\n{winnerMention}')
-        await message.edit(embed=discord.Embed(color=std.normal_color, title=f"🎉 Giveaway",
-                                               description=f'**Gewinn:** {win}\n'
-                                                           f'**Gewinner:** {winnerMention}.\n'
-                                                           f'ID: {message.id}'))
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: typing.Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]):
@@ -171,7 +88,7 @@ class Events(commands.Cog):
             return await self.bot.db.execute("UPDATE config.welcomer SET joinrole = NULL WHERE sid = $1", guild.id)
 
         if roles['noxprole'] == role.id:
-            return await self.bot.db.execute("UPDATE config.leveling SET noxproles = NULL WHERE sid = $2", xpRole, guild.id)
+            return await self.bot.db.execute("UPDATE config.leveling SET noxproles = NULL WHERE sid = $2", roles['noxprole'], guild.id)
 
         if (levelRoles := roles['roles']) is not None:
             if role.id in levelRoles:
@@ -215,40 +132,6 @@ class Events(commands.Cog):
                 for noXpChannel in noXpChannels:
                     if channel.id == noXpChannel:
                         return await self.bot.db.execute("UPDATE config.leveling SET noxpchannels = array_remove(noxpchannels, $1) WHERE sid = $2", noXpChannel, guild.id)
-
-    @commands.Cog.listener()
-    async def on_punishment_runout(self, guild: discord.Guild, memberID: int, punishType: int):
-        if guild is None:
-            return
-
-        if punishType == 0:
-            user = discord.Object(id=memberID)
-            if user is None:
-                return
-
-            try:
-                await guild.unban(user, reason='Tempban has expired')
-            except discord.NotFound:
-                pass
-            await self.bot.db.execute(
-                "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3",
-                guild.id, memberID, punishType)
-
-        if punishType == 1:
-            muteroleID: int = await self.bot.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
-            muterole: discord.Role = guild.get_role(muteroleID)
-            member: discord.Member = guild.get_member(memberID)
-
-            if muterole is None or member is None:
-                return
-
-            try:
-                await member.remove_roles(muterole)
-            except discord.Forbidden:
-                pass
-            await self.bot.db.execute(
-                "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3",
-                guild.id, memberID, punishType)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -357,41 +240,6 @@ class Events(commands.Cog):
             msg = formatMessage(data['leavemessage'], member)
             if msg is not None and channel is not None:
                 await channel.send(msg)
-
-    @commands.Cog.listener()
-    async def on_message(self, msg: discord.Message):
-        if msg.author.bot:
-            return
-
-        if not isinstance(msg.author, discord.Member):
-            return
-
-        ctx = await self.bot.get_context(msg, cls=context.Context)
-        await automod(ctx)
-
-    @commands.Cog.listener()
-    async def on_member_ban(self, guild: discord.Guild, user: discord.Member):
-        await self.bot.db.execute("DELETE FROM automod.users WHERE key = $1", f'{user.id}{guild.id}')
-
-    @commands.Cog.listener()
-    async def on_message_edit(self, before: discord.Message, after: discord.Message):
-        if before.author.bot:
-            return
-
-        if not isinstance(before.author, discord.Member):
-            return
-
-        if not before.created_at or not after.edited_at:
-            return
-
-        if before.content == after.content:
-            return
-
-        ctx = await self.bot.get_context(after, cls=context.Context)
-        await automod(ctx)
-
-        if (after.edited_at - before.created_at).seconds <= 30:
-            await self.bot.process_commands(after)
 
 
 def setup(bot):
