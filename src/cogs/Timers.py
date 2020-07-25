@@ -83,7 +83,6 @@ class Timers(commands.Cog):
         self.bot.dispatch('punishment_runout', guild, memberID, punishmentType)
 
     async def giveawayTimer(self, endTime: int, messageID: int, data):
-
         untilEnd = endTime - time.time()
         if endTime > 0:
             untilEnd = 0
