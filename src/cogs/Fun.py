@@ -302,6 +302,34 @@ class Fun(commands.Cog):
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
+    @cmd(name='8ball')
+    @checks.isActive('fun')
+    async def _8ball(self, ctx, *, Frage: str):
+        answers = [
+            'Ja.',
+            'Kann sein.',
+            'Auf jeden Fall!',
+            'Niemals!',
+            'Nein.',
+            'Vermutlich.',
+            'So wie ich das sehe, ja.',
+            'Das kann ich jetzt noch nicht sagen.',
+            'Ich sage nein.',
+            'Meine Quellen sagen nein.',
+            'Das sage ich dir besser nicht.',
+            'Schaut schlecht aus',
+            'Ja, auf jeden Fall!',
+            'Ich kann mich nicht entscheiden.',
+            'Die Sterne schauen gut aus.',
+            'Lass mich kurz nachdenken... Nein.',
+            'Lass mich kurz nachdenken... Ja.',
+            'Ich denke, ich kann dir das nicht sagen.',
+            'Meine Antwort ist ja.',
+            'Meine Antwort ist nein.',
+            'Ich bin mir unsicher.'
+        ]
+        await ctx.send(f'> {Frage}\n{random.choice(answers)}')
+
 
 def setup(bot):
     bot.add_cog(Fun(bot))

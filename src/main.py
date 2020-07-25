@@ -34,7 +34,8 @@ cogs = [
     "cogs.Fun",
     "cogs.Events",
     "cogs.Infos",
-    "cogs.Giveaway"
+    "cogs.Logging",
+    "cogs.Timers"
 ]
 
 
@@ -61,7 +62,7 @@ class Plyoox(commands.AutoShardedBot):
     def __init__(self):
         super().__init__(command_prefix=getPrefix,
                          case_insensitive=True,
-                         max_messages=5000)
+                         max_messages=10000)
 
         self.startTime: float = time.time()
         self.version: str = 'v2.5.0'
@@ -110,15 +111,6 @@ class Plyoox(commands.AutoShardedBot):
             self.commandsCount[commandName] = 1
         else:
             self.commandsCount[commandName] += 1
-
-    async def on_disconnect(self):
-        logger.info(time.strftime("Disconnected at: %d.%m.%Y um %H:%M:%S"))
-        with open('utils/simpleStorage.json', 'r+') as file:
-            data = json.load(file)
-            file.seek(0)
-            data['commands'] = json.dumps(self.commandsCount)
-            json.dump(data, file)
-            file.truncate()
 
     async def get(self, guildID: int, item: str):
         data = await self.redis.get(guildID, encoding='utf-8')
