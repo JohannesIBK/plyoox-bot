@@ -93,7 +93,7 @@ class Leveling(commands.Cog):
                 "SELECT channel, roles, message FROM config.leveling WHERE sid = $1",
                 msg.guild.id)
 
-            if (roles := data['roles']):
+            if roles := data['roles']:
                 addLvlRoles = []
                 for role in roles:
                     if role[0] not in userRoles and role[1] <= userData["lvl"] + 1:

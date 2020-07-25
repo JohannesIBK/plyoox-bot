@@ -16,10 +16,10 @@ def findWord(word):
     return re.compile(r'\b({0})\b'.format(word), flags=re.IGNORECASE).search
 
 
-async def managePunishment(ctx, punishment: int, reason: str):
+async def managePunishment(ctx, punishment, reason):
     await ctx.message.delete()
     user: discord.Member = ctx.author
-    msg: str = ctx.message.content if len(ctx.message.content) < 1015 else f'{ctx.message.content[:1015]}...'
+    msg = ctx.message.content if len(ctx.message.content) < 1015 else f'{ctx.message.content[:1015]}...'
     reason = f'Automoderation: {reason}'
 
     embed: discord.Embed = std.getBaseModEmbed(reason, user)
@@ -66,7 +66,7 @@ async def managePunishment(ctx, punishment: int, reason: str):
     await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user, ignoreNoLogging=True)
 
 
-async def add_points(ctx: context, addPoints: int, modType: str, user: discord.Member = None):
+async def add_points(ctx: context, addPoints, modType, user: discord.Member = None):
     await ctx.message.delete()
 
     if user is not None:
@@ -74,7 +74,7 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
     else:
         punishedUser: discord.Message = ctx.author
 
-    key: str = f'{punishedUser.id}{ctx.guild.id}'
+    key = f'{punishedUser.id}{ctx.guild.id}'
     msg: discord.Message = ctx.message
 
     userData = await ctx.bot.db.fetchrow(
@@ -82,20 +82,20 @@ async def add_points(ctx: context, addPoints: int, modType: str, user: discord.M
         'ON CONFLICT (key) DO UPDATE SET points = users.points + $3, time = $5 RETURNING points, time',
         punishedUser.id, ctx.guild.id, addPoints, key, time.time())
 
-    points: int = userData['points']
+    points = userData['points']
 
     if time.time() - userData['time'] > 604800:
         await ctx.bot.db.execute('UPDATE automod.users SET points = $1, time = $2 WHERE key = $2', addPoints, time.time(), key)
-        points: int = addPoints
+        points = addPoints
 
     data = await ctx.bot.db.fetchrow(
         "SELECT action, maxpoints, muterole, mutetime FROM automod.config WHERE sid = $1", ctx.guild.id)
 
-    action: int = data['action']
-    maxPoints: int = data['maxpoints']
+    action = data['action']
+    maxPoints = data['maxpoints']
     unixTime: float = time.time() + data['mutetime']
 
-    message: str = msg.content if len(msg.content) < 1015 else f'{ctx.message.content[:1015]}...'
+    message = msg.content if len(msg.content) < 1015 else f'{ctx.message.content[:1015]}...'
 
     embed: discord.Embed = std.getBaseModEmbed(f'{modType} [+{addPoints}]', punishedUser)
     userEmbed: discord.Embed = std.getBaseModEmbed(f'{modType} [+{addPoints}]')
@@ -154,7 +154,7 @@ async def automod(ctx):
     guild: discord.Guild = ctx.guild
     msg: discord.Message = ctx.message
     channel: discord.TextChannel = ctx.channel
-    blState: int = await bot.get(guild.id, 'state')
+    blState = await bot.get(guild.id, 'state')
 
     if not await bot.get(guild.id, 'automod'):
         return
@@ -194,11 +194,10 @@ async def automod(ctx):
                 return
 
         whitelistedServers = [guild.id]
-        if (partner := data['partner']):
+        if partner := data['partner']:
             whitelistedServers.extend([int(guildID) for guildID in partner])
 
         hasInvite: bool = False
-
         for invite in discordRegex.findall(msg.content):
             try:
                 invite = await bot.fetch_invite(invite[0])
