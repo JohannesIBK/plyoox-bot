@@ -11,6 +11,11 @@ from utils.ext import standards as std, checks
 from utils.ext.cmds import grp
 
 
+# BAN       0
+# MUTE      1
+# GIVEAWAY  2
+
+
 class ParseTime:
     @classmethod
     def parse(cls, timeStr: str):
