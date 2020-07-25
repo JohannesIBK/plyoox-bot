@@ -14,6 +14,8 @@ law_emoji = '<:law:704432646356467814>'
 level_emoji = '<:level:704442402718482432>'
 question_emoji = '\u2754'
 coin_emoji = '<:coin:718169101821804564>'
+upvote_emoji = '+' # '\u2795'
+downvote_emoji = '-' # '\u2796'
 
 # Status
 online_emoji = "<:online:703932456289435659>"
@@ -99,7 +101,7 @@ def getErrorEmbed(errorMessage: str) -> discord.Embed:
     return embed
 
 
-def getBaseModEmbed(reason: str, user: Union[discord.Member, discord.User] = None, mod: discord.Member = None):
+def getBaseModEmbed(reason, user: Union[discord.Member, discord.User] = None, mod: discord.Member = None):
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text='Plyoox Moderation', icon_url=avatar_url)
@@ -121,7 +123,7 @@ def getBaseModEmbed(reason: str, user: Union[discord.Member, discord.User] = Non
     return embed
 
 
-def getUserEmbed(reason: str, guildName: str, duration = 'permanent', punishType = 1):
+def getUserEmbed(reason, guildName: str, duration = 'permanent', punishType = 1):
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text='Plyoox Moderation', icon_url=avatar_url)
