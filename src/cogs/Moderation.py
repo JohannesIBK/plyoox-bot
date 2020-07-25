@@ -12,7 +12,8 @@ from discord.ext import commands
 import main
 from others import logs
 from utils import automod
-from utils.ext import checks, standards as std
+from utils.automod import automod
+from utils.ext import checks, standards as std, context
 from utils.ext.cmds import cmd
 
 
@@ -37,12 +38,12 @@ class ActionReason(commands.Converter):
 
         if len(ret) > 512:
             reason_max = 512 - len(ret) - len(argument)
-            raise commands.BadArgument(f'reason is too long ({len(argument)}/{reason_max})')
+            raise commands.BadArgument(f'Grund zu lang ({len(argument)}/{reason_max})')
 
         return ret
 
 
-class ParseTime():
+class ParseTime:
     @classmethod
     def parse(cls, timeStr: str):
         if timeStr.endswith(('j', 'y')):
@@ -82,6 +83,41 @@ class Moderation(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
 
+    @commands.Cog.listener()
+    async def on_message(self, msg: discord.Message):
+        if msg.author.bot:
+            return
+
+        if not isinstance(msg.author, discord.Member):
+            return
+
+        ctx = await self.bot.get_context(msg, cls=context.Context)
+        await automod(ctx)
+
+    @commands.Cog.listener()
+    async def on_member_ban(self, guild: discord.Guild, user: discord.Member):
+        await self.bot.db.execute("DELETE FROM automod.users WHERE key = $1", f'{user.id}{guild.id}')
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        if before.author.bot:
+            return
+
+        if not isinstance(before.author, discord.Member):
+            return
+
+        if not before.created_at or not after.edited_at:
+            return
+
+        if before.content == after.content:
+            return
+
+        ctx = await self.bot.get_context(after, cls=context.Context)
+        await automod(ctx)
+
+        if (after.edited_at - before.created_at).seconds <= 30:
+            await self.bot.process_commands(after)
+
     async def punishUser(self, user: Union[discord.Member, discord.User]):
         if user.id == self.bot.user.id:
             return False
@@ -107,7 +143,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_messages=True)
-    async def clear(self, ctx, amount: int, *, reason = 'No Reason'):
+    async def clear(self, ctx, amount: int, *, reason: ActionReason = 'No Reason'):
         deleted: int = len(await ctx.channel.purge(limit=amount + 1))
 
         embed = std.getBaseModEmbed(reason, mod=ctx.author)
@@ -116,14 +152,12 @@ class Moderation(commands.Cog):
                         value=str(amount))
 
         await logs.createCmdLog(ctx, embed)
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=f'{std.law_emoji} {deleted} Nachrichten wurden gelöscht.'),
-                       delete_after=5)
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} {deleted} Nachrichten wurden gelöscht.'), delete_after=5)
 
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def ban(self, ctx, user: discord.Member, *, reason = 'No Reason'):
+    async def ban(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht bannen.'))
 
@@ -136,15 +170,14 @@ class Moderation(commands.Cog):
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await ctx.guild.ban(user, reason=reason, delete_message_days=1)
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gebannt.'),
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gebannt.'),
                        delete_after=5)
         await ctx.message.delete()
 
     @cmd()
     @commands.bot_has_permissions(kick_members=True)
     @checks.isMod()
-    async def kick(self, ctx, user: discord.Member, *, reason = 'No Reason'):
+    async def kick(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht kicken.'))
 
@@ -157,15 +190,14 @@ class Moderation(commands.Cog):
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await user.kick(reason=reason)
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gekickt.'),
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gekickt.'),
                        delete_after=5)
         await ctx.message.delete()
 
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def softban(self, ctx, user: discord.Member, *, reason = 'No Reason'):
+    async def softban(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht kicken.'))
 
@@ -179,15 +211,13 @@ class Moderation(commands.Cog):
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await ctx.guild.ban(user, reason=reason, delete_message_days=1)
         await ctx.guild.unban(user)
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gekickt.'),
-                       delete_after=5)
+        await ctx.send(embed=std.getEmbed('{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gekickt.'), delete_after=5)
         await ctx.message.delete()
 
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def tempban(self, ctx, user: discord.Member, duration: str, *, reason = 'No Reason'):
+    async def tempban(self, ctx, user: discord.Member, duration: str, *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht bannen.'))
 
@@ -209,9 +239,7 @@ class Moderation(commands.Cog):
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await user.ban(reason=reason, delete_message_days=1)
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=f'{std.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gebannt.'),
-                       delete_after=5)
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gebannt.'), delete_after=5)
         await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, 0, $3)',
                              ctx.guild.id, user.id, unixTime)
         await ctx.message.delete()
@@ -219,7 +247,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def tempmute(self, ctx, user: discord.Member, duration: str, *, reason = 'No Reason'):
+    async def tempmute(self, ctx, user: discord.Member, duration: str, *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht muten.'))
 
@@ -245,8 +273,7 @@ class Moderation(commands.Cog):
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await user.add_roles(muteRole)
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=f'{std.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gemuted.'),
+        await ctx.send(embed=std.getEmbed('{std.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gemuted.'),
                        delete_after=5)
         await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, 1, $3)',
                              ctx.guild.id, user.id, unixTime)
@@ -255,7 +282,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def mute(self, ctx, user: discord.Member, *, reason = 'No Reason'):
+    async def mute(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht muten.'))
 
@@ -275,14 +302,12 @@ class Moderation(commands.Cog):
         userEmbed = std.getUserEmbed(reason, ctx.guild.name, punishType=2)
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
 
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gemuted.'),
-                       delete_after=5)
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gemuted.'), delete_after=5)
 
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def unmute(self, ctx, user: discord.Member, *, reason = 'No Reason'):
+    async def unmute(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
         muteRoleID = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', ctx.guild.id)
         muteRole = ctx.guild.get_role(muteRoleID)
         if muteRole is None:
@@ -290,16 +315,14 @@ class Moderation(commands.Cog):
 
         if muteRole in user.roles:
             await user.remove_roles(muteRole, reason=reason)
-            await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                               description='Der User wurde erfolgreich entmutet.'))
+            await ctx.send(embed=std.getEmbed('Der User wurde erfolgreich entmutet.'))
 
             await ctx.message.delete()
             embed = std.getBaseModEmbed(reason, user=user, mod=ctx.author)
             embed.title = f'Moderation [UNMUTE]'
             await logs.createEmbedLog(ctx, modEmbed=embed, member=user)
         else:
-            return await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                                      description='Der User ist nicht gemutet.'))
+            return await ctx.send(embed=std.getEmbed('Der User ist nicht gemutet.'))
 
         await self.bot.db.execute(
             "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = 1",
@@ -307,7 +330,7 @@ class Moderation(commands.Cog):
 
     @cmd()
     @checks.isMod()
-    async def warn(self, ctx, user: discord.Member, points: int, *, reason: str):
+    async def warn(self, ctx, user: discord.Member, points: int, *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht warnen.'))
 
@@ -315,9 +338,7 @@ class Moderation(commands.Cog):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst nur Punkte von 1-20 hinzufügen.'))
         await automod.add_points(ctx, points, reason, user=user)
         await ctx.message.delete()
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=f'{std.law_emoji} Dem User {user.mention} wurden {points} Punkte hinzugefügt.'),
-                       delete_after=5)
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Dem User {user.mention} wurden {points} Punkte hinzugefügt.'), delete_after=5)
 
     @cmd()
     @checks.isMod()
@@ -493,8 +514,7 @@ class Moderation(commands.Cog):
 
         confirm = await ctx.prompt(f'Das wird **{len(members)} User bannen**. Sicher?')
         if not confirm:
-            return await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                                      description=f'{std.error_emoji} Abgebrochen'))
+            return await ctx.send(embed=std.getEmbed(f'{std.error_emoji} Abgebrochen'))
 
         count = 0
         for member in members:
@@ -505,8 +525,7 @@ class Moderation(commands.Cog):
             else:
                 count += 1
 
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=f'{std.law_emoji} Es wurden {count}/{len(members)} User gebannt.'))
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Es wurden {count}/{len(members)} User gebannt.'))
 
         embed = std.getBaseModEmbed(reason, mod=ctx.author)
         embed.title = f'Moderation [MASSBAN]'
