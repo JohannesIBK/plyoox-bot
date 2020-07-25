@@ -35,7 +35,7 @@ class Servermoderation(commands.Cog):
         await ctx.send(embed=std.getEmbed('Das Levelsystem wurde erfolgreich aktiviert.'))
 
     @activate.command()
-    async def games(self, ctx):
+    async def fun(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET fun = true WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Das Games-Modul wurde erfolgreich aktiviert.'))
 
@@ -58,6 +58,12 @@ class Servermoderation(commands.Cog):
         await ctx.db.execute("UPDATE config.modules SET globalbans = true WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Globalbans wurden erfolgreich aktiviert.'))
 
+    @activate.command()
+    @commands.bot_has_permissions(ban_members=True)
+    async def logging(self, ctx):
+        await ctx.db.execute("UPDATE config.modules SET logging = true WHERE sid = $1", ctx.guild.id)
+        await ctx.send(embed=std.getEmbed('Logging wurden erfolgreich aktiviert.'))
+
     @grp(case_insensitive=True)
     @checks.isAdmin()
     async def deactivate(self, ctx):
@@ -71,10 +77,10 @@ class Servermoderation(commands.Cog):
         await ctx.send(embed=std.getEmbed('Das Levelsystem wurde deaktiviert.'))
 
     @deactivate.command(name='games')
-    async def _games(self, ctx):
+    async def _fun(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET fun = false WHERE sid = $1", ctx.guild.id)
 
-        await ctx.send(embed=std.getEmbed('Das Games-Modul wurde deaktiviert'))
+        await ctx.send(embed=std.getEmbed('Das Fun-Modul wurde deaktiviert'))
 
     @deactivate.command(name="automod")
     async def _automod(self, ctx):
@@ -91,6 +97,11 @@ class Servermoderation(commands.Cog):
     async def _globalban(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET globalbans = false WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Globalbans wurden erfolgreich deaktiviert."'))
+
+    @deactivate.command(name='logging')
+    async def _globalban(self, ctx):
+        await ctx.db.execute("UPDATE config.modules SET logging = false WHERE sid = $1", ctx.guild.id)
+        await ctx.send(embed=std.getEmbed('Logging wurden erfolgreich deaktiviert."'))
 
     @cmd()
     @checks.isAdmin()
@@ -178,8 +189,7 @@ class Servermoderation(commands.Cog):
     # async def lockGuild(self, ctx):
     #     guild: discord.Guild = ctx.guild
     #
-    #     await ctx.send(embed=discord.Embed(color=standards.normal_color,
-    #                                        description='Channel werden geschlossen...'))
+    #     await ctx.send(embed=std.getEmbed('Channel werden geschlossen...'))
     #
     #     for channel in guild.channels:
     #         if isinstance(channel, discord.TextChannel):
@@ -229,8 +239,7 @@ class Servermoderation(commands.Cog):
     #                 newOverwrites.update({overwriteObject: overwrite})
     #             await channel.edit(overwrites=newOverwrites)
     #
-    #     await ctx.send(embed=discord.Embed(color=standards.normal_color,
-    #                                        description='Channel wurden geschlossen'))
+    #     await ctx.send(embed=std.getEmbed('Channel wurden geschlossen'))
 
 
 def setup(bot):

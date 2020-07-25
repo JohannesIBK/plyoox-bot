@@ -166,21 +166,22 @@
   "activate": [
     "Aktiviert ein Modul und seine Commands.",
     "\n**__Command:__**",
-    " » {p}activate games",
+    " » {p}activate fun",
     " » {p}activate leveling",
     " » {p}activate automoderation",
     " » {p}activate welcomer",
-    " » {p}activate globalbans"
-
+    " » {p}activate globalbans",
+    " » {p}activate logging"
   ],
   "deactivate": [
     "Deaktiviert ein Modul und seine Commands.",
     "\n**__Command:__**",
-    " » {p}deactivate games",
+    " » {p}deactivate fun",
     " » {p}deactivate leveling",
     " » {p}deactivate automoderation",
     " » {p}deactivate welcomer",
-    " » {p}deactivate globalbans"
+    " » {p}deactivate globalbans",
+    " » {p}deactivate logging"
   ],
   "points": [
     "Erlaubt das Abfragen von Punkten eines bestimmten Users.",
