@@ -352,5 +352,11 @@
   "levelroles": [
     "Zeigt alle Rollen, die man mit dem Levelsystem erhalten kann.",
     "\n**__Command:__** {p}levelroles"
+  ],
+  "8ball": [
+    "Antwortet zufällig auf eine Ja/Nein Frage",
+    "\n**__Command:__** {p}8ball < **`Frage`** >",
+    "\n**__Beispiel:__**",
+    " » {p}8ball Ist Discord cool?"
   ]
 }
