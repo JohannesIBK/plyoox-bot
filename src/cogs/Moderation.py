@@ -49,31 +49,31 @@ class ParseTime:
         if timeStr.endswith(('j', 'y')):
             try:
                 years = int(timeStr.replace('j', '').replace('y', ''))
-                if 3 < years <= 1:
-                    raise TimeToLong()
+                if years > 3 or years < 0.5:
+                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
 
                 return years * 3600 * 24 * 365 + time.time()
-            except:
+            except ValueError:
                 raise TypeError
 
         if timeStr.endswith('d'):
             try:
                 days = int(timeStr.replace('d', ''))
-                if 365 < days <= 1:
-                    raise TimeToLong()
+                if days > 365 or days < 1:
+                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
 
                 return days * 3600 * 24 + time.time()
-            except:
+            except ValueError:
                 raise TypeError
 
         if timeStr.endswith('h'):
             try:
                 hours = float(timeStr.replace('h', ''))
-                if 720 < hours <= 0.25:
-                    raise TimeToLong()
+                if hours > 48 or hours < 0.25:
+                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
 
                 return hours * 3600 + time.time()
-            except:
+            except ValueError:
                 raise TypeError
         else:
             return None

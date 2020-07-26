@@ -22,21 +22,31 @@ class ParseTime:
         if timeStr.endswith('d'):
             try:
                 days = int(timeStr.replace('d', ''))
-                if 30 < days <= 1:
-                    raise TimeToLong()
+                if days > 90 or days < 1:
+                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
 
                 return days * 3600 * 24 + time.time()
-            except:
+            except ValueError:
                 raise TypeError
 
         if timeStr.endswith('h'):
             try:
                 hours = float(timeStr.replace('h', ''))
-                if 48 < hours <= 0.25:
-                    raise TimeToLong()
+                if hours > 48 or hours < 0.25:
+                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
 
                 return hours * 3600 + time.time()
-            except:
+            except ValueError:
+                raise TypeError
+
+        if timeStr.endswith('min'):
+            try:
+                mins = float(timeStr.replace('min', ''))
+                if mins > 120 or mins < 15:
+                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
+
+                return mins * 60 + time.time()
+            except ValueError:
                 raise TypeError
         else:
             return None
@@ -51,7 +61,7 @@ class Timers(commands.Cog):
         self.bot = bot
         self.checkTimers.start()
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(minutes=10)
     async def checkTimers(self):
         entrys = await self.bot.db.fetch('SELECT * FROM extra.timers WHERE time - extract(EPOCH FROM now()) <= 900;')
 
@@ -170,6 +180,9 @@ class Timers(commands.Cog):
     @giveaway.command()
     async def start(self, ctx, duration: str, winner: int, channel: discord.TextChannel, *, win: str):
         unixTime: float = ParseTime.parse(duration)
+        if unixTime is None:
+            return await ctx.send(embed=std.getErrorEmbed('Ein Fehler beim Parsen der Zeit ist aufgetreten. Halte die Zeit ein!'))
+
         data = {
             'winner': winner,
             'winType': win,

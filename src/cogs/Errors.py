@@ -91,6 +91,8 @@ class Errors(commands.Cog):
             elif isinstance(error, asyncio.TimeoutError):
                 await ctx.send(embed=standards.getErrorEmbed('Dein Report wurde abgebrochen, da du zu lange gebraucht hast.'))
 
+            elif isinstance(error, TypeError):
+                await ctx.send(embed=standards.getErrorEmbed('Ein Fehler bei deiner Eingabe ist aufgetreten. Bitte überprüfe deine Eingabe.'))
 
             else:
                 userEmbed = discord.Embed(color=standards.error_color, title=f"{standards.error_emoji} **__ERROR__**")
