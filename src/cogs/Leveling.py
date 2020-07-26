@@ -102,12 +102,9 @@ class Leveling(commands.Cog):
                 await msg.author.add_roles(*addLvlRoles)
 
             lvlMsg = data['message']
-            if lvlMsg is None:
-                return
-
             channel = msg.guild.get_channel(data['channel'])
             lvlMsg = formatMessage(lvlMsg, msg.author, userData["lvl"] + 1)
-            if msg is not None:
+            if lvlMsg is not None:
                 if channel is not None:
                     await channel.send(lvlMsg)
                 else:

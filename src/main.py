@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import time
+import traceback
 from logging.handlers import RotatingFileHandler
 
 import aiohttp
@@ -159,5 +160,5 @@ class Plyoox(commands.AutoShardedBot):
     async def create_redis_pool(self):
         self.redis = await aioredis.create_redis_pool('redis://localhost/')
 
-    # async def on_error(self, event_method, *args, **kwargs):
-    #     logger.error(traceback.format_exc())
+    async def on_error(self, event_method, *args, **kwargs):
+        logger.error(traceback.format_exc())
