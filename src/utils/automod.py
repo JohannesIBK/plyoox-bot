@@ -22,7 +22,7 @@ async def managePunishment(ctx, punishment, reason):
     msg = ctx.message.content if len(ctx.message.content) < 1015 else f'{ctx.message.content[:1015]}...'
     reason = f'Automoderation: {reason}'
 
-    embed: discord.Embed = std.getBaseModEmbed(reason, user)
+    embed: discord.Embed = std.getBaseModEmbed(reason, ctx.me)
     userEmbed: discord.Embed = std.getBaseModEmbed(reason)
     userEmbed.add_field(name=f'{std.folder_emoji} **Server**', value=ctx.guild.name)
     embed.add_field(name=f'{std.supporter_emoji} **__Moderator__**', value=ctx.author.mention)
@@ -30,7 +30,7 @@ async def managePunishment(ctx, punishment, reason):
     embed.add_field(name=f'{std.channel_emoji} **__Channel__**', value=ctx.channel.mention)
     embed.add_field(name=f'{std.list_emoji} **__Message__**', value=msg, inline=False)
 
-    data = await ctx.bot.db.fetchrow('SELECT bantime, mutetime FROM automod.config WHERE sid = $1', ctx.guild.id)
+    data = await ctx.bot.db.fetchrow('SELECT bantime, mutetime, muterole FROM automod.config WHERE sid = $1', ctx.guild.id)
 
     if punishment == 1:
         if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
@@ -89,11 +89,17 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
         points = addPoints
 
     data = await ctx.bot.db.fetchrow(
-        "SELECT action, maxpoints, muterole, mutetime FROM automod.config WHERE sid = $1", ctx.guild.id)
+        "SELECT action, maxpoints, muterole, mutetime, bantime FROM automod.config WHERE sid = $1", ctx.guild.id)
 
     action = data['action']
     maxPoints = data['maxpoints']
-    unixTime: float = time.time() + data['mutetime']
+
+    unixTimeMute = unixTimeBan = time.time() + 86400
+
+    if data['mutetime']:
+        unixTimeMute: float = time.time() + data['mutetime']
+    if data['bantime']:
+        unixTimeBan: float = time.time() + data['bantime']
 
     message = msg.content if len(msg.content) < 1015 else f'{ctx.message.content[:1015]}...'
 
@@ -104,8 +110,9 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
     userEmbed.title = f'AUTOMODERATION [LOG]'
     if user is not None:
         embed.add_field(name=f'{std.supporter_emoji} **__Moderator__**',
-                        value=ctx.author.mention)
-    embed.add_field(name=f'{std.channel_emoji} **__Channel__**', value=ctx.channel.mention)
+                        value=ctx.author.mention,
+                        inline=False)
+    embed.add_field(name=f'{std.channel_emoji} **__Channel__**', value=ctx.channel.mention, inline=False)
     embed.add_field(name=f'{std.invite_emoji} **__Punkte__**', value=f'{points}/{maxPoints}', inline=False)
     userEmbed.add_field(name=f'{std.invite_emoji} **__Punkte__**', value=f'{points}/{maxPoints}', inline=False)
     if user is None:
@@ -133,7 +140,7 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
                 embed.title = 'AUTOMODERATION [TEMPBAN]'
                 await punishedUser.ban(reason="Automoderation: User reached max points.")
                 await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',
-                                     ctx.guild.id, punishedUser.id, 0, unixTime)
+                                     ctx.guild.id, punishedUser.id, 0, unixTimeBan)
 
         if action == 4:
             if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
@@ -144,7 +151,7 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
                 await punishedUser.add_roles(muteRole)
                 await ctx.bot.db.execute("UPDATE automod.users SET points = 0 WHERE key = $1", key)
                 await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',
-                                     ctx.guild.id, punishedUser.id, 1, unixTime)
+                                     ctx.guild.id, punishedUser.id, 1, unixTimeMute)
 
     await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=punishedUser, ignoreNoLogging=True)
 
