@@ -84,7 +84,6 @@ class Infos(commands.Cog):
                             f'{std.owner_emoji} **Owner:** {guild.owner}\n' \
                             f'{std.globe_emoji} **Region:** {guild.region}\n' \
                             f'{std.lock_emoji} **Verification:** {guild.verification_level}\n'
-
         embed.add_field(name=f'{std.members_emoji} **Mitglieder** ({guild.member_count})',
                         value=f'{std.online_emoji}{online_members} '
                               f'{std.idle_emoji}{idle_members} '
@@ -92,15 +91,18 @@ class Infos(commands.Cog):
                               f'{std.offline_emoji}{offline_members} '
                               f'{std.clyde_emoji}{bots}',
                         inline=False)
-
         embed.add_field(name=f'{std.date_emoji} **Daten**',
                         value=f'**Erstellt:** {guild.created_at.strftime("%d.%m.%Y")}\n'
                               f'**Tage seitdem:** {(datetime.datetime.now() - guild.created_at).days}',
                         inline=False)
-
         embed.add_field(name=f'{std.mention_emoji} **Rollen ({len(guild.roles) - 1})**',
                         value=roles,
                         inline=False)
+        embed.add_field(name=f'{std.folder_emoji} **__Channel__**',
+                        value=f'**Insgesamt:** {len(guild.channels)}\n'
+                              f'**Text:** {len(guild.text_channels)}\n'
+                              f'**Voice:** {len(guild.voice_channels)}\n'
+                              f'**Kategorie:** {len(guild.categories)}')
 
         embed.add_field(name=f'{std.ola_emoji} **Emojis ({len(guild.emojis)})**',
                         value=emojis,
@@ -121,7 +123,7 @@ class Infos(commands.Cog):
         since_joined_guild = (datetime.datetime.now() - user.joined_at).days
         roles = self._getRoles(user.roles)
         members = ctx.guild.members
-        flags = user.public_flags
+        # flags = user.public_flags
         members.sort(key=sort)
         join_pos = members.index(user) + 1
 

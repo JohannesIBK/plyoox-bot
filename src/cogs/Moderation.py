@@ -12,7 +12,7 @@ from discord.ext import commands
 import main
 from others import logs
 from utils import automod
-from utils.automod import automod
+from utils.automod import automod, add_points
 from utils.ext import checks, standards as std, context
 from utils.ext.cmds import cmd
 
@@ -122,7 +122,7 @@ class Moderation(commands.Cog):
         if user.id == self.bot.user.id:
             return False
 
-        if user.guild is None:
+        if not isinstance(user, discord.Member):
             return True
 
         if user.guild_permissions.manage_guild:
@@ -144,20 +144,30 @@ class Moderation(commands.Cog):
     @checks.isMod()
     @commands.bot_has_permissions(manage_messages=True)
     async def clear(self, ctx, amount: int, *, reason: ActionReason = 'No Reason'):
+        if amount > 2000:
+            return await ctx.send(embed=std.getErrorEmbed('Es können nicht mehr wie 2000 Nachrichten gelöscht werden.'))
+
+        messages = await ctx.channel.history(limit=amount + 1).flatten()
+        content = '\n'.join(f'{msg.author} ({msg.author.id}): {msg.content}' for msg in messages)
+        file = io.BytesIO(content.encode())
+
         deleted: int = len(await ctx.channel.purge(limit=amount + 1))
 
         embed = std.getBaseModEmbed(reason, mod=ctx.author)
         embed.title = 'Moderation [CLEAR]'
         embed.add_field(name=f'{std.bughunter_badge} **Menge**',
-                        value=str(amount))
+                        value=str(deleted - 1))
+        embed.add_field(name=f'{std.channel_emoji} **Channel**',
+                        value=ctx.channel.mention)
 
-        await logs.createCmdLog(ctx, embed)
-        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} {deleted} Nachrichten wurden gelöscht.'), delete_after=5)
+
+        await logs.createCmdLog(ctx, embed, file=file)
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} {deleted - 1} Nachrichten wurden gelöscht.'), delete_after=5)
 
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def ban(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
+    async def ban(self, ctx, user: Union[discord.Member, discord.User], *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht bannen.'))
 
@@ -334,10 +344,9 @@ class Moderation(commands.Cog):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht warnen.'))
 
-        if 0 > points <= 20:
+        if points < 0 or points > 20:
             return await ctx.send(embed=std.getErrorEmbed('Du kannst nur Punkte von 1-20 hinzufügen.'))
-        await automod.add_points(ctx, points, reason, user=user)
-        await ctx.message.delete()
+        await add_points(ctx, points, reason, user=user)
         await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Dem User {user.mention} wurden {points} Punkte hinzugefügt.'), delete_after=5)
 
     @cmd()
@@ -361,7 +370,7 @@ class Moderation(commands.Cog):
         await ctx.message.delete()
         await ctx.send(embed=discord.Embed(description=f'Die Punkte des Users wurden zurückgesetzt.'), delete_after=5)
 
-    @cmd(aliases=['slow'])
+    @cmd(aliases=['slow', 'sm'])
     @checks.isMod()
     @commands.bot_has_permissions(manage_channels=True)
     @commands.cooldown(rate=2, per=15, type=commands.BucketType.channel)
