@@ -76,7 +76,7 @@ class Events(commands.Cog):
     async def on_guild_role_delete(self, role: discord.Role):
         guild: discord.Guild = role.guild
 
-        query = 'SELECT welcomer.joinrole, config.modroles, config.muterole, leveling.noxproles, leveling.roles ' \
+        query = 'SELECT welcomer.joinrole, config.modroles, config.muterole, leveling.noxprole, leveling.roles ' \
                 'FROM automod.config LEFT JOIN config.leveling ON config.sid = leveling.sid ' \
                 'LEFT JOIN config.welcomer ON config.sid =  welcomer.sid WHERE config.sid = $1'
         roles = await self.bot.db.fetchrow(query, role.guild.id)
@@ -88,7 +88,7 @@ class Events(commands.Cog):
             return await self.bot.db.execute("UPDATE config.welcomer SET joinrole = NULL WHERE sid = $1", guild.id)
 
         if roles['noxprole'] == role.id:
-            return await self.bot.db.execute("UPDATE config.leveling SET noxproles = NULL WHERE sid = $2", roles['noxprole'], guild.id)
+            return await self.bot.db.execute("UPDATE config.leveling SET noxprole = NULL WHERE sid = $2", roles['noxprole'], guild.id)
 
         if (levelRoles := roles['roles']) is not None:
             if role.id in levelRoles:
@@ -114,6 +114,9 @@ class Events(commands.Cog):
                 'LEFT JOIN config.leveling ON config.sid = leveling.sid LEFT JOIN config.welcomer ' \
                 'ON config.sid = welcomer.sid WHERE config.sid = $1'
         channels = await self.bot.db.fetchrow(query, guild.id)
+
+        if channels is None:
+            return
 
         if channel.id == channels['joinchannel']:
             return await self.bot.db.execute("UPDATE config.welcomer SET joinchannel = NULL WHERE sid = $1", guild.id)
@@ -199,6 +202,9 @@ class Events(commands.Cog):
                 channel = discord.utils.find(lambda c: c.name == channelMention[1:], guild.channels)
                 if channel is not None:
                     msg = msg.replace(channelMention, channel.mention)
+
+            if msg is None:
+                return
 
             if data['joindm']:
                 await member.send(msg)
