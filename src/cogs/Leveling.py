@@ -62,7 +62,7 @@ class Leveling(commands.Cog):
             if msg.channel.id in noXPChannels:
                 return
 
-        noXPRole: list = await self.bot.get(guildID, 'noxproles')
+        noXPRole: list = await self.bot.get(guildID, 'noxprole')
         if noXPRole in userRoles:
             return
 
@@ -161,6 +161,9 @@ class Leveling(commands.Cog):
             neededXP = self._get_level_xp(lvl)
             member = self.bot.get_user(user['userid'])
             if member is None:
+                continue
+
+            if user['xp'] == 0:
                 continue
 
             count += 1
