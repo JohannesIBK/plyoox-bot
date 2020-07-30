@@ -245,7 +245,7 @@
     "Schickt den Avatar eines USers in den Channel.",
     "\n**__Command:__** {p}avatar [ `User` ]",
     "\n**__Beispiel:__**",
-    " » {p}ship @Plyoxx#0000"
+    " » {p}avatar @Plyoxx#0000"
   ],
   "resetlevel": [
     "Resetet das Level eines Users.",
