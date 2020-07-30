@@ -1,11 +1,10 @@
 import codecs
 import json
 
-import main
-
 import discord
 from discord.ext import commands
 
+import main
 from utils.ext import standards
 from utils.ext.cmds import cmd
 
@@ -22,7 +21,7 @@ class Help(commands.Cog):
             arg: str = command.lower()
 
         modules = dict((key.lower(), [key, value]) for key, value in self.bot.cogs.items()
-                       if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events'])
+                       if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging'])
 
         if arg == '':
             embed: discord.Embed = discord.Embed(title=f'{standards.question_emoji} Command Hilfe',
