@@ -84,7 +84,7 @@ class Timers(commands.Cog):
 
     async def punishTimer(self, unbanTime: int, memberID: int, guildID: int, punishmentType: str):
         untilUnban = unbanTime - time.time()
-        if unbanTime > 0:
+        if unbanTime < 0:
             untilUnban = 0
 
         await asyncio.sleep(untilUnban)
@@ -94,7 +94,7 @@ class Timers(commands.Cog):
 
     async def giveawayTimer(self, endTime: int, messageID: int, data):
         untilEnd = endTime - time.time()
-        if endTime > 0:
+        if endTime < 0:
             untilEnd = 0
 
         await asyncio.sleep(untilEnd)
@@ -146,8 +146,7 @@ class Timers(commands.Cog):
         winnerCount = data['winner']
         win = data['winType']
 
-        deleted: int = await self.bot.db.fetch('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2',
-                                               message.guild.id, message.id)
+        deleted: int = await self.bot.db.fetch('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', message.guild.id, message.id)
 
         if deleted == 0:
             return
@@ -165,12 +164,15 @@ class Timers(commands.Cog):
                         users.remove(user)
                 break
 
-        winnerMention = ' '.join(member.mention for member in winners)
-        await channel.send(f'Gewinner von {data["winType"]} {"ist" if len(winners) == 1 else "sind"}\n{winnerMention}')
-        await message.edit(embed=discord.Embed(color=std.normal_color, title=f"🎉 Giveaway",
-                                               description=f'**Gewinn:** {win}\n'
-                                                           f'**Gewinner:** {winnerMention}.\n'
-                                                           f'ID: {message.id}'))
+        if len(winners) == 0:
+            await channel.send(f'Niemand hat teilgenommen. Es gibt keine Gewinner :(')
+            await message.edit(embed=discord.Embed(color=std.normal_color, title=f"🎉 Giveaway",
+                                                   description=f'**Gewinn:** {win}\n**Gewinner:** Keine Gewinner.\nID: {message.id}'))
+        else:
+            winnerMention = ' '.join(member.mention for member in winners)
+            await channel.send(f'Gewinner von {data["winType"]} {"ist" if len(winners) == 1 else "sind"}\n{winnerMention}')
+            await message.edit(embed=discord.Embed(color=std.normal_color, title=f"🎉 Giveaway",
+                                                   description=f'**Gewinn:** {win}\n**Gewinner:** {winnerMention}.\nID: {message.id}'))
 
     @grp(case_insensitive=True)
     @checks.isMod()
@@ -180,6 +182,7 @@ class Timers(commands.Cog):
     @giveaway.command()
     async def start(self, ctx, duration: str, winner: int, channel: discord.TextChannel, *, win: str):
         unixTime: float = ParseTime.parse(duration)
+        print(unixTime)
         if unixTime is None:
             return await ctx.send(embed=std.getErrorEmbed('Ein Fehler beim Parsen der Zeit ist aufgetreten. Halte die Zeit ein!'))
 
@@ -189,10 +192,7 @@ class Timers(commands.Cog):
             'channel': channel.id
         }
 
-        embed: discord.Embed = discord.Embed(color=std.normal_color,
-                                             title=f'🎉 Giveaway',
-                                             description=f'**Gewinn:** {win}\n'
-                                                         'Reagiere mit 🎉 um dem Giveaway beizutreten.\n')
+        embed: discord.Embed = discord.Embed(color=std.normal_color, title=f'🎉 Giveaway', description=f'**Gewinn:** {win}\nReagiere mit 🎉 um dem Giveaway beizutreten.\n')
 
         msg: discord.Message = await channel.send(embed=embed)
         await msg.add_reaction('🎉')
@@ -211,8 +211,7 @@ class Timers(commands.Cog):
     async def stop(self, ctx, ID: int):
         data = await ctx.db.execute(
             'SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2',
-            ctx.guild.id, ID
-        )
+            ctx.guild.id, ID)
         if data is None:
             return await ctx.send(embed=std.getErrorEmbed('Kein Giveaway mit dieser ID gefunden.'))
 
@@ -230,7 +229,7 @@ class Timers(commands.Cog):
                 pass
 
     @giveaway.command()
-    async def end(self, ctx, ID):
+    async def end(self, ctx, ID: int):
         data = await ctx.db.execute(
             'SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2',
             ctx.guild.id, ID
