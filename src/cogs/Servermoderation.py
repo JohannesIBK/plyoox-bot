@@ -76,7 +76,7 @@ class Servermoderation(commands.Cog):
         await self.bot.update_redis(ctx.guild.id, {'leveling': False})
         await ctx.send(embed=std.getEmbed('Das Levelsystem wurde deaktiviert.'))
 
-    @deactivate.command(name='games')
+    @deactivate.command(name='fun')
     async def _fun(self, ctx):
         await ctx.db.execute("UPDATE config.modules SET fun = false WHERE sid = $1", ctx.guild.id)
 
