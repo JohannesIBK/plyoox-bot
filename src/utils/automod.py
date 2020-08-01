@@ -1,3 +1,4 @@
+import datetime
 import re
 import time
 
@@ -78,7 +79,7 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
         'INSERT INTO automod.users (uid, sid, points, time, reason) VALUES ($1, $2, $3, $4, $5)',
         punishedUser.id, ctx.guild.id, addPoints, time.time(), f'Automoderation: {modType}')
 
-    points  = await ctx.bot.db.fetchval('SELECT sum(points) WHERE uid = $1 AND sid = $2 AND $3 - time < 2592000', punishedUser.id, ctx.guild.id, time.time())
+    points  = await ctx.bot.db.fetchval('SELECT sum(points) FROM automod.users WHERE uid = $1 AND sid = $2 AND $3 - time < 2592000', punishedUser.id, ctx.guild.id, time.time())
     data = await ctx.bot.db.fetchrow("SELECT action, maxpoints, muterole, mutetime, bantime FROM automod.config WHERE sid = $1", ctx.guild.id)
     msg: discord.Message = ctx.message
 
@@ -108,6 +109,7 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
         embed.add_field(name=f'{std.list_emoji} **__Message__**', value=message, inline=False)
 
     if points >= maxPoints:
+        print(action)
         if action is None:
             embed.title = 'AUTOMODERATION [LOG]'
 
@@ -116,29 +118,38 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
                 embed.title = 'AUTOMODERATION [KICK]'
                 await punishedUser.kick(reason="Automoderation")
                 await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
+            else:
+                return
 
         if action == 2:
             if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
                 embed.title = 'AUTOMODERATION [BAN]'
                 await punishedUser.ban(reason="Automoderation")
                 await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
+            else:
+                return
 
         if action == 3:
             if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
+                embed.add_field(name=f'{std.date_emoji} **__Dauer__**', value=datetime.datetime.utcfromtimestamp(unixTimeBan).strftime('%d. %m. %Y um %H:%M:%S'))
                 embed.title = 'AUTOMODERATION [TEMPBAN]'
                 await punishedUser.ban(reason="Automoderation")
                 await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)', ctx.guild.id, punishedUser.id, 0, unixTimeBan)
-
+            else:
+                return
         if action == 4:
             if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
                 muteRole = ctx.guild.get_role(data['muterole'])
                 if muteRole is None:
                     return
+
+                embed.add_field(name=f'{std.date_emoji} **__Dauer__**', value=datetime.datetime.utcfromtimestamp(unixTimeMute).strftime('%d. %m. %Y um %H:%M:%S'))
                 embed.title = 'AUTOMODERATION [TEMPMUTE]'
                 await punishedUser.add_roles(muteRole, reason='Automoderation')
                 await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
                 await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)', ctx.guild.id, punishedUser.id, 1, unixTimeMute)
-
+            else:
+                return
     await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=punishedUser, ignoreNoLogging=True)
 
 
