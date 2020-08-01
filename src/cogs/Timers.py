@@ -67,7 +67,8 @@ class Timers(commands.Cog):
         if deleted == 0:
             return
 
-        channel = self.bot.get_channel(data['channel'])
+        data = json.loads(data)
+        channel = self.bot.get_channel(int(data['channel']))
         message = await channel.fetch_message(messageID)
         self.bot.dispatch('giveaway_runout', message, json.loads(data))
 
@@ -87,7 +88,7 @@ class Timers(commands.Cog):
         member: discord.Member = guild.get_member(memberID)
         if member is None:
             return
-        channel: discord.TextChannel = guild.get_channel(data['channelid'])
+        channel: discord.TextChannel = guild.get_channel(int(data['channelid']))
         try:
             await channel.send(f'Hier ist deine Erinnerung {member.mention}!', embed=std.getEmbed(data['message']))
         except discord.Forbidden:
