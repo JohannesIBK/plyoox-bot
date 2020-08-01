@@ -7,53 +7,14 @@ import discord
 from discord.ext import commands, tasks
 
 import main
-from utils.ext import standards as std, checks
-from utils.ext.cmds import grp
+from utils.ext import standards as std, checks, converters
+from utils.ext.cmds import grp, cmd
 
 
 # BAN       0
 # MUTE      1
 # GIVEAWAY  2
-
-
-class ParseTime:
-    @classmethod
-    def parse(cls, timeStr: str):
-        if timeStr.endswith('d'):
-            try:
-                days = int(timeStr.replace('d', ''))
-                if days > 90 or days < 1:
-                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
-
-                return days * 3600 * 24 + time.time()
-            except ValueError:
-                raise TypeError
-
-        if timeStr.endswith('h'):
-            try:
-                hours = float(timeStr.replace('h', ''))
-                if hours > 48 or hours < 0.25:
-                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
-
-                return hours * 3600 + time.time()
-            except ValueError:
-                raise TypeError
-
-        if timeStr.endswith('min'):
-            try:
-                mins = float(timeStr.replace('min', ''))
-                if mins > 120 or mins < 15:
-                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
-
-                return mins * 60 + time.time()
-            except ValueError:
-                raise TypeError
-        else:
-            return None
-
-
-class TimeToLong(Exception):
-    pass
+# REMINDER  3
 
 
 class Timers(commands.Cog):
@@ -118,9 +79,7 @@ class Timers(commands.Cog):
                 await guild.unban(user, reason='Tempban has expired')
             except discord.NotFound:
                 pass
-            await self.bot.db.execute(
-                "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3",
-                guild.id, memberID, punishType)
+            await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3", guild.id, memberID, punishType)
 
         if punishType == 1:
             muteroleID: int = await self.bot.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
@@ -134,9 +93,7 @@ class Timers(commands.Cog):
                 await member.remove_roles(muterole)
             except discord.Forbidden:
                 pass
-            await self.bot.db.execute(
-                "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3",
-                guild.id, memberID, punishType)
+            await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3", guild.id, memberID, punishType)
 
     @commands.Cog.listener()
     async def on_giveaway_runout(self, message: discord.Message, data):
@@ -180,12 +137,7 @@ class Timers(commands.Cog):
         pass
 
     @giveaway.command()
-    async def start(self, ctx, duration: str, winner: int, channel: discord.TextChannel, *, win: str):
-        unixTime: float = ParseTime.parse(duration)
-        print(unixTime)
-        if unixTime is None:
-            return await ctx.send(embed=std.getErrorEmbed('Ein Fehler beim Parsen der Zeit ist aufgetreten. Halte die Zeit ein!'))
-
+    async def start(self, ctx, duration: converters.ParseTime, winner: int, channel: discord.TextChannel, *, win: str):
         data = {
             'winner': winner,
             'winType': win,
@@ -199,26 +151,18 @@ class Timers(commands.Cog):
         await ctx.send(embed=std.getEmbed('Das Giveaway wurde gestartet.'))
         await msg.edit(embed=discord.Embed(color=std.normal_color,
                                            title=f"🎉 Giveaway",
-                                           description=f'**Gewinn:** {win} ({winner} Gewinner)\n'
-                                                       'Reagiere mit 🎉 um dem Giveaway beizutreten.\n'
-                                                       f'ID: {msg.id}'))
+                                           description=f'**Gewinn:** {win} ({winner} Gewinner)\nReagiere mit 🎉 um dem Giveaway beizutreten.\nID: {msg.id}'))
         await ctx.db.execute(
             'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, 2, $4)',
-            ctx.guild.id, msg.id, unixTime, json.dumps(data)
-        )
+            ctx.guild.id, msg.id, duration, json.dumps(data))
 
     @giveaway.command()
     async def stop(self, ctx, ID: int):
-        data = await ctx.db.execute(
-            'SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2',
-            ctx.guild.id, ID)
+        data = await ctx.db.execute('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         if data is None:
             return await ctx.send(embed=std.getErrorEmbed('Kein Giveaway mit dieser ID gefunden.'))
 
-        await ctx.db.execute(
-            'DELETE FROM extra.timers WHERE sid = $1 AND objid = $2',
-            ctx.guild.id, ID
-        )
+        await ctx.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         await ctx.send(embed=std.getEmbed('Das Giveaway wurde abgebrochen.'))
         channel: discord.TextChannel = ctx.guild.get_channel(data['channel'])
         msg = await channel.fetch_message(data['objid'])
@@ -230,10 +174,7 @@ class Timers(commands.Cog):
 
     @giveaway.command()
     async def end(self, ctx, ID: int):
-        data = await ctx.db.execute(
-            'SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2',
-            ctx.guild.id, ID
-        )
+        data = await ctx.db.execute('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         if data is None:
             await ctx.send(embed=std.getErrorEmbed('Kein Giveaway mit dieser ID gefunden.'))
 
@@ -242,6 +183,17 @@ class Timers(commands.Cog):
         msg = await channel.fetch_message(data['objid'])
         if msg is not None:
             self.bot.dispatch('giveaway_runout', msg, data['data'])
+
+    @cmd()
+    async def reminder(self, ctx, duration: converters.ParseTime, text: str):
+        if text is None:
+            return await ctx.send(embed=std.getEmbed('Der Text darf nicht leer sein!'))
+
+        await ctx.db.execute(
+            'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5',
+            ctx.guild.id, ctx.author.id, duration, 3, json.dumps({'message': text})
+        )
+
 
 
 def setup(bot):

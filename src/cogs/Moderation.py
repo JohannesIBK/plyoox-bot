@@ -13,12 +13,8 @@ import main
 from others import logs
 from utils import automod
 from utils.automod import automod, add_points
-from utils.ext import checks, standards as std, context
+from utils.ext import checks, standards as std, context, converters
 from utils.ext.cmds import cmd
-
-
-class TimeToLong(Exception):
-    pass
 
 
 class Arguments(argparse.ArgumentParser):
@@ -43,42 +39,6 @@ class ActionReason(commands.Converter):
         return ret
 
 
-class ParseTime:
-    @classmethod
-    def parse(cls, timeStr: str):
-        if timeStr.endswith(('j', 'y')):
-            try:
-                years = int(timeStr.replace('j', '').replace('y', ''))
-                if years > 3 or years < 0.5:
-                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
-
-                return years * 3600 * 24 * 365 + time.time()
-            except ValueError:
-                raise TypeError
-
-        if timeStr.endswith('d'):
-            try:
-                days = int(timeStr.replace('d', ''))
-                if days > 365 or days < 1:
-                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
-
-                return days * 3600 * 24 + time.time()
-            except ValueError:
-                raise TypeError
-
-        if timeStr.endswith('h'):
-            try:
-                hours = float(timeStr.replace('h', ''))
-                if hours > 48 or hours < 0.25:
-                    raise TimeToLong('Die Zeit ist entweder zu groß oder zu klein!')
-
-                return hours * 3600 + time.time()
-            except ValueError:
-                raise TypeError
-        else:
-            return None
-
-
 class Moderation(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
@@ -101,10 +61,10 @@ class Moderation(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild: discord.Guild, user: discord.Member):
-        await self.bot.db.execute("DELETE FROM automod.users WHERE key = $1", f'{user.id}{guild.id}')
+        await self.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", user.id, guild.id)
 
     @commands.Cog.listener()
-    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+    async   def on_message_edit(self, before: discord.Message, after: discord.Message):
         if before.author.bot:
             return
 
@@ -232,19 +192,12 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def tempban(self, ctx, user: discord.Member, duration: str, *, reason: ActionReason = 'No Reason'):
+    async def tempban(self, ctx, user: discord.Member, duration: converters.ParseTime, *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht bannen.'))
 
         if user == ctx.author:
             return await ctx.send(embed=std.getErrorEmbed('Du kannst den Command nicht an dir selbst ausführen.'))
-
-        if not duration.endswith(('d', 'min', 'h', 'y', 'j')):
-            return await ctx.send(embed=std.getErrorEmbed('Die Dauer wurde falsch angegeben.'))
-
-        unixTime = ParseTime.parse(duration)
-        if unixTime is None:
-            return await ctx.send(embed=std.getErrorEmbed('Der Bot konnte die Zeit nicht parsen. Bitte versuche es erneut.'))
 
         embed = std.getBaseModEmbed(reason, user=user, mod=ctx.author)
         embed.title = f'Moderation [TEMPBAN]'
@@ -256,13 +209,13 @@ class Moderation(commands.Cog):
         await user.ban(reason=reason, delete_message_days=1)
         await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gebannt.'), delete_after=5)
         await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, 0, $3)',
-                             ctx.guild.id, user.id, unixTime)
+                             ctx.guild.id, user.id, duration)
         await ctx.message.delete()
 
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def tempmute(self, ctx, user: discord.Member, duration: str, *, reason: ActionReason = 'No Reason'):
+    async def tempmute(self, ctx, user: discord.Member, duration: converters.ParseTime, *, reason: ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht muten.'))
 
@@ -274,13 +227,6 @@ class Moderation(commands.Cog):
         if user == ctx.author:
             return await ctx.send(embed=std.getErrorEmbed('Du kannst den Command nicht an dir selbst ausführen.'))
 
-        if not duration.endswith(('d', 'min', 'h', 'y', 'j')):
-            return await ctx.send(embed=std.getErrorEmbed('Die Dauer wurde falsch angegeben.'))
-
-        unixTime = ParseTime.parse(duration)
-        if unixTime is None:
-            return await ctx.send(embed=std.getErrorEmbed('Der Bot konnte die Zeit nicht parsen. Bitte versuche es erneut.'))
-
         embed = std.getBaseModEmbed(reason, user=user, mod=ctx.author)
         embed.title = f'Moderation [TEMPMUTE]'
         embed.add_field(name=f'{std.date_emoji} **__Dauer__**', value=duration)
@@ -291,7 +237,7 @@ class Moderation(commands.Cog):
         await ctx.send(embed=std.getEmbed('{std.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gemuted.'),
                        delete_after=5)
         await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, 1, $3)',
-                             ctx.guild.id, user.id, unixTime)
+                             ctx.guild.id, user.id, duration)
         await ctx.message.delete()
 
     @cmd()
