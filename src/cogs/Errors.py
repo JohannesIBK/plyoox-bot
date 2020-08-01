@@ -69,7 +69,7 @@ class Errors(commands.Cog):
             per = cooldown.per
 
             await ctx.send(embed=standards.getErrorEmbed(f'Dieser Command hat einen Cooldown. Du kannst ihn nur {rate} pro {per}s benutzen.\n'
-                                                         f'Versuche es in {round(retryAfter, 1)}s erneut.'))
+                                                         f'Versuche es in {round(retryAfter)}s erneut.'))
 
         elif isinstance(error, commands.NotOwner):
             await ctx.send(embed=standards.getErrorEmbed('Diesen Command kann nur der Owner des Bots ausführen.'))
