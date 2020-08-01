@@ -21,11 +21,16 @@ class Help(commands.Cog):
             arg: str = command.lower()
 
         modules = dict((key.lower(), [key, value]) for key, value in self.bot.cogs.items()
-                       if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging'])
+                       if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging', 'plyooxsupport'])
+
 
         if arg == '':
+            prefix = await ctx.db.fetchval('SELECT prefix FROM config.guild WHERE sid = $1', ctx.guild.id)
+            if prefix is None:
+                prefix = '@Plyoox#1355'
+
             embed: discord.Embed = discord.Embed(title=f'{standards.question_emoji} Command Hilfe',
-                                                 description=f'[Dashboard](https://plyoox.net/) | [Support](https://discordapp.com/invite/5qPPvQe)',
+                                                 description=f'[Dashboard](https://plyoox.net/) | [Support](https://discordapp.com/invite/5qPPvQe)\nPrefix: `{prefix}`',
                                                  color=standards.help_color)
             embed.set_footer(icon_url=ctx.me.avatar_url)
 
@@ -58,8 +63,7 @@ class Help(commands.Cog):
         elif arg.lower() in modules:
             cogHelp: commands.Cog = modules[arg.lower()][1]
             command: commands.Command
-            embed: discord.Embed = discord.Embed(color=standards.help_color,
-                                                 title=f'{standards.question_emoji} Modul-Hilfe')
+            embed: discord.Embed = discord.Embed(color=standards.help_color, title=f'{standards.question_emoji} Modul-Hilfe')
 
             for command in cogHelp.get_commands():
                 cmdHelpRaw: list = self.helpText[command.name.lower()].copy()
