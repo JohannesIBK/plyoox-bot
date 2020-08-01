@@ -46,34 +46,21 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def load(self, ctx: commands.Context, CogName: str = None):
-        if CogName is not None:
-            try:
-                self.bot.reload_extension("cogs." + CogName)
-            except commands.ExtensionNotLoaded:
-                await ctx.send(embed=discord.Embed(color=discord.Color.red(),
-                                                   description=f'Das Modul `{CogName}` konnte nicht gefunden werden.'))
-            else:
-                cog: commands.Cog = self.bot.get_cog(CogName)
-                for cogCmd in cog.get_commands():
-                    self.bot.get_all_commands.update({cogCmd.name.lower(): cogCmd})
-                    for alias in cogCmd.aliases:
-                        self.bot.get_all_commands.update({alias.lower(): cogCmd})
-                await ctx.send(embed=discord.Embed(color=discord.Color.green(),
-                                                   description=f'Das Modul `{CogName}` wurde neu geladen.'))
-        else:
-            for cogName in self.bot.cogs:
-                try:
-                    self.bot.reload_extension("cogs." + cogName)
-                    cog: commands.Cog = self.bot.get_cog(cogName)
-                    for cogCmd in cog.get_commands():
-                        self.bot.get_all_commands.update({cogCmd.name.lower(): cogCmd})
-                        for alias in cogCmd.aliases:
-                            self.bot.get_all_commands.update({alias.lower(): cogCmd})
-                except:
-                    await ctx.send(f'```py\n{traceback.format_exc()}\n```')
-            await ctx.send(embed=discord.Embed(color=discord.Color.green(),
-                                               description=f'Alle Module wurden neu geladen.'))
+    async def load(self, ctx: commands.Context, cog):
+        self.bot.load_extension(cog)
+        await ctx.send(embed=std.getEmbed(f'Das Modul {cog} wurde geladen.'))
+
+    @cmd(hidden=True)
+    @commands.is_owner()
+    async def reload(self, ctx: commands.Context, cog):
+        self.bot.reload_extension(cog)
+        await ctx.send(embed=std.getEmbed(f'Das Modul {cog} wurde neugeladen.'))
+
+    @cmd(hidden=True)
+    @commands.is_owner()
+    async def unload(self, ctx: commands.Context, cog):
+        self.bot.unload_extension(cog)
+        await ctx.send(embed=std.getEmbed(f'Das Modul {cog} wurde entladen.'))
 
     @cmd(hidden=True)
     @commands.is_owner()
