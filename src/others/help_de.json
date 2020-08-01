@@ -86,7 +86,7 @@
   ],
   "prefix": [
     "Ändert den Prefix auf dem Server.",
-    "\n**__Command:__** {p}prefix < **`Prefix`** >",
+    "\n**__Command:__** {p}prefix < **`Neuer Prefix`** >",
     "\n**__Beispiele:__**",
     " » {p}prefix >",
     " » {p}prefix *"
