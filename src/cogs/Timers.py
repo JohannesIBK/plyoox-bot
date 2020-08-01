@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import json
 import random
 import time
@@ -165,13 +166,16 @@ class Timers(commands.Cog):
         }
 
         embed: discord.Embed = discord.Embed(color=std.normal_color, title=f'🎉 Giveaway', description=f'**Gewinn:** {win}\nReagiere mit 🎉 um dem Giveaway beizutreten.\n')
-
         msg: discord.Message = await channel.send(embed=embed)
         await msg.add_reaction('🎉')
         await ctx.send(embed=std.getEmbed('Das Giveaway wurde gestartet.'))
-        await msg.edit(embed=discord.Embed(color=std.normal_color,
-                                           title=f"🎉 Giveaway",
-                                           description=f'**Gewinn:** {win} ({winner} Gewinner)\nReagiere mit 🎉 um dem Giveaway beizutreten.\nID: {msg.id}'))
+        embed = discord.Embed(color=std.normal_color,
+                              title=f"🎉 Giveaway",
+                              description=f'**Gewinn:** {win} ({winner} Gewinner)\nReagiere mit 🎉 um dem Giveaway beizutreten.\nID: {msg.id}')
+        embed.set_footer(text=f'Endet um')
+        # noinspection PyTypeChecker
+        embed.timestamp = datetime.datetime.utcfromtimestamp(duration)
+        await msg.edit(embed=embed)
         await ctx.db.execute(
             'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, 2, $4)',
             ctx.guild.id, msg.id, duration, json.dumps(data))
