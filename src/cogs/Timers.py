@@ -207,7 +207,7 @@ class Timers(commands.Cog):
 
     @cmd()
     @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
-    async def reminder(self, ctx, duration: converters.ParseTime, text: str):
+    async def reminder(self, ctx, duration: converters.ParseTime, *, text: str):
         if text is None:
             return await ctx.send(embed=std.getEmbed('Der Text darf nicht leer sein!'))
 
