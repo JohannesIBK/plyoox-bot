@@ -36,7 +36,7 @@ class Logging(commands.Cog):
             if webhook.id == webhookID:
                 break
         else:
-            await self.bot.db.execute('UPDATE config.logging SET id = NULL, token = NULL, channelid = NULL WHERE l.sid = $1', channel.guild.id)
+            await self.bot.db.execute('UPDATE config.logging SET id = NULL, token = NULL, channelid = NULL WHERE sid = $1', channel.guild.id)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild: discord.Guild, user: Union[discord.Member, discord.User]):
