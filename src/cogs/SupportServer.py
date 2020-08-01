@@ -4,6 +4,7 @@ import json
 import discord
 from discord.ext import commands
 
+from utils.ext import standards as std
 from utils.ext.cmds import grp
 
 ACCEPTED_SUGGESTION_CHANNEL = 739109521452040193
@@ -144,6 +145,14 @@ class PlyooxSupport(commands.Cog):
         embed.add_field(name=str(suggestionMsg.author), value=suggestionMsg.content)
         await msg.edit(embed=embed)
         await suggestionMsg.delete()
+        await ctx.message.delete()
+
+    @suggestion.command()
+    async def dev(self, ctx, ID: int, channel: discord.TextChannel, *, text):
+        msg: discord.Message = await channel.fetch_message(ID)
+        embed = msg.embeds[0]
+        embed.add_field(name=f'{std.botdev_emoji} Anmekung', value=text)
+        await msg.edit(embed=embed)
         await ctx.message.delete()
 
 
