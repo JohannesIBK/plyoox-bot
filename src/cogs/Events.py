@@ -1,41 +1,19 @@
 import re
 import typing
 
-import dbl
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 import main
 from others import db
 from utils.ext import standards as std
 from utils.ext.formatter import formatMessage
 
-BRACKET_REGEX = r'{.*?}'
 CHANNEL_REGEX = r'#\w+'
 
 class Events(commands.Cog):
-    with open(r"./others/keys/dbl.env", 'r') as file:
-        dblToken = file.read()
-
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
-        self.dblpy = dbl.DBLClient(bot, self.dblToken)
-        self.update_stats.start()
-
-    @tasks.loop(hours=6)
-    async def update_stats(self):
-        self.bot.logger.info('Attempting to post server count')
-        try:
-            await self.dblpy.post_guild_count()
-            self.bot.logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
-        except Exception as e:
-            self.bot.logger.exception('Failed to post server count\n{}'.format(type(e).__name__))
-
-    @update_stats.before_loop
-    async def before_update_stats(self):
-        if self.bot.user.id != 5054335413916622850:
-            self.update_stats.cancel()
-        await self.bot.wait_until_ready()
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: typing.Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]):

@@ -85,6 +85,9 @@ class Plyoox(commands.AutoShardedBot):
             except commands.ExtensionAlreadyLoaded:
                 self.reload_extension(cog)
 
+        if self.user.id == 505433541916622850:
+            self.load_extension('cogs.BotLists')
+
         for cmd in self.commands:
             self.get_all_commands.update({cmd.name.lower(): cmd})
             for alias in cmd.aliases:
