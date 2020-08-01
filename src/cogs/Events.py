@@ -13,15 +13,12 @@ from utils.ext.formatter import formatMessage
 BRACKET_REGEX = r'{.*?}'
 CHANNEL_REGEX = r'#\w+'
 
-
-with open(r"./others/keys/dbl.env", 'r') as file:
-    dblToken = file.read()
-
-
 class Events(commands.Cog):
+    with open(r"./others/keys/dbl.env", 'r') as file:
+        dblToken = file.read()
+
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
-        self.dblToken = dblToken
         self.dblpy = dbl.DBLClient(bot, self.dblToken)
         self.update_stats.start()
 
@@ -43,6 +40,9 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: typing.Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]):
         guild: discord.Guild = channel.guild
+        if not guild.me.guild_permissions.manage_channels:
+            return
+
         muteRoleID = await self.bot.db.fetchval('SELECT muterole from automod.config WHERE sid = $1', guild.id)
         muteRole = guild.get_role(muteRoleID)
         if muteRole is None:
