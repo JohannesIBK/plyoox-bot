@@ -13,7 +13,7 @@ class Logging(commands.Cog):
 
     async def createWebhook(self, guildID):
         guild: discord.Guild = self.bot.get_guild(guildID)
-        channelID = await self.bot.db.fetchval('SELECT channelid FROM config.logging WHERE sid = $1')
+        channelID = await self.bot.db.fetchval('SELECT channelid FROM config.logging WHERE sid = $1', guild.id)
         channel: discord.TextChannel = guild.get_channel(channelID)
         if channel is None:
             return
