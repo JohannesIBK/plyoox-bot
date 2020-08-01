@@ -74,26 +74,16 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
     else:
         punishedUser: discord.Message = ctx.author
 
-    key = f'{punishedUser.id}{ctx.guild.id}'
+    await ctx.bot.db.fetchrow(
+        'INSERT INTO automod.users (uid, sid, points, time, reason) VALUES ($1, $2, $3, $4, $5)',
+        punishedUser.id, ctx.guild.id, addPoints, time.time(), f'Automoderation: {modType}')
+
+    points  = await ctx.bot.db.fetchval('SELECT sum(points) WHERE uid = $1 AND sid = $2 AND $3 - time < 2592000', punishedUser.id, ctx.guild.id, time.time())
+    data = await ctx.bot.db.fetchrow("SELECT action, maxpoints, muterole, mutetime, bantime FROM automod.config WHERE sid = $1", ctx.guild.id)
     msg: discord.Message = ctx.message
-
-    userData = await ctx.bot.db.fetchrow(
-        'INSERT INTO automod.users (userid, guildid, points, key, time) VALUES ($1, $2, $3, $4, $5) '
-        'ON CONFLICT (key) DO UPDATE SET points = users.points + $3, time = $5 RETURNING points, time',
-        punishedUser.id, ctx.guild.id, addPoints, key, time.time())
-
-    points = userData['points']
-
-    if time.time() - userData['time'] > 604800:
-        await ctx.bot.db.execute('UPDATE automod.users SET points = $1, time = $2 WHERE key = $2', addPoints, time.time(), key)
-        points = addPoints
-
-    data = await ctx.bot.db.fetchrow(
-        "SELECT action, maxpoints, muterole, mutetime, bantime FROM automod.config WHERE sid = $1", ctx.guild.id)
 
     action = data['action']
     maxPoints = data['maxpoints']
-
     unixTimeMute = unixTimeBan = time.time() + 86400
 
     if data['mutetime']:
@@ -109,9 +99,7 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
     embed.title = f'AUTOMODERATION [LOG]'
     userEmbed.title = f'AUTOMODERATION [LOG]'
     if user is not None:
-        embed.add_field(name=f'{std.supporter_emoji} **__Moderator__**',
-                        value=ctx.author.mention,
-                        inline=False)
+        embed.add_field(name=f'{std.supporter_emoji} **__Moderator__**', value=ctx.author.mention, inline=False)
     embed.add_field(name=f'{std.channel_emoji} **__Channel__**', value=ctx.channel.mention, inline=False)
     embed.add_field(name=f'{std.invite_emoji} **__Punkte__**', value=f'{points}/{maxPoints}', inline=False)
     userEmbed.add_field(name=f'{std.invite_emoji} **__Punkte__**', value=f'{points}/{maxPoints}', inline=False)
@@ -126,21 +114,20 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
         if action == 1:
             if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
                 embed.title = 'AUTOMODERATION [KICK]'
-                await punishedUser.kick(reason="Automoderation: User reached max points.")
-                await ctx.bot.db.execute("UPDATE automod.users SET points = 0 WHERE key = $1", key)
+                await punishedUser.kick(reason="Automoderation")
+                await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
 
         if action == 2:
             if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
                 embed.title = 'AUTOMODERATION [BAN]'
-                await punishedUser.ban(reason="Automoderation: User reached max points.")
-                await ctx.bot.db.execute("UPDATE automod.users SET points = 0 WHERE key = $1", key)
+                await punishedUser.ban(reason="Automoderation")
+                await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
 
         if action == 3:
             if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
                 embed.title = 'AUTOMODERATION [TEMPBAN]'
-                await punishedUser.ban(reason="Automoderation: User reached max points.")
-                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',
-                                     ctx.guild.id, punishedUser.id, 0, unixTimeBan)
+                await punishedUser.ban(reason="Automoderation")
+                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)', ctx.guild.id, punishedUser.id, 0, unixTimeBan)
 
         if action == 4:
             if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
@@ -148,10 +135,9 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
                 if muteRole is None:
                     return
                 embed.title = 'AUTOMODERATION [TEMPMUTE]'
-                await punishedUser.add_roles(muteRole)
-                await ctx.bot.db.execute("UPDATE automod.users SET points = 0 WHERE key = $1", key)
-                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',
-                                     ctx.guild.id, punishedUser.id, 1, unixTimeMute)
+                await punishedUser.add_roles(muteRole, reason='Automoderation')
+                await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
+                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)', ctx.guild.id, punishedUser.id, 1, unixTimeMute)
 
     await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=punishedUser, ignoreNoLogging=True)
 
@@ -172,9 +158,7 @@ async def automod(ctx):
             for word in words:
                 if findWord(word)(msg.content.lower()):
                     if not await checks.ignores_automod(ctx):
-                        data = await bot.db.fetchrow(
-                            'SELECT points, whitelist FROM automod.blacklist WHERE sid = $1',
-                            guild.id)
+                        data = await bot.db.fetchrow('SELECT points, whitelist FROM automod.blacklist WHERE sid = $1', guild.id)
 
                         if data['whitelist'] is not None:
                             if channel.id in data['whitelist']:
@@ -189,9 +173,7 @@ async def automod(ctx):
         if await checks.ignores_automod(ctx):
             return
 
-        data = await bot.db.fetchrow(
-            "SELECT state, whitelist, partner, points FROM automod.invites WHERE sid = $1",
-            guild.id)
+        data = await bot.db.fetchrow("SELECT state, whitelist, partner, points FROM automod.invites WHERE sid = $1", guild.id)
 
         if not (state := data['state']):
             return
@@ -232,9 +214,7 @@ async def automod(ctx):
         if await checks.ignores_automod(ctx):
             return
 
-        data = await bot.db.fetchrow(
-            'SELECT points, state, links, whitelist, iswhitelist FROM automod.links WHERE sid = $1',
-            guild.id)
+        data = await bot.db.fetchrow('SELECT points, state, links, whitelist, iswhitelist FROM automod.links WHERE sid = $1', guild.id)
 
         if not (state := data['state']):
             return
@@ -290,9 +270,7 @@ async def automod(ctx):
             return
 
         lenMentions = sum(not m.bot and m.id != ctx.author.id for m in msg.mentions)
-        data = await bot.db.fetchrow(
-            "SELECT state, points, count, whitelist FROM automod.mentions WHERE sid = $1",
-            guild.id)
+        data = await bot.db.fetchrow("SELECT state, points, count, whitelist FROM automod.mentions WHERE sid = $1", guild.id)
 
         if not (state := data['state']):
             return

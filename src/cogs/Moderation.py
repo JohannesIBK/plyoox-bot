@@ -7,7 +7,7 @@ import time
 from typing import Union
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 import main
 from others import logs
@@ -82,6 +82,11 @@ class ParseTime:
 class Moderation(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
+        self.checkPunishments.start()
+
+    @tasks.loop(minutes=30)
+    async def checkPunishments(self):
+        await self.bot.db.execute('DELETE FROM automod.users WHERE $1 - time >= 2592000', time.time())
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
@@ -334,9 +339,7 @@ class Moderation(commands.Cog):
         else:
             return await ctx.send(embed=std.getEmbed('Der User ist nicht gemutet.'))
 
-        await self.bot.db.execute(
-            "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = 1",
-            ctx.guild.id, user.id)
+        await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = 1", ctx.guild.id, user.id)
 
     @cmd()
     @checks.isMod()
@@ -355,20 +358,18 @@ class Moderation(commands.Cog):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesem User keine Punkte geben.'))
 
-        userData = await self.bot.db.fetchval('SELECT points FROM automod.users WHERE key = $1', f'{user.id}{ctx.guild.id}')
-        if userData is None:
+        points = await self.bot.db.fetchval('SELECT sum(points) FROM automod.users WHERE uid = $1 AND sid = $2', user.id, ctx.guild.id)
+        if points is None:
             return await ctx.send(embed=std.getErrorEmbed('Der User hat noch nie etwas getan.'))
 
-        await ctx.send(embed=discord.Embed(description=f'Der User hat {userData} Punkte.'))
+        await ctx.send(embed=std.getEmbed(f'Der User hat {points} Punkte.'))
 
     @cmd()
     @checks.isMod()
     async def resetPoints(self, ctx, user: discord.Member):
-        key: str = f'{user.id}{ctx.guild.id}'
-
-        await ctx.bot.db.execute('UPDATE automod.users SET points = 0, time = $1 WHERE key = $2', time.time(), key)
+        await ctx.bot.db.execute('DELETE FROM automod.users WHERE sid = $1 AND uid = $2', ctx.guild.id, user.id)
         await ctx.message.delete()
-        await ctx.send(embed=discord.Embed(description=f'Die Punkte des Users wurden zurückgesetzt.'), delete_after=5)
+        await ctx.send(embed=std.getEmbed('Die Punkte des Users wurden zurückgesetzt.'), delete_after=5)
 
     @cmd(aliases=['slow', 'sm'])
     @checks.isMod()
@@ -379,7 +380,7 @@ class Moderation(commands.Cog):
             return await ctx.send(embed=std.getErrorEmbed('Die Sekundenanzahl muss zwischen 0 und 21600 (6h) liegen'))
         await ctx.channel.edit(slowmode_delay=seconds)
         await ctx.message.delete()
-        await ctx.send(embed=std.getEmbed(f'Der Slowmode wurde erfolgreich auf {seconds}s gesetzt.'), delete_after=5)
+        await ctx.send(embed=std.getEmbed(f'Der Slowmode wurde erfolgreich auf `{seconds}` {"Sekunde" if seconds == 1 else "Sekunden"} gesetzt.'), delete_after=5)
 
     @cmd()
     @commands.guild_only()
@@ -459,8 +460,7 @@ class Moderation(commands.Cog):
                 try:
                     return await ctx.guild.fetch_member(member_id)
                 except discord.HTTPException as exc:
-                    raise commands.BadArgument(
-                        f'User mit der ID `{member_id}` konnte nicht gefunden werden: {exc}') from None
+                    raise commands.BadArgument(f'User mit der ID `{member_id}` konnte nicht gefunden werden: {exc}') from None
             return r
 
         if args.regex:
@@ -508,10 +508,8 @@ class Moderation(commands.Cog):
 
         if args.show:
             members = sorted(members, key=lambda m: m.joined_at or now)
-            fmt = "\n".join(
-                '{id}\tBeigetreten: {joined_at}\tErstellt: {created_at}\t{m}'.format(id=m.id, joined_at=m.joined_at,
-                                                                                     created_at=m.created_at, m=m) for m
-                in members)
+            fmt = "\n".join('{id}\tBeigetreten: {joined_at}\tErstellt: {created_at}\t{m}'
+                            .format(id=m.id, joined_at=m.joined_at, created_at=m.created_at, m=m) for m in members)
             content = f'Useranzahl: {len(members)}\n{fmt}'
             file = discord.File(io.BytesIO(content.encode('utf-8')), filename='members.txt')
             return await ctx.send(file=file)
@@ -538,8 +536,7 @@ class Moderation(commands.Cog):
 
         embed = std.getBaseModEmbed(reason, mod=ctx.author)
         embed.title = f'Moderation [MASSBAN]'
-        embed.add_field(name=f'{std.bughunter_badge} **User:** {count}',
-                        value=f'**Gebannt:** {count}/{len(members)}')
+        embed.add_field(name=f'{std.bughunter_badge} **User:** {count}', value=f'**Gebannt:** {count}/{len(members)}')
 
         await logs.createCmdLog(ctx, embed)
 
