@@ -31,19 +31,21 @@ class Timers(commands.Cog):
             endTime = entry['time']
             guildID = entry['sid']
             if timerType in [0, 1]:
-                memberID = entry['objid']
-                self.bot.loop.create_task(self.punishTimer(endTime, memberID, guildID, timerType))
+                self.bot.loop.create_task(self.punishTimer(endTime, entry['objid'], guildID, timerType))
 
-            if timerType == 2:
-                messageID = entry['objid']
-                data = entry['data']
-                self.bot.loop.create_task(self.giveawayTimer(endTime, messageID, data))
+            elif timerType == 2:
+                self.bot.loop.create_task(self.giveawayTimer(endTime, entry['objid'], guildID, entry['data']))
+
+            if timerType == 3:
+                # self.bot.loop.create_task(self.)
+                pass
+
 
     @checkTimers.before_loop
     async def before_printer(self):
         await self.bot.wait_until_ready()
 
-    async def punishTimer(self, unbanTime: int, memberID: int, guildID: int, punishmentType: str):
+    async def punishTimer(self, unbanTime: int, memberID: int, guildID: int, punishmentType: int):
         untilUnban = unbanTime - time.time()
         if unbanTime < 0:
             untilUnban = 0
@@ -51,19 +53,45 @@ class Timers(commands.Cog):
         await asyncio.sleep(untilUnban)
 
         guild = self.bot.get_guild(guildID)
+        await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3", guild.id, memberID, punishmentType)
         self.bot.dispatch('punishment_runout', guild, memberID, punishmentType)
 
-    async def giveawayTimer(self, endTime: int, messageID: int, data):
+    async def giveawayTimer(self, endTime: int, messageID: int, guildID: int, data):
         untilEnd = endTime - time.time()
         if endTime < 0:
             untilEnd = 0
 
         await asyncio.sleep(untilEnd)
 
-        data = json.loads(data)
+        deleted = await self.bot.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 2', guildID, messageID)
+        if deleted == 0:
+            return
+
         channel = self.bot.get_channel(data['channel'])
         message = await channel.fetch_message(messageID)
-        self.bot.dispatch('giveaway_runout', message, data)
+        self.bot.dispatch('giveaway_runout', message, json.loads(data))
+
+    async def reminderTimer(self, endTime: int, guildID: int, memberID: int, data):
+        untilEnd = endTime - time.time()
+        if endTime < 0:
+            untilEnd = 0
+
+        await asyncio.sleep(untilEnd)
+
+        await self.bot.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 3', guildID, memberID)
+
+        data = json.loads(data)
+        guild: discord.Guild = self.bot.get_guild(guildID)
+        if guild is None:
+            return
+        member: discord.Member = guild.get_member(memberID)
+        if member is None:
+            return
+        channel: discord.TextChannel = guild.get_channel(data['channelid'])
+        try:
+            await channel.send(f'Hier ist deine Erinnerung f{member.mention}!', embed=std.getEmbed(data['message']))
+        except discord.Forbidden:
+            pass
 
     @commands.Cog.listener()
     async def on_punishment_runout(self, guild: discord.Guild, memberID: int, punishType: int):
@@ -77,9 +105,8 @@ class Timers(commands.Cog):
 
             try:
                 await guild.unban(user, reason='Tempban has expired')
-            except discord.NotFound:
+            except:
                 pass
-            await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3", guild.id, memberID, punishType)
 
         if punishType == 1:
             muteroleID: int = await self.bot.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
@@ -93,7 +120,6 @@ class Timers(commands.Cog):
                 await member.remove_roles(muterole)
             except discord.Forbidden:
                 pass
-            await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3", guild.id, memberID, punishType)
 
     @commands.Cog.listener()
     async def on_giveaway_runout(self, message: discord.Message, data):
@@ -102,11 +128,6 @@ class Timers(commands.Cog):
         winners = []
         winnerCount = data['winner']
         win = data['winType']
-
-        deleted: int = await self.bot.db.fetch('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', message.guild.id, message.id)
-
-        if deleted == 0:
-            return
 
         for reaction in reactions:
             if reaction.emoji == '🎉':
@@ -185,14 +206,16 @@ class Timers(commands.Cog):
             self.bot.dispatch('giveaway_runout', msg, data['data'])
 
     @cmd()
+    @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
     async def reminder(self, ctx, duration: converters.ParseTime, text: str):
         if text is None:
             return await ctx.send(embed=std.getEmbed('Der Text darf nicht leer sein!'))
 
         await ctx.db.execute(
-            'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5',
-            ctx.guild.id, ctx.author.id, duration, 3, json.dumps({'message': text})
-        )
+            'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5)',
+            ctx.guild.id, ctx.author.id, duration, 3, json.dumps({'message': text, 'channelid': ctx.channel.id}))
+
+        await ctx.send(embed=std.getEmbed('Dein Timer wurde erstellt.'))
 
 
 

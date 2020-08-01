@@ -364,5 +364,14 @@
   "dashboard": [
     "Der Link zum Dashboard des Bots.",
     "\n**__Command:__** {p}dashboard"
+  ],
+  "reminder": [
+    "Setze eine Timer um deine Termine einzuhalten!",
+    "\n**__Command:__** {p}reminder < **`Dauer`** > < **`Text`** >",
+    "\n**__Infos:__**",
+    " » Dauer in Minuten (min), Stunden (h), Tagen (d), Monaten (mdn), oder Jahr (y).",
+    "\n**__Beispiel:__**",
+    " » {p}reminder 15min Plyoox promoten",
+    " » {p}reminder 3mon Rechungen bezahlen"
   ]
 }
