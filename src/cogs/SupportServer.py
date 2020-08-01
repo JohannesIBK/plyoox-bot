@@ -10,6 +10,7 @@ ACCEPTED_SUGGESTION_CHANNEL = 739109521452040193
 DENIED_SUGGESTION_CHANNEL = 739109592541298779
 WAITING_SUGGESTION_CHANNEL = 739110352913956925
 IMPLEMENTED_SUGGESTION_CHANNEL = 739110320827531294
+DEVELOPED_SUGGESTION_CHANNEL = 739142451771474031
 
 
 class PlyooxSupport(commands.Cog):
@@ -98,6 +99,20 @@ class PlyooxSupport(commands.Cog):
             await implementedChannel.send(embed=embed, file=attachment)
         else:
             await implementedChannel.send(embed=embed)
+        await msg.delete()
+        await ctx.message.delete()
+
+    @suggestion.command()
+    async def developed(self, ctx, ID: int):
+        msg: discord.Message = await ctx.channel.fetch_message(ID)
+        embed = msg.embeds[0]
+        embed.color = discord.Color.dark_teal()
+        developedChannel: discord.TextChannel = ctx.guild.get_channel(DEVELOPED_SUGGESTION_CHANNEL)
+        if msg.attachments:
+            attachment = await msg.attachments[0].to_file()
+            await developedChannel.send(embed=embed, file=attachment)
+        else:
+            await developedChannel.send(embed=embed)
         await msg.delete()
         await ctx.message.delete()
 
