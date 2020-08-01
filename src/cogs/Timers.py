@@ -37,8 +37,7 @@ class Timers(commands.Cog):
                 self.bot.loop.create_task(self.giveawayTimer(endTime, entry['objid'], guildID, entry['data']))
 
             if timerType == 3:
-                # self.bot.loop.create_task(self.)
-                pass
+                self.bot.loop.create_task(self.reminderTimer(endTime, entry['objid'], guildID, entry['data']))
 
 
     @checkTimers.before_loop
@@ -71,7 +70,7 @@ class Timers(commands.Cog):
         message = await channel.fetch_message(messageID)
         self.bot.dispatch('giveaway_runout', message, json.loads(data))
 
-    async def reminderTimer(self, endTime: int, guildID: int, memberID: int, data):
+    async def reminderTimer(self, endTime: int, memberID: int, guildID: int, data):
         untilEnd = endTime - time.time()
         if endTime < 0:
             untilEnd = 0
@@ -89,7 +88,7 @@ class Timers(commands.Cog):
             return
         channel: discord.TextChannel = guild.get_channel(data['channelid'])
         try:
-            await channel.send(f'Hier ist deine Erinnerung f{member.mention}!', embed=std.getEmbed(data['message']))
+            await channel.send(f'Hier ist deine Erinnerung {member.mention}!', embed=std.getEmbed(data['message']))
         except discord.Forbidden:
             pass
 
