@@ -360,5 +360,9 @@
     "\n**__Command:__** {p}8ball < **`Frage`** >",
     "\n**__Beispiel:__**",
     " » {p}8ball Ist Discord cool?"
+  ],
+  "dashboard": [
+    "Der Link zum Dashboard des Bots.",
+    "\n**__Command:__** {p}dashboard"
   ]
 }

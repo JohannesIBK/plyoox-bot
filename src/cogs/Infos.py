@@ -241,6 +241,10 @@ class Infos(commands.Cog):
     async def members(self, ctx):
         await ctx.send(embed=std.getEmbed(f'Der Discord hat momentan `{ctx.guild.member_count}` Mitglieder.'))
 
+    @cmd()
+    async def dashboard(self, ctx):
+        await ctx.send('https://plyoox.net/')
+
 
 def setup(bot):
     bot.add_cog(Infos(bot))
