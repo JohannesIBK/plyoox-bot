@@ -109,7 +109,6 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
         embed.add_field(name=f'{std.list_emoji} **__Message__**', value=message, inline=False)
 
     if points >= maxPoints:
-        print(action)
         if action is None:
             embed.title = 'AUTOMODERATION [LOG]'
 
