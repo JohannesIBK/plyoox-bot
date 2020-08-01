@@ -31,12 +31,13 @@ cogs = [
     "cogs.Leveling",
     "cogs.Utilities",
     "cogs.Commands",
-    "cogs.Errors",
+    # "cogs.Errors",
     "cogs.Fun",
     "cogs.Events",
     "cogs.Infos",
     "cogs.Logging",
-    "cogs.Timers"
+    "cogs.Timers",
+    'cogs.SupportServer'
 ]
 
 
@@ -45,7 +46,8 @@ async def getPrefix(bot, msg: discord.Message):
     if not msg.guild:
         return prefixes
     else:
-        prefixes.append(await bot.get(msg.guild.id, 'prefix'))
+        prefix = await bot.get(msg.guild.id, 'prefix')
+        prefixes.append(prefix)
     return prefixes
 
 
@@ -115,37 +117,48 @@ class Plyoox(commands.AutoShardedBot):
 
     async def get(self, guildID: int, item: str):
         data = await self.redis.get(guildID, encoding='utf-8')
-        try:
-            returnData = json.loads(data)[item]
-            if item in ['noxproles', 'noxpchannels'] and item is not None:
-                return list(map(int, returnData))
-            return returnData
-        except:
-            if item == 'prefix':
-                query = 'SELECT prefix FROM config.guild WHERE sid = $1'
-            elif item in ['noxproles', 'noxpchannels']:
-                query = 'SELECT noxproles, noxpchannels FROM config.leveling WHERE sid = $1'
-            elif item in ['words', 'state']:
-                query = 'SELECT words, state FROM automod.blacklist WHERE sid = $1'
-            elif item in ['leveling', 'automod']:
-                query = 'SELECT leveling, automod FROM config.modules WHERE sid = $1'
-            else:
-                raise TypeError(f'Item {item} in DB not found')
+        if data is not None:
+            try:
+                redisData = json.loads(data)[item]
+                if item == 'noxpchannels':
+                    if redisData is None:
+                        return None
+                    return list(map(int, redisData))
+                elif item == 'noxprole':
+                    if redisData is None:
+                        return None
+                    return int(redisData)
+                return redisData
+            except KeyError:
+                pass
 
+        if item == 'prefix':
+            query = 'SELECT prefix FROM config.guild WHERE sid = $1'
+        elif item in ['noxprole', 'noxpchannels']:
+            query = 'SELECT noxprole, noxpchannels FROM config.leveling WHERE sid = $1'
+        elif item in ['words', 'state']:
+            query = 'SELECT words, state FROM automod.blacklist WHERE sid = $1'
+        elif item in ['leveling', 'automod']:
+            query = 'SELECT leveling, automod FROM config.modules WHERE sid = $1'
+        else:
+            raise ValueError(f'Item {item} in DB not found')
+
+        resp = await self.db.fetchrow(query, guildID)
+        if resp is None and item in ['prefix', 'leveling', 'automod']:
+            await db.gotAddet(self, self.get_guild(guildID))
             resp = await self.db.fetchrow(query, guildID)
+        elif resp is None:
+            return None
 
-            if resp is None:
-                await db.gotAddet(self, self.get_guild(guildID))
-                resp = await self.db.fetchrow(query, guildID)
-
-            if data is None:
-                await self.redis.set(guildID, json.dumps({item: resp[item]}))
-            else:
-                currentGuildData = json.loads(await self.redis.get(guildID, encoding='utf-8'))
-                currentGuildData[item] = resp[item]
-                await self.redis.set(guildID, json.dumps(currentGuildData))
-
-            return resp[item]
+        if data is None:
+            await self.redis.set(guildID, json.dumps({item: resp[item]}))
+        else:
+            currentGuildData = json.loads(await self.redis.get(guildID, encoding='utf-8'))
+            if currentGuildData is None:
+                return None
+            currentGuildData[item] = resp[item]
+            await self.redis.set(guildID, json.dumps(currentGuildData))
+        return resp[item]
 
     async def update_redis(self, guildID, data: dict):
         currentData: dict = json.loads(await self.redis.get(guildID, encoding='utf-8'))
@@ -161,4 +174,4 @@ class Plyoox(commands.AutoShardedBot):
         self.redis = await aioredis.create_redis_pool('redis://localhost/')
 
     async def on_error(self, event_method, *args, **kwargs):
-        logger.error(traceback.format_exc())
+         logger.error(traceback.format_exc())
