@@ -27,6 +27,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
+    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     async def color(self, ctx):
         rgbs = []
         for i in range(0, 3, 1):
@@ -100,6 +101,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
+    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     async def dice(self, ctx):
         zahl = random.choice([":one:", ":two:", ":three:", ":four:", ":five:", ":six:"])
         await ctx.send(zahl)
@@ -126,6 +128,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
+    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     async def thisorthat(self, ctx, *, questions: str):
         if questions.count('|') == 0:
             return await ctx.send(embed=std.getErrorEmbed('Fargen müssen mit `|` getrennt werden'))
@@ -136,6 +139,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
+    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     async def coinflip(self, ctx):
         flip = ['<:coin:718169101821804564>', '<:supporter:703906781859938364>']
         emoji = random.choice(flip)
@@ -240,6 +244,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
+    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     async def pat(self, ctx, user: discord.Member):
         if user == ctx.author:
             return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
@@ -254,6 +259,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
+    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     async def hug(self, ctx, user: discord.Member):
         if user == ctx.author:
             return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
@@ -268,6 +274,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
+    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     async def highfive(self, ctx, user: discord.Member):
         if user == ctx.author:
             return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
@@ -282,6 +289,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
+    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     async def rage(self, ctx):
         gifs: list = self.gifData['rage']
         gif: str = random.choice(gifs)
@@ -304,6 +312,7 @@ class Fun(commands.Cog):
 
     @cmd(name='8ball')
     @checks.isActive('fun')
+    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     async def _8ball(self, ctx, *, Frage: str):
         answers = [
             'Ja.',
