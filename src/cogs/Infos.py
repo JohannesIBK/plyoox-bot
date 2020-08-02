@@ -245,6 +245,10 @@ class Infos(commands.Cog):
     async def dashboard(self, ctx):
         await ctx.send('https://plyoox.net/')
 
+    @cmd()
+    async def vote(self, ctx):
+        await ctx.send(embed=std.getEmbed('Vote [hier](https://top.gg/bot/505433541916622850/vote) für mich :D'))
+
 
 def setup(bot):
     bot.add_cog(Infos(bot))

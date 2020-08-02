@@ -373,5 +373,9 @@
     "\n**__Beispiel:__**",
     " » {p}reminder 15min Plyoox promoten",
     " » {p}reminder 3mon Rechungen bezahlen"
+  ],
+  "vote": [
+    "Vote für den Bot auf der TOP.GG Bot Liste.",
+    "\n**__Command:__** {p}vote"
   ]
 }
