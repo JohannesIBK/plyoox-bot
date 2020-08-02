@@ -177,9 +177,9 @@ class Events(commands.Cog):
             msg = formatMessage(data["joinmessage"], member)
 
             for channelMention in channels:
-                channel = discord.utils.find(lambda c: c.name == channelMention[1:], guild.channels)
-                if channel is not None:
-                    msg = msg.replace(channelMention, channel.mention)
+                channelToMention = discord.utils.find(lambda c: c.name == channelMention[1:], guild.channels)
+                if channelToMention is not None:
+                    msg = msg.replace(channelMention, channelToMention.mention)
 
             if msg is None:
                 return
