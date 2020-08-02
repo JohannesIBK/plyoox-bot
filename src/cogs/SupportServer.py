@@ -148,8 +148,8 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def dev(self, ctx, ID: int, channel: discord.TextChannel, *, text):
-        msg: discord.Message = await channel.fetch_message(ID)
+    async def dev(self, ctx, ID: int, *, text):
+        msg: discord.Message = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
         embed.add_field(name=f'{std.botdev_emoji} Anmekung', value=text)
         await msg.edit(embed=embed)
