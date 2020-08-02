@@ -157,7 +157,7 @@ class Logging(commands.Cog):
         if not data or not data['logging'] or not data['msgdelete']:
             return
 
-        embed = discord.Embed(color=std.normal_color, title = 'LOGGING [DELETE]')
+        embed = discord.Embed(color=std.normal_color, title = 'LOGGING [MESSAGE DELETE]')
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
 
