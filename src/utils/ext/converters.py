@@ -1,5 +1,6 @@
 import time
 
+import discord
 from discord.ext import commands
 
 
@@ -46,3 +47,31 @@ class ParseTime(commands.Converter):
                 raise commands.BadArgument('Deine Eingabe war fehlerhaft.') from err
         else:
             raise commands.BadArgument('Deine Eingabe war fehlerhaft.') from None
+
+
+class ActionReason(commands.Converter):
+    async def convert(self, ctx, argument):
+        reason = f'{ctx.author} (ID: {ctx.author.id}): {argument}'
+
+        if len(reason) > 512:
+            reason_max = 512 - len(reason) - len(argument)
+            raise commands.BadArgument(f'Grund zu lang ({len(argument)}/{reason_max})')
+
+        return reason
+
+
+class BannedMember(commands.Converter):
+    async def convert(self, ctx, argument):
+        if argument.isdigit():
+            memberID = int(argument, base=10)
+            try:
+                return await ctx.guild.fetch_ban(discord.Object(id=memberID))
+            except discord.NotFound:
+                raise commands.BadArgument('Dieser User ist nicht gebannt.') from None
+
+        banList = await ctx.guild.bans()
+        user = discord.utils.find(lambda u: str(u.user) == argument, banList)
+
+        if user is None:
+            raise commands.BadArgument('Dieser User ist nicht gebannt.')
+        return user

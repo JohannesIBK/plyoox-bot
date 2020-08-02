@@ -28,17 +28,6 @@ def can_execute_action(ctx, user, target):
            user.top_role > target.top_role
 
 
-class ActionReason(commands.Converter):
-    async def convert(self, ctx, argument):
-        ret = f'{ctx.author} (ID: {ctx.author.id}): {argument}'
-
-        if len(ret) > 512:
-            reason_max = 512 - len(ret) - len(argument)
-            raise commands.BadArgument(f'Grund zu lang ({len(argument)}/{reason_max})')
-
-        return ret
-
-
 class Moderation(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
@@ -108,7 +97,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_messages=True)
-    async def clear(self, ctx, amount: int, *, reason: ActionReason = 'No Reason'):
+    async def clear(self, ctx, amount: int, *, reason: converters.ActionReason = 'No Reason'):
         if amount > 2000:
             return await ctx.send(embed=std.getErrorEmbed('Es können nicht mehr wie 2000 Nachrichten gelöscht werden.'))
 
@@ -132,7 +121,7 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def ban(self, ctx, user: Union[discord.Member, discord.User], *, reason: ActionReason = 'No Reason'):
+    async def ban(self, ctx, user: Union[discord.Member, discord.User], *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht bannen.'))
 
@@ -152,7 +141,7 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(kick_members=True)
     @checks.isMod()
-    async def kick(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
+    async def kick(self, ctx, user: discord.Member, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht kicken.'))
 
@@ -172,7 +161,7 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def softban(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
+    async def softban(self, ctx, user: discord.Member, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht kicken.'))
 
@@ -192,7 +181,7 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def tempban(self, ctx, user: discord.Member, duration: converters.ParseTime, *, reason: ActionReason = 'No Reason'):
+    async def tempban(self, ctx, user: discord.Member, duration: converters.ParseTime, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht bannen.'))
 
@@ -215,7 +204,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def tempmute(self, ctx, user: discord.Member, duration: converters.ParseTime, *, reason: ActionReason = 'No Reason'):
+    async def tempmute(self, ctx, user: discord.Member, duration: converters.ParseTime, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht muten.'))
 
@@ -243,7 +232,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def mute(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
+    async def mute(self, ctx, user: discord.Member, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht muten.'))
 
@@ -268,7 +257,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def unmute(self, ctx, user: discord.Member, *, reason: ActionReason = 'No Reason'):
+    async def unmute(self, ctx, user: discord.Member, *, reason: converters.ActionReason = 'No Reason'):
         muteRoleID = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', ctx.guild.id)
         muteRole = ctx.guild.get_role(muteRoleID)
         if muteRole is None:
@@ -289,7 +278,7 @@ class Moderation(commands.Cog):
 
     @cmd()
     @checks.isMod()
-    async def warn(self, ctx, user: discord.Member, points: int, *, reason: ActionReason = 'No Reason'):
+    async def warn(self, ctx, user: discord.Member, points: int, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht warnen.'))
 
@@ -327,6 +316,13 @@ class Moderation(commands.Cog):
         await ctx.channel.edit(slowmode_delay=seconds)
         await ctx.message.delete()
         await ctx.send(embed=std.getEmbed(f'Der Slowmode wurde erfolgreich auf `{seconds}` {"Sekunde" if seconds == 1 else "Sekunden"} gesetzt.'), delete_after=5)
+
+    @cmd()
+    @checks.isMod()
+    @commands.bot_has_permissions(ban_members=True)
+    async def unban(self, ctx, user: converters.BannedMember, *, reason: converters.ActionReason = 'No Reason'):
+        await ctx.guild.unban(user.user, reason=reason)
+        await ctx.send(embed=std.getEmbed('Der User wurde erfolgreich entbannt.'))
 
     @cmd()
     @commands.guild_only()
@@ -463,7 +459,7 @@ class Moderation(commands.Cog):
         if args.reason is None:
             return await ctx.send(embed=std.getErrorEmbed('Das Argument `--reason` wird benötigt'))
         else:
-            reason = await ActionReason().convert(ctx, args.reason)
+            reason = await converters.ActionReason().convert(ctx, args.reason)
 
         confirm = await ctx.prompt(f'Das wird **{len(members)} User bannen**. Sicher?')
         if not confirm:
