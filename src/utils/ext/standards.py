@@ -107,11 +107,9 @@ def getBaseModEmbed(reason, user: Union[discord.Member, discord.User] = None, mo
     embed.set_footer(text='Plyoox Moderation', icon_url=avatar_url)
 
     if user is not None:
-        embed.add_field(name=f'{info_emoji} **__User__**',
-                        value=f'{nametag_emoji} {user}\n'
-                              f'{botdev_emoji} {user.id}\n'
-                              f'{mention_emoji} {user.mention}',
-                        inline=False)
+        embed.description = f'{nametag_emoji} {user}\n' \
+                            f'{botdev_emoji} {user.id}\n' \
+                            f'{mention_emoji} {user.mention}' \
 
     if mod is not None:
         embed.add_field(name=f'{supporter_emoji} **__Moderator__**',
