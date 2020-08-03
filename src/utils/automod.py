@@ -65,7 +65,7 @@ async def managePunishment(ctx, punishment, reason):
                                  ctx.guild.id, user.id, 1, unixTime)
             await user.add_roles(muteRole)
 
-    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user, ignoreNoLogging=True)
+    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
 
 
 async def add_points(ctx: context, addPoints, modType, user: discord.Member = None):
