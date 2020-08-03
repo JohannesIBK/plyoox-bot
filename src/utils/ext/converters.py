@@ -51,13 +51,10 @@ class ParseTime(commands.Converter):
 
 class ActionReason(commands.Converter):
     async def convert(self, ctx, argument):
-        reason = f'{ctx.author} (ID: {ctx.author.id}): {argument}'
+        if len(argument) > 512:
+            raise commands.BadArgument(f'Grund zu lang ({len(argument)}/512)')
 
-        if len(reason) > 512:
-            reason_max = 512 - len(reason) - len(argument)
-            raise commands.BadArgument(f'Grund zu lang ({len(argument)}/{reason_max})')
-
-        return reason
+        return argument
 
 
 class BannedMember(commands.Converter):
