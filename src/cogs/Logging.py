@@ -134,8 +134,9 @@ class Logging(commands.Cog):
                               f'{std.botdev_emoji} {user.id}\n',
                         inline=False)
         embed.add_field(name=f'{std.date_emoji} Tage auf dem Server', value=str(since_joined_guild), inline=False)
+        roles = [role.mention for role in user.roles if role.name != '@everyone']
         embed.add_field(name=f'{std.mention_emoji} **__Rollen__**',
-                        value=' '.join(role.mention for role in user.roles if role.name != '@everyone') if len(user.roles) != 1 else '-----')
+                        value=' '.join(roles) if len(roles) != 0 else '-----')
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
 
