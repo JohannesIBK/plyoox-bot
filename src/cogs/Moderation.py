@@ -76,10 +76,10 @@ class Moderation(commands.Cog):
         if user.id == self.bot.user.id:
             return False
 
-        if not isinstance(user, discord.Member):
-            return True
-
         if user.guild_permissions.manage_guild:
+            return False
+
+        if not isinstance(user, discord.Member):
             return True
 
         modRoles: list = await self.bot.db.fetchval('SELECT modroles FROM automod.config WHERE sid = $1', user.guild.id)
