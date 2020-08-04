@@ -45,7 +45,7 @@ class Utilities(commands.Cog):
     async def bin(self, ctx, number: int):
         if number > 10000**10:
             return await ctx.send(embed=std.getErrorEmbed('Die Zahl ist zu groß!'))
-        await ctx.send(embed=std.getEmbed('{number} in binär ist `{str(bin(number))[2:]}`'))
+        await ctx.send(embed=std.getEmbed(f'{number} in binär ist `{str(bin(number))[2:]}`'))
 
     @cmd()
     async def hex(self, ctx, number: int):
