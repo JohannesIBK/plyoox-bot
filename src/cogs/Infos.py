@@ -133,12 +133,12 @@ class Infos(commands.Cog):
                             f'{std.nametag_emoji} **Name:** {user.display_name}\n' \
                             f'{std.mention_emoji} **Erwähnung:** {user.mention}'
         embed.add_field(name=f'{std.date_emoji} **Daten**',
-                        value=f'**__Discord__**\n'
+                        value=f'**__Account__**\n'
                               f'**Erstellt:** {joined_dc}\n'
                               f'**Tage seitdem:** {days_dc}'
                               f'\n\n'
                               f'**__Server__**\n'
-                              f'**Erstellt:** {joined_guild}\n'
+                              f'**Beigetreten:** {joined_guild}\n'
                               f'**Tage seitdem:** {since_joined_guild}\n'
                               f'**Join-Position:** {join_pos}',
                         inline=False)
@@ -147,8 +147,8 @@ class Infos(commands.Cog):
                               f"**Handy:** {self.statusEmoji(user.mobile_status)}\n"
                               f'**Web:** {self.statusEmoji(user.web_status)}\n',
                         inline=False)
-        embed.add_field(name=f'{std.folder_emoji} **Server-Daten**',
-                        value=f'{std.mention_emoji} **Rollen ({len(user.roles) - 1})** {roles}',
+        embed.add_field(name=f'{std.mention_emoji} **Rollen**',
+                        value=f'({len(user.roles) - 1}) {roles}',
                         inline=False)
         # embed.add_field(name='Flags', value=f'{std.botdev_emoji if flags.verified_bot_developer else ""}'
         #                                     f'{std.staff_emoji if flags.staff else ""}'
