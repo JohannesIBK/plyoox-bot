@@ -1,4 +1,5 @@
 import datetime
+import json
 import re
 import time
 
@@ -47,9 +48,9 @@ async def managePunishment(ctx, punishment, reason):
             embed.title = 'AUTOMODERATION [TEMPBAN]'
             userEmbed.title = 'AUTOMODERATION [TEMPBAN]'
             unixTime = time.time() + data['bantime']
-            embed.add_field(name=f'{std.date_emoji} **__Entbann__**', value=datetime.datetime.utcfromtimestamp(unixTime).strftime('%d. %m. %Y um %H:%M:%S'))
-            await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',
-                                 ctx.guild.id, user.id, 0, unixTime)
+            embed.add_field(name=f'{std.date_emoji} **__Entbann__**', value=datetime.datetime.fromtimestamp(unixTime).strftime('%d. %m. %Y um %H:%M:%S'))
+            await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
+                                 ctx.guild.id, user.id, 0, unixTime, json.dumps({'reason': reason}))
             await ctx.guild.ban(user, reason=reason)
     elif punishment == 4:
         if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
@@ -60,10 +61,10 @@ async def managePunishment(ctx, punishment, reason):
             embed.title = 'AUTOMODERATION [TEMPMUTE]'
             userEmbed.title = 'AUTOMODERATION [TEMPMUTE]'
             unixTime = time.time() + data['mutetime']
-            embed.add_field(name=f'{std.date_emoji} **__Entmute__**', value=datetime.datetime.utcfromtimestamp(unixTime).strftime('%d. %m. %Y um %H:%M:%S'))
-            await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)',
-                                 ctx.guild.id, user.id, 1, unixTime)
-            await user.add_roles(muteRole)
+            embed.add_field(name=f'{std.date_emoji} **__Entmute__**', value=datetime.datetime.fromtimestamp(unixTime).strftime('%d. %m. %Y um %H:%M:%S'))
+            await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
+                                 ctx.guild.id, user.id, 1, unixTime, json.dumps({'reason': reason}))
+            await user.add_roles(muteRole, reason=reason)
 
     await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
 
@@ -131,10 +132,11 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
 
         if action == 3:
             if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
-                embed.add_field(name=f'{std.date_emoji} **__Entbann__**', value=datetime.datetime.utcfromtimestamp(unixTimeBan).strftime('%d. %m. %Y um %H:%M:%S'))
+                embed.add_field(name=f'{std.date_emoji} **__Entbann__**', value=datetime.datetime.fromtimestamp(unixTimeBan).strftime('%d. %m. %Y um %H:%M:%S'))
                 embed.title = 'AUTOMODERATION [TEMPBAN]'
-                await punishedUser.ban(reason="Automoderation")
-                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)', ctx.guild.id, punishedUser.id, 0, unixTimeBan)
+                await punishedUser.ban(reason="Automoderation: Punktesystem")
+                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
+                                     ctx.guild.id, punishedUser.id, 0, unixTimeBan, json.dumps({'reason': 'Automoderation: Punktesystem'}))
             else:
                 return
         if action == 4:
@@ -143,11 +145,12 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
                 if muteRole is None:
                     return
 
-                embed.add_field(name=f'{std.date_emoji} **__Entmute__**', value=datetime.datetime.utcfromtimestamp(unixTimeMute).strftime('%d. %m. %Y um %H:%M:%S'))
+                embed.add_field(name=f'{std.date_emoji} **__Entmute__**', value=datetime.datetime.fromtimestamp(unixTimeMute).strftime('%d. %m. %Y um %H:%M:%S'))
                 embed.title = 'AUTOMODERATION [TEMPMUTE]'
                 await punishedUser.add_roles(muteRole, reason='Automoderation')
                 await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
-                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, $3, $4)', ctx.guild.id, punishedUser.id, 1, unixTimeMute)
+                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
+                                     ctx.guild.id, punishedUser.id, 1, unixTimeMute, json.dumps({'reason': 'Automoderation: Punktesystem'}))
             else:
                 return
     await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=punishedUser, ignoreNoLogging=True)
@@ -263,7 +266,6 @@ async def automod(ctx):
         percent = lenCaps / len(msg.content)
         if percent > 0.7:
             data = await bot.db.fetchrow("SELECT points, state, whitelist FROM automod.caps WHERE sid = $1", msg.guild.id)
-
             if not (state := data['state']):
                 return
 
@@ -276,11 +278,11 @@ async def automod(ctx):
             else:
                 return await managePunishment(ctx, state, 'Caps')
 
-    if len(msg.mentions) >= 3:
+    if len(msg.raw_mentions) + len(msg.raw_role_mentions) >= 3:
         if await checks.ignores_automod(ctx):
             return
 
-        lenMentions = sum(not m.bot and m.id != ctx.author.id for m in msg.mentions)
+        lenMentions = sum(m != ctx.author.id for m in msg.raw_mentions) + len(msg.raw_role_mentions)
         data = await bot.db.fetchrow("SELECT state, points, count, whitelist FROM automod.mentions WHERE sid = $1", guild.id)
 
         if not (state := data['state']):
