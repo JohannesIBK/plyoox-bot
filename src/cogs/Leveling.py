@@ -100,6 +100,9 @@ class Leveling(commands.Cog):
     @cmd(aliases=['rank'])
     @checks.isActive('leveling')
     async def level(self, ctx, user: discord.Member = None):
+        if user.bot:
+            return await ctx.send(embed=std.getEmbed('Bots können keine XP erhalten!'))
+
         if user is None:
             user = ctx.author
 
