@@ -110,6 +110,9 @@ class Errors(commands.Cog):
                     await channel.send(embed=embed)
 
                 if self.bot.user.id == 505433541916622850:
+                    if ctx.cog.qualified_name == 'Owner':
+                        return
+
                     channel: discord.TextChannel = self.bot.get_guild(694790265382109224).get_channel(718554837771616316)
                     embed = discord.Embed(color=discord.Color.red())
                     embed.add_field(name=ctx.guild.name,
