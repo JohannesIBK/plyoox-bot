@@ -179,9 +179,9 @@ class Owner(commands.Cog):
 
     @cmd()
     @commands.is_owner()
-    async def setXP(self, ctx, memb: discord.Member, Level: int, XP: int):
-        await ctx.db.execute("UPDATE extra.levels SET xp = $1, lvl = $2, time = $3 WHERE userid = $4 AND guildid = $5",
-                             XP, Level, 0, memb.id, ctx.guild.id)
+    async def setXP(self, ctx, memb: discord.Member, XP: int):
+        await ctx.db.execute("UPDATE extra.levels SET xp = $1, time = 0 WHERE userid = $2 AND guildid = $3",
+                             XP, memb.id, ctx.guild.id)
 
     @cmd()
     @commands.is_owner()
