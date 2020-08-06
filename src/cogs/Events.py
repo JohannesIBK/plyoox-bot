@@ -132,6 +132,10 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         await self.bot.db.execute("DELETE FROM config.guild WHERE sid = $1", guild.id)
+        await self.bot.db.execute("DELETE FROM automod.users WHERE sid = $1", guild.id)
+        await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1", guild.id)
+        await self.bot.db.execute("DELETE FROM extra.commands WHERE sid = $1", guild.id)
+
         await self.bot.redis.delete(guild.id)
 
         bots = len(list(filter(lambda m: m.bot, guild.members)))
