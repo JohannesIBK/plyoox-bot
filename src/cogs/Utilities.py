@@ -28,7 +28,7 @@ class Utilities(commands.Cog):
     @cmd()
     async def invite(self, ctx):
         embed = discord.Embed(title=f"Hol mich {std.ola_emoji}",
-                              url=f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=268528742",
+                              url=f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=822471806",
                               color=std.normal_color)
         await ctx.send(embed=embed)
 
