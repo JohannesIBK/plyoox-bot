@@ -339,6 +339,16 @@ class Fun(commands.Cog):
         ]
         await ctx.send(f'> {Frage}\n{random.choice(answers)}')
 
+    @cmd()
+    @checks.isActive('fun')
+    async def cat(self, ctx):
+        gifs: list = self.gifData['cat']
+        gif: str = random.choice(gifs)
+
+        embed: discord.Embed = discord.Embed(color=std.normal_color)
+        embed.set_image(url=gif)
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(Fun(bot))
