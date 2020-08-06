@@ -21,7 +21,7 @@ class Help(commands.Cog):
             arg: str = command.lower()
 
         modules = dict((key.lower(), [key, value]) for key, value in self.bot.cogs.items()
-                       if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging', 'plyooxsupport'])
+                       if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging', 'plyooxsupport', 'botlists'])
 
 
         if arg == '':
