@@ -92,8 +92,6 @@ class Moderation(commands.Cog):
 
         return True
 
-    # --------------------------------commands--------------------------------
-
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_messages=True)
@@ -175,7 +173,7 @@ class Moderation(commands.Cog):
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await ctx.guild.ban(user, reason=reason, delete_message_days=1)
         await ctx.guild.unban(user)
-        await ctx.send(embed=std.getEmbed('{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gekickt.'), delete_after=5)
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Der User `{user}` wurde erfolgreich für `{reason}` gekickt.'), delete_after=5)
         await ctx.message.delete()
 
     @cmd()
@@ -223,7 +221,7 @@ class Moderation(commands.Cog):
 
         await logs.createEmbedLog(ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
         await user.add_roles(muteRole)
-        await ctx.send(embed=std.getEmbed('{std.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gemuted.'),
+        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Der User `{user}` wurde erfolgreich `{duration}` für `{reason}` gemuted.'),
                        delete_after=5)
         await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time) VALUES ($1, $2, 1, $3)',
                              ctx.guild.id, user.id, duration)
@@ -323,6 +321,32 @@ class Moderation(commands.Cog):
     async def unban(self, ctx, user: converters.BannedMember, *, reason: converters.ActionReason = 'No Reason'):
         await ctx.guild.unban(user.user, reason=reason)
         await ctx.send(embed=std.getEmbed('Der User wurde erfolgreich entbannt.'))
+
+    @cmd()
+    @checks.isMod()
+    async def check(self, ctx, user: Union[converters.BannedMember, discord.User]):
+        if not isinstance(user, discord.User):
+            banData = await ctx.bot.db.fetchrow('SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 0', user.user.id, ctx.guild.id)
+            if banData is None:
+                return await ctx.send(embed=std.getEmbed(f'Dieser User ist derzeit für {user.reason} gebannt.'))
+            else:
+                timestamp = datetime.datetime.fromtimestamp(banData['time']).strftime('%d. %m. %Y um %H:%M:%S')
+                print(banData['time'])
+                await ctx.send(embed=std.getEmbed(f'Dieser User ist bis `{timestamp}` für `{user.reason}`a gebannt.'))
+        else:
+            embed = discord.Embed(color=std.normal_color)
+            muteData = await ctx.bot.db.fetchrow('SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 1', user.id, ctx.guild.id)
+            punishments = await ctx.bot.db.fetch('SELECT * FROM automod.users WHERE uid = $1 AND sid = $2', user.id, ctx.guild.id)
+
+            if muteData:
+                timestamp = datetime.datetime.utcfromtimestamp(muteData['time']).strftime('%d. %m. %Y um %H:%M:%S')
+                embed.description = f'Dieser User ist bis `{timestamp}` für `{muteData["reason"]}` gemutet.'
+            if punishments:
+                punishmentList = [f'{pm["reason"]} [{pm["points"]}]' for pm in punishments]
+                embed.add_field(name=f'Der User hat derzeit `{len(punishments)}` Vergehen', value='\n'.join(punishmentList))
+            else:
+                return await ctx.send(embed=std.getEmbed('Der User hat keine offenen Bestrafungen oder Einträge.'))
+            await ctx.send(embed=embed)
 
     @cmd()
     @commands.guild_only()
