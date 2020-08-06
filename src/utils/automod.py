@@ -77,7 +77,7 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
     else:
         punishedUser: discord.Message = ctx.author
 
-    await ctx.bot.db.fetchrow(
+    await ctx.bot.db.execute(
         'INSERT INTO automod.users (uid, sid, points, time, reason) VALUES ($1, $2, $3, $4, $5)',
         punishedUser.id, ctx.guild.id, addPoints, time.time(), f'Automoderation: {modType}')
 
@@ -188,6 +188,8 @@ async def automod(ctx):
             return
 
         data = await bot.db.fetchrow("SELECT state, whitelist, partner, points FROM automod.invites WHERE sid = $1", guild.id)
+        if not data:
+            return
 
         if not (state := data['state']):
             return
@@ -229,6 +231,8 @@ async def automod(ctx):
             return
 
         data = await bot.db.fetchrow('SELECT points, state, links, whitelist, iswhitelist FROM automod.links WHERE sid = $1', guild.id)
+        if not data:
+            return
 
         if not (state := data['state']):
             return
@@ -266,6 +270,9 @@ async def automod(ctx):
         percent = lenCaps / len(msg.content)
         if percent > 0.7:
             data = await bot.db.fetchrow("SELECT points, state, whitelist FROM automod.caps WHERE sid = $1", msg.guild.id)
+            if not data:
+                return
+
             if not (state := data['state']):
                 return
 
@@ -284,6 +291,8 @@ async def automod(ctx):
 
         lenMentions = sum(m != ctx.author.id for m in msg.raw_mentions) + len(msg.raw_role_mentions)
         data = await bot.db.fetchrow("SELECT state, points, count, whitelist FROM automod.mentions WHERE sid = $1", guild.id)
+        if not data:
+            return
 
         if not (state := data['state']):
             return
