@@ -90,7 +90,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def implement(self, ctx, ID: int):
+    async def publish(self, ctx, ID: int):
         msg: discord.Message = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
         embed.color = discord.Color.blue()
