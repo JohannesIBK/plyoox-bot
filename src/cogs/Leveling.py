@@ -16,8 +16,8 @@ class Leveling(commands.Cog):
 
     @staticmethod
     def _get_xp_from_lvl(lvl: int):
-        xp = 0
-        for _ in range(1, lvl):
+        xp = 100
+        for _ in range(1, lvl + 1):
             xp += Leveling._get_level_xp(_)
         return xp
 
@@ -69,26 +69,39 @@ class Leveling(commands.Cog):
                 "INSERT INTO extra.levels (userid, guildid, xp, time, id) VALUES ($1, $2, $3, $4, $5)",
                 author.id, guild.id, random.randint(15, 25), time.time(), key)
 
-        if time.time() - userData['time'] < 60:
-            return
-
-        await self.bot.db.execute("UPDATE extra.levels SET xp = xp + $1, time = $2 WHERE id = $3", random.randint(15, 25), time.time(), key)
+        # if time.time() - userData['time'] < 60:
+        #     return
+        newXP = random.randint(15, 25)
+        await self.bot.db.execute("UPDATE extra.levels SET xp = xp + $1, time = $2 WHERE id = $3", newXP, time.time(), key)
 
         currentLvl = self._get_level_from_xp(userData['xp'])
-        if currentLvl >= currentLvl + 1:
-            data = await self.bot.db.fetchrow("SELECT channel, roles, message FROM config.leveling WHERE sid = $1", guild.id)
+        nextLvl = self._get_level_from_xp(userData['xp'] + newXP)
+        if currentLvl >= nextLvl:
+            data = await self.bot.db.fetchrow("SELECT channel, roles, message, remove FROM config.leveling WHERE sid = $1", guild.id)
+            if data is None:
+                return
 
             if data['roles']:
-                addLvlRoles = []
-                for role in data['roles']:
-                    if role[0] not in userRoles and role[1] <= currentLvl + 1:
-                        addLvlRoles.append(guild.get_role(role[0]))
-
-                await author.add_roles(*addLvlRoles)
+                roles = data['roles']
+                roles.sort(key = lambda role: role[1])
+                if data['remove']:
+                    role = list(filter(lambda role: role[1] == nextLvl, roles)) or None
+                    removeRoles = list(filter(lambda role: role[1] != nextLvl, roles)) or None
+                    if not role:
+                        return
+                    await author.add_roles(guild.get_role(role[0][0]))
+                    if removeRoles:
+                        await author.remove_roles(*[guild.get_role(role[0]) for role in removeRoles])
+                else:
+                    addLvlRoles = []
+                    for role in data['roles']:
+                        if role[0] not in userRoles and role[1] <= nextLvl:
+                            addLvlRoles.append(guild.get_role(role[0]))
+                    await author.add_roles(*addLvlRoles)
 
             lvlMsg = data['message']
             channel = guild.get_channel(data['channel'])
-            lvlMsg = formatMessage(lvlMsg, author, currentLvl + 1)
+            lvlMsg = formatMessage(lvlMsg, author, nextLvl)
             if lvlMsg is not None:
                 if channel is not None:
                     await channel.send(lvlMsg)
@@ -100,19 +113,22 @@ class Leveling(commands.Cog):
     @cmd(aliases=['rank'])
     @checks.isActive('leveling')
     async def level(self, ctx, user: discord.Member = None):
-        if user.bot:
-            return await ctx.send(embed=std.getEmbed('Bots können keine XP erhalten!'))
-
         if user is None:
             user = ctx.author
+
+        if user.bot:
+            return await ctx.send(embed=std.getEmbed('Bots können keine XP erhalten!'))
 
         userData = await ctx.db.fetchrow("SELECT xp FROM extra.levels WHERE id = $1", f'{user.id}{ctx.guild.id}')
         if not userData:
             return await ctx.send(embed=std.getErrorEmbed('Dieser User hat noch nie etwas geschrieben.'))
 
         lvl = self._get_level_from_xp(userData['xp'])
-        lvlXP = self._get_level_xp(lvl + 1)
-        currentXP = userData['xp'] - self._get_xp_from_lvl(lvl)
+        lvlXP = self._get_level_xp(lvl)
+        if lvl == 0:
+            currentXP = userData['xp']
+        else:
+            currentXP = userData['xp'] - self._get_xp_from_lvl(lvl - 1)
 
         embed = discord.Embed(color=user.color, title=f"**{user.display_name}**")
         embed.set_thumbnail(url=user.avatar_url)
@@ -141,16 +157,19 @@ class Leveling(commands.Cog):
         embed = discord.Embed(color=std.normal_color, title='TOP 10')
         count = 0
 
-        for user in users:
-            lvl = self._get_level_from_xp(user['xp'])
-            lvlXP = self._get_level_xp(lvl + 1)
-            currentXP = user['xp'] - self._get_xp_from_lvl(lvl)
-
-            member: discord.Member = self.bot.get_user(user['userid'])
-            if member is None:
+        for userData in users:
+            if userData['xp'] == 0:
                 continue
 
-            if user['xp'] == 0:
+            lvl = self._get_level_from_xp(userData['xp'])
+            lvlXP = self._get_level_xp(lvl)
+            if lvl == 0:
+                currentXP = userData['xp']
+            else:
+                currentXP = userData['xp'] - self._get_xp_from_lvl(lvl - 1)
+
+            member: discord.Member = self.bot.get_user(userData['userid'])
+            if member is None:
                 continue
 
             count += 1
