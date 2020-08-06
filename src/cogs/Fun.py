@@ -135,7 +135,7 @@ class Fun(commands.Cog):
 
         questionsList = questions.split('|')
         choosen: str = random.choice(questionsList)
-        await ctx.send(f'Ich wähle: `{choosen.strip()}`')
+        await ctx.send(f'Ich wähle: `{choosen.strip()}`', allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @cmd()
     @checks.isActive('fun')
@@ -163,7 +163,7 @@ class Fun(commands.Cog):
     @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     @checks.isActive('fun')
     async def reverse(self, ctx, *, text: str):
-        await ctx.send(text[::-1])
+        await ctx.send(text[::-1], allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @cmd()
     @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
@@ -184,7 +184,7 @@ class Fun(commands.Cog):
                     lastUpper = False
             newText.append(t)
 
-        await ctx.send(' '.join(newText))
+        await ctx.send(' '.join(newText), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @cmd(aliases=['ts'])
     @checks.isActive('fun')
@@ -239,8 +239,7 @@ class Fun(commands.Cog):
         songStr = '\n'.join(f'`{song["by"]}` | `{song["song"]}` | `{song["year"]}`' for song in songs)
         if songStr == '':
             songStr = 'Keine Songs gefunden :('
-        await ctx.send(embed=discord.Embed(color=std.normal_color,
-                                           description=songStr[:2000]))
+        await ctx.send(embed=std.getEmbed(songStr[:2000]))
 
     @cmd()
     @checks.isActive('fun')
@@ -337,7 +336,7 @@ class Fun(commands.Cog):
             'Meine Antwort ist nein.',
             'Ich bin mir unsicher.'
         ]
-        await ctx.send(f'> {Frage}\n{random.choice(answers)}')
+        await ctx.send(f'> {Frage}\n{random.choice(answers)}', allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @cmd()
     @checks.isActive('fun')
