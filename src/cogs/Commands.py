@@ -32,7 +32,7 @@ class Commands(commands.Cog):
             return
 
         content = custom_command['content']
-        await ctx.send(content)
+        await ctx.send(content, allowed_mentions=discord.AllowedMentions(everyone=True, roles=True, users=True))
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
