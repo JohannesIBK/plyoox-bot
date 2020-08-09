@@ -12,7 +12,7 @@ from utils.ext.cmds import cmd
 class Help(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
-        self.helpText = json.load(codecs.open(r'others/help_de.json', encoding='utf-8'))
+        self.helpText = json.load(codecs.open(r'other/help_de.json', encoding='utf-8'))
 
     @cmd()
     async def help(self, ctx, command = None):

@@ -13,11 +13,11 @@ def close():
 
 
 if sys.platform == "win32":
-    with open(r"others/keys/testbot.env") as f:
+    with open(r"utils/keys/testbot.env") as f:
         token = f.read()
     print("\n\nStarting Test...\n")
 else:
-    with open(r"others/keys/bot.env") as f:
+    with open(r"utils/keys/bot.env") as f:
         token = f.read()
     print("\n\nBot startet...\n")
 

@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 import main
-from others import db
+from other import db
 from utils.ext import standards as std
 from utils.ext.formatter import formatMessage
 

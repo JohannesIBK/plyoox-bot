@@ -10,7 +10,7 @@ import asyncpg
 import discord
 from discord.ext import commands
 
-from others import db
+from other import db
 from utils.ext import context
 
 # ---------------------------------------------------------------

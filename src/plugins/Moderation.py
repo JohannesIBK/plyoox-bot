@@ -10,10 +10,9 @@ import discord
 from discord.ext import commands, tasks
 
 import main
-from others import logs
 from utils import automod
 from utils.automod import automod, add_points
-from utils.ext import checks, standards as std, context, converters
+from utils.ext import checks, standards as std, context, converters, logs
 from utils.ext.cmds import cmd
 
 

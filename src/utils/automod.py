@@ -5,8 +5,7 @@ import time
 
 import discord
 
-from others import logs
-from utils.ext import standards as std, checks, context
+from utils.ext import standards as std, checks, context, logs
 
 DISCORD_INVITE = '(discord(app\.com\/invite|\.com(\/invite)?|\.gg)\/?[a-zA-Z0-9-]{2,32})'
 EXTERNAL_LINK = '((https?:\/\/(www\.)?|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})'

@@ -192,7 +192,7 @@ class Owner(commands.Cog):
     @cmd()
     @commands.is_owner()
     async def reloadLang(self, ctx):
-        self.bot.get_cog('Help').helpText = json.load(codecs.open(r'others/help_de.json', encoding='utf-8'))
+        self.bot.get_cog('Help').helpText = json.load(codecs.open(r'other/help_de.json', encoding='utf-8'))
         await ctx.send(embed=std.getEmbed('Der Help-Text wurde reloadet.'))
 
     @cmd()
@@ -229,14 +229,14 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def maintenance(self, ctx):
         if ctx.invoked_subcommand is None:
-            with open('others/simpleStorage.json', 'r') as file:
+            with open('other/simpleStorage.json', 'r') as file:
                 data = json.load(file)
 
             await ctx.send(embed=std.getEmbed(f'Maintenance: {data["maintenance"]}'))
 
     @maintenance.command()
     async def activate(self, ctx):
-        with open('others/simpleStorage.json', 'r+') as file:
+        with open('other/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
             data['maintenance'] = True
@@ -252,7 +252,7 @@ class Owner(commands.Cog):
 
     @maintenance.command()
     async def deactivate(self, ctx):
-        with open('others/simpleStorage.json', 'r+') as file:
+        with open('other/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
             data['maintenance'] = False

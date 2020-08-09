@@ -25,7 +25,7 @@ class PlyooxSupport(commands.Cog):
 
     @suggestion.command()
     async def accept(self, ctx, ID: int):
-        with open('others/simpleStorage.json', 'r+') as file:
+        with open('other/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
             data['suggestion'] += 1
@@ -47,7 +47,7 @@ class PlyooxSupport(commands.Cog):
 
     @suggestion.command()
     async def deny(self, ctx, ID: int):
-        with open('others/simpleStorage.json', 'r+') as file:
+        with open('other/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
             data['suggestion'] += 1
@@ -69,7 +69,7 @@ class PlyooxSupport(commands.Cog):
 
     @suggestion.command()
     async def wait(self, ctx, ID: int):
-        with open('others/simpleStorage.json', 'r+') as file:
+        with open('other/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
             data['suggestion'] += 1
