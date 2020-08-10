@@ -23,20 +23,20 @@ logger.addHandler(handler)
 # ---------------------------------------------------------------
 
 cogs = [
-    "cogs.Owner",
-    "cogs.Moderation",
-    "cogs.Servermoderation",
-    "cogs.Help",
-    "cogs.Leveling",
-    "cogs.Utilities",
-    "cogs.Commands",
-    # "cogs.Errors",
-    "cogs.Fun",
-    "cogs.Events",
-    "cogs.Infos",
-    "cogs.Logging",
-    "cogs.Timers",
-    'cogs.SupportServer'
+    "plugins.Owner",
+    "plugins.Moderation",
+    "plugins.Servermoderation",
+    "plugins.Help",
+    "plugins.Leveling",
+    "plugins.Utilities",
+    "plugins.Commands",
+    # "plugins.Errors",
+    "plugins.Fun",
+    "plugins.Events",
+    "plugins.Infos",
+    "plugins.Logging",
+    "plugins.Timers",
+    'plugins.SupportServer'
 ]
 
 

@@ -17,7 +17,7 @@ class Arguments(argparse.ArgumentParser):
 
 
 class Fun(commands.Cog):
-    with open('./other/gif_links.json', encoding='utf-8') as gifs:
+    with open('utils/json/gif_links.json', encoding='utf-8') as gifs:
         gifData = json.load(gifs)
 
     def __init__(self, bot: main.Plyoox):
@@ -206,7 +206,7 @@ class Fun(commands.Cog):
             return await ctx.send(str(e))
 
 
-        with open('other/songs.json') as songFile:
+        with open('utils/json/songs.json') as songFile:
             songs = json.load(songFile)
 
         if lang := argsParsed.lang:

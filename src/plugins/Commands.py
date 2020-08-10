@@ -19,15 +19,10 @@ class Commands(commands.Cog):
                 command = ctx.message.content.split(" ")[1]
             except IndexError:
                 return
-
         else:
-            command: str = msg[0].replace(await self.bot.get(ctx.guild.id, 'prefix'), '')
-
-        if self.bot.get_command(command) is not None:
-            return
+            command: str = msg[0].replace(ctx.prefix, '')
 
         custom_command = await ctx.db.fetchrow("SELECT * FROM extra.commands WHERE sid = $1 AND name = $2", ctx.guild.id, command)
-
         if custom_command is None:
             return
 
@@ -45,10 +40,13 @@ class Commands(commands.Cog):
         if not isinstance(msg.author, discord.Member):
             return
 
+        ctx = await self.bot.get_context(msg)
+        if ctx.command:
+            return
+
         prefixes = [f'<@!{self.bot.user.id}> ', f'<@{self.bot.user.id}> ', await self.bot.get(msg.guild.id, 'prefix')]
 
         if msg.content.startswith(tuple(prefixes)):
-            ctx = await self.bot.get_context(msg)
             await self.command_list(ctx)
 
     @grp(name="command")
