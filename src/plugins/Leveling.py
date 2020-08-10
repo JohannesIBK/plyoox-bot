@@ -69,8 +69,9 @@ class Leveling(commands.Cog):
                 "INSERT INTO extra.levels (userid, guildid, xp, time, id) VALUES ($1, $2, $3, $4, $5)",
                 author.id, guild.id, random.randint(15, 25), time.time(), key)
 
-        # if time.time() - userData['time'] < 60:
-        #     return
+        if time.time() - userData['time'] < 60:
+            return
+
         newXP = random.randint(15, 25)
         await self.bot.db.execute("UPDATE extra.levels SET xp = xp + $1, time = $2 WHERE id = $3", newXP, time.time(), key)
 
