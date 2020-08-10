@@ -262,7 +262,7 @@ class Moderation(commands.Cog):
 
         if muteRole in user.roles:
             await user.remove_roles(muteRole, reason=reason)
-            await ctx.send(embed=std.getEmbed('Der User wurde erfolgreich entmutet.'))
+            await ctx.send(embed=std.getEmbed('Der User wurde erfolgreich entmutet.'), delete_after=5)
 
             await ctx.message.delete()
             embed = std.getBaseModEmbed(reason, user=user, mod=ctx.author)
