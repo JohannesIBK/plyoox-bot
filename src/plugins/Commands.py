@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import context, checks, standards
+from utils.ext import checks, standards
 from utils.ext.cmds import grp
 
 
@@ -48,7 +48,7 @@ class Commands(commands.Cog):
         prefixes = [f'<@!{self.bot.user.id}> ', f'<@{self.bot.user.id}> ', await self.bot.get(msg.guild.id, 'prefix')]
 
         if msg.content.startswith(tuple(prefixes)):
-            ctx = await self.bot.get_context(msg, cls=context.Context)
+            ctx = await self.bot.get_context(msg)
             await self.command_list(ctx)
 
     @grp(name="command")

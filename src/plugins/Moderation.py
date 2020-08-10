@@ -12,7 +12,7 @@ from discord.ext import commands, tasks
 import main
 from utils import automod
 from utils.automod import automod, add_points
-from utils.ext import checks, standards as std, context, converters, logs
+from utils.ext import checks, standards as std, converters, logs
 from utils.ext.cmds import cmd
 
 
@@ -44,7 +44,7 @@ class Moderation(commands.Cog):
         if not isinstance(msg.author, discord.Member):
             return
 
-        ctx = await self.bot.get_context(msg, cls=context.Context)
+        ctx = await self.bot.get_context(msg)
         await automod(ctx)
 
     @commands.Cog.listener()
@@ -65,7 +65,7 @@ class Moderation(commands.Cog):
         if before.content == after.content:
             return
 
-        ctx = await self.bot.get_context(after, cls=context.Context)
+        ctx = await self.bot.get_context(after)
         await automod(ctx)
 
         if (after.edited_at - before.created_at).seconds <= 30:

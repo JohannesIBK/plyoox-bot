@@ -99,8 +99,11 @@ class Plyoox(commands.AutoShardedBot):
         print(f'Server: {len(self.guilds)} [{self.shard_count}]')
         print(f'{len(cogs)} Cogs loaded.')
 
+    async def get_context(self, message, *, cls = context.Context):
+        return await super().get_context(message, cls=cls)
+
     async def process_commands(self, message: discord.Message):
-        ctx = await self.get_context(message, cls=context.Context)
+        ctx = await self.get_context(message)
 
         if ctx.command is None:
             return
