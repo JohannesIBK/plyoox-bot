@@ -65,7 +65,7 @@ async def managePunishment(ctx, punishment, reason):
                                  ctx.guild.id, user.id, 1, unixTime, json.dumps({'reason': reason}))
             await user.add_roles(muteRole, reason=reason)
 
-    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user)
+    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user, ignoreMMSG=True)
 
 
 async def add_points(ctx: context, addPoints, modType, user: discord.Member = None):
@@ -152,7 +152,7 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
                                      ctx.guild.id, punishedUser.id, 1, unixTimeMute, json.dumps({'reason': 'Automoderation: Punktesystem'}))
             else:
                 return
-    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=punishedUser, ignoreNoLogging=True)
+    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=punishedUser, ignoreNoLogging=True, ignoreMMSG=True)
 
 
 async def automod(ctx):
