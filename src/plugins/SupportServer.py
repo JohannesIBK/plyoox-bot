@@ -151,7 +151,7 @@ class PlyooxSupport(commands.Cog):
     async def dev(self, ctx, ID: int, *, text):
         msg: discord.Message = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
-        embed.add_field(name=f'{std.botdev_emoji} Anmekung', value=text)
+        embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=text)
         await msg.edit(embed=embed)
         await ctx.message.delete()
 
