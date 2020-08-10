@@ -99,6 +99,7 @@ class Logging(commands.Cog):
 
         days_dc = (datetime.datetime.now() - user.created_at).days
         embed = discord.Embed(color=std.normal_color, title='LOGGING [JOIN]')
+        embed.set_thumbnail(url=user.avatar_url)
         embed.timestamp = datetime.datetime.utcnow()
         embed.description = f'{std.inbox_emoji} {user} ist dem Discord gejoint.'
         embed.add_field(name=f'{std.info_emoji} **__User__**',
@@ -127,6 +128,7 @@ class Logging(commands.Cog):
 
         since_joined_guild = (datetime.datetime.now() - user.joined_at).days
         embed = discord.Embed(color=std.normal_color, title = 'LOGGING [LEAVE]')
+        embed.set_thumbnail(url=user.avatar_url)
         embed.timestamp = datetime.datetime.utcnow()
         embed.description = f'{std.outbox_emoji} {user} hat den Discord verlassen.'
         embed.add_field(name=f'{std.info_emoji} **__User__**',
@@ -161,7 +163,6 @@ class Logging(commands.Cog):
         embed = discord.Embed(color=std.normal_color, title = 'LOGGING [MESSAGE DELETE]')
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
-
         embed.add_field(name=f'{std.info_emoji} **__Author__**',
                         value=f'{std.nametag_emoji} {msg.author}\n'
                               f'{std.botdev_emoji} {msg.author.id}\n'
@@ -240,6 +241,7 @@ class Logging(commands.Cog):
                 return
 
             embed = discord.Embed(color=std.normal_color, title='MEMBER [NAME UPDATE]')
+            embed.set_thumbnail(url=after.avatar_url)
             embed.timestamp = datetime.datetime.utcnow()
             embed.add_field(name=f'{std.info_emoji} **__User__**',
                             value=f'{std.nametag_emoji} {before}\n'
@@ -269,6 +271,7 @@ class Logging(commands.Cog):
                 return
 
             embed = discord.Embed(color=std.normal_color, title='MEMBER [ROLE UPDATE]')
+            embed.set_thumbnail(url=after.avatar_url)
             embed.timestamp = datetime.datetime.utcnow()
             embed.add_field(name=f'{std.info_emoji} **__User__**',
                             value=f'{std.nametag_emoji} {before}\n'
