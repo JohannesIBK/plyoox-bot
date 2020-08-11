@@ -51,15 +51,15 @@ class Leveling(commands.Cog):
 
         author: discord.Member = msg.author
         guild: discord.Guild = msg.guild
-        key: str = f'{author.id}{guild.id}'
-        userRoles: list = [role.id for role in author.roles]
+        key = f'{author.id}{guild.id}'
+        userRoles = [role.id for role in author.roles]
 
-        noXPChannels: list = await self.bot.get(guild.id, 'noxpchannels')
+        noXPChannels = await self.bot.get(guild.id, 'noxpchannels')
         if noXPChannels:
             if msg.channel.id in noXPChannels:
                 return
 
-        noXPRole: list = await self.bot.get(guild.id, 'noxprole')
+        noXPRole = await self.bot.get(guild.id, 'noxprole')
         if noXPRole in userRoles:
             return
 
