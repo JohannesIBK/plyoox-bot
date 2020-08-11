@@ -60,7 +60,7 @@ async def setGame(bot):
         await asyncio.sleep(3600)
 
 
-class Plyoox(commands.AutoShardedBot):
+class Plyoox(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix=getPrefix,
                          case_insensitive=True,
