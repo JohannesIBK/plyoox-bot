@@ -330,7 +330,6 @@ class Moderation(commands.Cog):
                 return await ctx.send(embed=std.getEmbed(f'Dieser User ist derzeit für {user.reason} gebannt.'))
             else:
                 timestamp = datetime.datetime.fromtimestamp(banData['time']).strftime('%d. %m. %Y um %H:%M:%S')
-                print(banData['time'])
                 await ctx.send(embed=std.getEmbed(f'Dieser User ist bis `{timestamp}` für `{user.reason}`a gebannt.'))
         else:
             embed = discord.Embed(color=std.normal_color)
