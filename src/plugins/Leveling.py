@@ -69,40 +69,44 @@ class Leveling(commands.Cog):
                 "INSERT INTO extra.levels (userid, guildid, xp, time, id) VALUES ($1, $2, $3, $4, $5)",
                 author.id, guild.id, random.randint(15, 25), time.time(), key)
 
-        if time.time() - userData['time'] < 60:
-            return
+        # if time.time() - userData['time'] < 60:
+        #     return
 
         newXP = random.randint(15, 25)
         await self.bot.db.execute("UPDATE extra.levels SET xp = xp + $1, time = $2 WHERE id = $3", newXP, time.time(), key)
 
-        currentLvl = self._get_level_from_xp(userData['xp'])
-        nextLvl = self._get_level_from_xp(userData['xp'] + newXP)
-        if currentLvl >= nextLvl:
+        bevorLvl = self._get_level_from_xp(userData['xp'])
+        currentLvl = self._get_level_from_xp(userData['xp'] + newXP)
+        if currentLvl > bevorLvl:
+            addRole = None
             data = await self.bot.db.fetchrow("SELECT channel, roles, message, remove FROM config.leveling WHERE sid = $1", guild.id)
             if data is None:
                 return
 
             if data['roles']:
                 roles = data['roles']
+                addRoleID = list(filter(lambda role: role[1] == currentLvl, roles))
+                if addRoleID:
+                    addRole = guild.get_role(addRoleID[0][0])
                 roles.sort(key = lambda role: role[1])
                 if data['remove']:
-                    role = list(filter(lambda role: role[1] == nextLvl, roles)) or None
-                    removeRoles = list(filter(lambda role: role[1] != nextLvl, roles)) or None
-                    if not role:
+                    if not addRole:
                         return
-                    await author.add_roles(guild.get_role(role[0][0]))
+
+                    removeRoles = list(filter(lambda role: role[1] != currentLvl, roles)) or None
+                    await author.add_roles(addRole)
                     if removeRoles:
                         await author.remove_roles(*[guild.get_role(role[0]) for role in removeRoles])
                 else:
                     addLvlRoles = []
                     for role in data['roles']:
-                        if role[0] not in userRoles and role[1] <= nextLvl:
+                        if role[0] not in userRoles and role[1] <= currentLvl:
                             addLvlRoles.append(guild.get_role(role[0]))
                     await author.add_roles(*addLvlRoles)
 
             lvlMsg = data['message']
             channel = guild.get_channel(data['channel'])
-            lvlMsg = formatMessage(lvlMsg, author, nextLvl)
+            lvlMsg = formatMessage(lvlMsg, author, currentLvl, addRole)
             if lvlMsg is not None:
                 if channel is not None:
                     await channel.send(lvlMsg)

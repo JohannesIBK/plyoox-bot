@@ -1,6 +1,9 @@
 import discord
 
 
+class NoRoleReached(Exception):
+    pass
+
 class __Member:
     def __init__(self, member: discord.Member):
         self.name = member.name
@@ -26,15 +29,40 @@ class __Guild:
         return self.name
 
 
-def formatMessage(msg: str, user: discord.Member, lvl = None) -> str or None:
+class __Level:
+    def __init__(self, lvl, role: discord.Role):
+        self.role = role
+        self.lvl = str(lvl)
+
+    def __str__(self):
+        return self.lvl
+
+    @property
+    def role(self):
+        if self._role:
+            return self._role.mention
+        raise NoRoleReached
+
+    @role.setter
+    def role(self, value):
+        self._role = value
+
+    @property
+    def rolelvl(self):
+        if self._role:
+            return self._role.mention
+        return self.lvl
+
+
+def formatMessage(msg: str, user: discord.Member, lvl = None, role: discord.Role = None) -> str or None:
     guild = __Guild(user.guild)
     member = __Member(user)
+    level = __Level(lvl, role)
 
     try:
         if lvl is not None:
-            return msg.format(guild=guild, user=member, lvl=lvl)
+            return msg.format(guild=guild, user=member, lvl=level)
         else:
             return msg.format(guild=guild, user=member)
-
     except:
         return None
