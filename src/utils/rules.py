@@ -1,5 +1,5 @@
 rules = """
-__***REGELWERK***__:scroll:
+__***REGELWERK***__ :scroll:
 
  ```ml
 Die Regeln gelten für dein ganzes Erscheinen, also Chatnachrichten, Name, Avatar, Spieleanzeige oder anderes.
