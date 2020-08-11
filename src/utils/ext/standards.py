@@ -69,6 +69,7 @@ error_color = 0xff0000
 normal_color = 0x7289DA
 help_color = 0x38b3e8
 tag_color = 0x7adeaa
+plyoox_color = 0x24c689
 
 avatar_url = 'https://cdn.discordapp.com/avatars/505433541916622850/ccc8ba894dd4188ecf37de0a53430f22.webp?size=1024'
 
