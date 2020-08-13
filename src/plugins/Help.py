@@ -25,17 +25,26 @@ class Help(commands.Cog):
 
 
         if arg == '':
-            prefix = await ctx.db.fetchval('SELECT prefix FROM config.guild WHERE sid = $1', ctx.guild.id)
-            if prefix is None:
-                prefix = '@Plyoox#1355'
+            prefix = '@Plyoox#1355'
+
+            data = await ctx.db.fetchrow(
+                'SELECT c.prefix, m.* FROM config.guild c INNER JOIN config.modules m ON c.sid = m.sid WHERE c.sid = $1',
+                ctx.guild.id)
+            if data['prefix'] is not None:
+                prefix = data['prefix']
 
             embed: discord.Embed = discord.Embed(title=f'{standards.question_emoji} Command Hilfe',
                                                  description=f'[Dashboard](https://plyoox.net/) | [Support](https://discordapp.com/invite/5qPPvQe)\nPrefix: `{prefix}`',
                                                  color=standards.help_color)
             embed.set_footer(icon_url=ctx.me.avatar_url)
+            disabledModules = []
 
             for module in modules:
                 cog = modules[module]
+                if data.get(module) is not None and data.get(module) == False:
+                    disabledModules.append(cog[0])
+                    continue
+
 
                 if ctx.guild.id != 665609018793787422 and module == "briiaande":
                     continue
@@ -45,6 +54,11 @@ class Help(commands.Cog):
                 embed.add_field(name=cog[0], value=f'> {", ".join(f"`{module_cmd}`" for module_cmd in cmds)}', inline=False)
                 embed.set_footer(text=f"{ctx.prefix}help <Modul>",
                                  icon_url=ctx.me.avatar_url)
+
+            if disabledModules:
+                embed.add_field(name='Deaktivierte Module',
+                                value=' '.join(f'`{module}`' for module in disabledModules))
+
             await ctx.send(embed=embed)
 
         elif arg in self.bot.get_all_commands:
