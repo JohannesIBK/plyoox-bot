@@ -1,24 +1,38 @@
 import discord
 from discord.ext import commands
+
 from utils.ext import context
 
 
-def isMod():
+def isMod(*, helper: bool = False):
     async def predicate(ctx):
         perms = ctx.author.permissions_in(ctx.channel)
         if ctx.message.author.id == 263347878150406144 or perms.manage_guild:
             return True
 
-        modRoles = await ctx.bot.db.fetchval('SELECT modroles FROM automod.config WHERE sid = $1', ctx.guild.id)
-        if not modRoles:
-            raise commands.MissingPermissions(["nr"])
+        if helper:
+            data = await ctx.bot.db.fetchrow('SELECT modroles, helperroles FROM automod.config WHERE sid = $1', ctx.guild.id)
+            if data is None:
+                return
+            roles = []
+            if data['modroles'] is not None:
+                roles.extend(data['modroles'])
+            if data['helperroles'] is not None:
+                roles.extend(data['helperroles'])
+        else:
+            roles = await ctx.bot.db.fetchval('SELECT modroles FROM automod.config WHERE sid = $1', ctx.guild.id)
+        if not roles:
+            if helper:
+                raise commands.MissingPermissions(['Du musst ein Moderator oder Helfer sein, um den Command auszuführen'])
+            raise commands.MissingPermissions(['Du musst ein Moderator sein, um den Command auszuführen'])
 
         userRoles = [role.id for role in ctx.author.roles]
-
-        if any(role_u in modRoles for role_u in userRoles):
+        if any(role in roles for role in userRoles):
             return True
         else:
-            raise commands.MissingPermissions(['nr'])
+            if helper:
+                raise commands.MissingPermissions(['Du musst ein Moderator oder Helfer sein, um den Command auszuführen'])
+            raise commands.MissingPermissions(['Du musst ein Moderator sein, um den Command auszuführen'])
 
     return commands.check(predicate)
 
@@ -26,7 +40,6 @@ def isMod():
 def isAdmin():
     async def predicate(ctx):
         user = ctx.author
-
         if user.id == ctx.bot.owner_id or user.guild_permissions.administrator:
             return True
         else:
@@ -41,12 +54,9 @@ def hasPerms(**perms):
             return True
 
         permissions = ctx.channel.permissions_for(ctx.author)
-
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm, None) != value]
-
         if not missing:
             return True
-
         raise commands.MissingPermissions(missing)
 
     return commands.check(predicate)
@@ -61,7 +71,8 @@ def isBriiaan():
 
 def isActive(modul):
     async def predicate(ctx):
-        status = await ctx.db.fetchrow("SELECT fun, leveling, automod, welcomer, logging FROM config.modules WHERE sid = $1", ctx.guild.id)
+        status = await ctx.db.fetchrow(
+            "SELECT fun, leveling, timers FROM config.modules WHERE sid = $1", ctx.guild.id)
         modul_bool = status[modul]
         if modul_bool:
             return True
@@ -86,17 +97,16 @@ async def ignores_automod(ctx: context):
     if ctx.author.permissions_in(ctx.channel).manage_messages:
         return True
 
-    rolesData = await ctx.db.fetchrow('SELECT modroles, ignoredroles FROM automod.config WHERE sid = $1', ctx.guild.id)
-    roles = []
-
-    if rolesData is None:
+    data = await ctx.db.fetchrow('SELECT modroles, ignoredroles FROM automod.config WHERE sid = $1', ctx.guild.id)
+    if data is None:
         return False
 
-    if (ignoredRoles := rolesData['ignoredroles']) is not None:
-        roles.extend(ignoredRoles)
+    roles = []
+    if data['ignoredroles'] is not None:
+        roles.extend(data['ignoredroles'])
 
-    if (modRoles := rolesData['modroles']) is not None:
-        roles.extend(modRoles)
+    if data['modroles'] is not None:
+        roles.extend(data['modroles'] )
 
     authorRoles = [role.id for role in ctx.author.roles]
     if any(roleID in roles for roleID in authorRoles):

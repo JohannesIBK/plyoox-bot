@@ -92,7 +92,7 @@ class Moderation(commands.Cog):
         return True
 
     @cmd()
-    @checks.isMod()
+    @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_messages=True)
     async def clear(self, ctx, amount: int, *, reason: converters.ActionReason = 'No Reason'):
         if amount > 2000:
@@ -137,7 +137,7 @@ class Moderation(commands.Cog):
 
     @cmd()
     @commands.bot_has_permissions(kick_members=True)
-    @checks.isMod()
+    @checks.isMod(helper=True)
     async def kick(self, ctx, user: discord.Member, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht kicken.'))
@@ -199,7 +199,7 @@ class Moderation(commands.Cog):
         await ctx.message.delete()
 
     @cmd()
-    @checks.isMod()
+    @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_roles=True)
     async def tempmute(self, ctx, user: discord.Member, duration: converters.ParseTime, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
@@ -274,7 +274,7 @@ class Moderation(commands.Cog):
         await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = 1", ctx.guild.id, user.id)
 
     @cmd()
-    @checks.isMod()
+    @checks.isMod(helper=True)
     async def warn(self, ctx, user: discord.Member, points: int, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.send(embed=std.getErrorEmbed('Du kannst diesen User nicht warnen.'))
