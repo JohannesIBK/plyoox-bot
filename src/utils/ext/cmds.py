@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 
-class commandsExtension(commands.Command):
+class CommandsExtension(commands.Command):
     def __init__(self, func, **kwargs):
         super().__init__(func, **kwargs)
 
@@ -14,7 +14,7 @@ class commandsExtension(commands.Command):
 
 
 def cmd(*args, **kwargs):
-    return commands.command(*args, **kwargs, cls=commandsExtension)
+    return commands.command(*args, **kwargs, cls=CommandsExtension)
 
 
 class GroupExtension(commands.Group):
