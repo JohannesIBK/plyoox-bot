@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards
+from utils.ext import standards as std
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class Errors(commands.Cog):
         else:
             helpText = [text]
 
-        embed: discord.Embed = discord.Embed(color=standards.error_color, title=f'**__Command Help__**',
+        embed: discord.Embed = discord.Embed(color=std.error_color, title=f'**__Command Help__**',
                                              description="\n".join(helpText))
         return embed
 
@@ -42,40 +42,25 @@ class Errors(commands.Cog):
             await ctx.send(embed=embed)
 
         elif isinstance(error, commands.BotMissingPermissions):
-            missing_perms_str = ""
-            for perm in error.missing_perms:
-                missing_perms_str += f' {perm},'
-
-            await ctx.send(embed=standards.getErrorEmbed(f'Dem Bot fehlt die Berechtigung(en) {missing_perms_str[:-1]}'))
+            await ctx.send(embed=std.getErrorEmbed(f'Dem Bot fehlt die Berechtigung(en) {" ".join(error.missing_perms)}'))
 
         elif isinstance(error, commands.MissingPermissions):
-            if error.missing_perms[0] == "nr":
-                await ctx.send(embed=standards.getErrorEmbed('Du musst ein Moderator sein, um den Command auszuführen.'))
-
-            else:
-                missing_perms_str = ""
-                for perm in error.missing_perms:
-                    missing_perms_str += f'{perm}, '
-
-                await ctx.send(embed=standards.getErrorEmbed(f'Dir fehlen die Berechtigungen `{missing_perms_str[:-2]}`.'))
+            await ctx.send(embed=std.getErrorEmbed(f'Dir fehlen die Berechtigung(en) `{" ".join(error.missing_perms)}`.'))
 
         elif isinstance(error, commands.CommandNotFound):
             pass
 
         elif isinstance(error, commands.CommandOnCooldown):
-            retryAfter = error.retry_after
             cooldown = error.cooldown
-            rate = cooldown.rate
-            per = cooldown.per
-
-            await ctx.send(embed=standards.getErrorEmbed(f'Dieser Command hat einen Cooldown. Du kannst ihn nur {rate} pro {per}s benutzen.\n'
-                                                         f'Versuche es in {round(retryAfter)}s erneut.'))
+            await ctx.send(embed=std.getErrorEmbed(f'Dieser Command hat einen Cooldown. '
+                                                   f'Du kannst ihn nur {cooldown.rate} pro {cooldown.per}s benutzen.\n'
+                                                   f'Versuche es in {round(error.retry_after)}s erneut.'))
 
         elif isinstance(error, commands.NotOwner):
-            await ctx.send(embed=standards.getErrorEmbed('Diesen Command kann nur der Owner des Bots ausführen.'))
+            await ctx.send(embed=std.getErrorEmbed('Diesen Command kann nur der Owner des Bots ausführen.'))
 
         elif isinstance(error, commands.DisabledCommand):
-            await ctx.send(embed=standards.getErrorEmbed('Dieser Command ist auf diesem Server deaktiviert.'))
+            await ctx.send(embed=std.getErrorEmbed('Dieser Command ist auf diesem Server deaktiviert.'))
 
         elif isinstance(error, commands.CheckFailure):
             pass
@@ -84,18 +69,18 @@ class Errors(commands.Cog):
             error = error.__cause__
             if isinstance(error, discord.Forbidden):
                 try:
-                    await ctx.send(embed=standards.getErrorEmbed('Der Bot hat keine Berechtigung um den Command auszuführen.'))
+                    await ctx.send(embed=std.getErrorEmbed('Der Bot hat keine Berechtigung um den Command auszuführen.'))
                 except:
                     pass
 
             elif isinstance(error, asyncio.TimeoutError):
-                await ctx.send(embed=standards.getErrorEmbed('Dein Report wurde abgebrochen, da du zu lange gebraucht hast.'))
+                await ctx.send(embed=std.getErrorEmbed('Dein Report wurde abgebrochen, da du zu lange gebraucht hast.'))
 
             elif isinstance(error, TypeError):
-                await ctx.send(embed=standards.getErrorEmbed('Ein Fehler bei deiner Eingabe ist aufgetreten. Bitte überprüfe deine Eingabe.'))
+                await ctx.send(embed=std.getErrorEmbed('Ein Fehler bei deiner Eingabe ist aufgetreten. Bitte überprüfe deine Eingabe.'))
 
             else:
-                userEmbed = discord.Embed(color=standards.error_color, title=f"{standards.error_emoji} **__ERROR__**")
+                userEmbed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")
                 userEmbed.add_field(name="Original Error", value=f'{error}')
                 try:
                     await ctx.send(embed=userEmbed)
