@@ -154,9 +154,16 @@ class Timers(commands.Cog):
                                                    description=f'**Gewinn:** {win}\n**Gewinner:** {winnerMention}.\nID: {message.id}'))
 
     @grp(case_insensitive=True)
-    @checks.isMod()
+    @checks.isActive('timers')
     async def giveaway(self, ctx):
-        pass
+        if not ctx.author.guild_permissions.administrator:
+            manager = await ctx.db.fetchval('SELECT giveawaymanager FROM config.timers WHERE sid = $1', ctx.guild.id)
+            if manager:
+                userRoles = [role.id for role in ctx.author.roles]
+                if not any(role in userRoles for role in manager):
+                    raise commands.MissingPermissions(['administrator / giveawaymanager'])
+            else:
+                raise commands.MissingPermissions(['administrator / giveawaymanager-role'])
 
     @giveaway.command()
     async def start(self, ctx, duration: converters.ParseTime, winner: int, channel: discord.TextChannel, *, win: str):
@@ -210,14 +217,20 @@ class Timers(commands.Cog):
             self.bot.dispatch('giveaway_runout', msg, data['data'])
 
     @cmd()
-    @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
-    async def reminder(self, ctx, duration: converters.ParseTime, *, text: str):
-        if text is None:
-            return await ctx.send(embed=std.getEmbed('Der Text darf nicht leer sein!'))
+    @checks.isActive('timers')
+    @commands.cooldown(rate=1, per=30.0, type=commands.BucketType.user)
+    async def reminder(self, ctx, duration: converters.ParseTime, *, reason: str):
+        noreminder = await ctx.db.fetchval('SELECT noreminderrole FROM config.timers WHERE sid = $1', ctx.guild.id)
+        if noreminder:
+            if noreminder in [role.id for role in ctx.author.roles]:
+                return await ctx.send(embed=std.getErrorEmbed('Du darfst keien Reminder verwenden.'))
+
+        if reason is None:
+            return await ctx.send(embed=std.getEmbed('Gib einen Grund für deinen Reminder an.'))
 
         await ctx.db.execute(
             'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5)',
-            ctx.guild.id, ctx.author.id, duration, 3, json.dumps({'message': text, 'channelid': ctx.channel.id}))
+            ctx.guild.id, ctx.author.id, duration, 3, json.dumps({'message': reason, 'channelid': ctx.channel.id}))
 
         await ctx.send(embed=std.getEmbed('Dein Timer wurde erstellt.'))
 
