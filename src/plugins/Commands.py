@@ -22,8 +22,8 @@ class Commands(commands.Cog):
         commandName = msgSplited.replace(ctx.prefix, '').lower()
         mentions = [ False, False, False ]
 
-        command = await self.bot.db.fetchrow("SELECT * FROM extra.commands WHERE sid = $1 AND name = $2", ctx.guild.id, commandName)
-        if command is None:
+        command = await self.bot.db.fetchrow("SELECT c.*, m.commands FROM extra.commands c LEFT JOIN config.modules m WHERE sid = $1 AND name = $2", ctx.guild.id, commandName)
+        if command is None or not command['commands']:
             return
 
         if command['cooldown']:
