@@ -33,6 +33,8 @@ class PlyooxSupport(commands.Cog):
             file.truncate()
 
         msg: discord.Message = await ctx.channel.fetch_message(ID)
+        if not msg.content:
+            raise commands.BadArgument('Nachricht hat keinen Content')
         acceptedChannel: discord.TextChannel = ctx.guild.get_channel(ACCEPTED_SUGGESTION_CHANNEL)
         embed = discord.Embed(color=discord.Color.green(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
         embed.set_footer(text=f'#{data["suggestion"]} | {msg.author}')
@@ -55,6 +57,8 @@ class PlyooxSupport(commands.Cog):
             file.truncate()
 
         msg: discord.Message = await ctx.channel.fetch_message(ID)
+        if not msg.content:
+            raise commands.BadArgument('Nachricht hat keinen Content')
         deniedChannel: discord.TextChannel = ctx.guild.get_channel(DENIED_SUGGESTION_CHANNEL)
         embed = discord.Embed(color=discord.Color.red(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
         embed.description = msg.content
@@ -77,6 +81,8 @@ class PlyooxSupport(commands.Cog):
             file.truncate()
 
         msg: discord.Message = await ctx.channel.fetch_message(ID)
+        if not msg.content:
+            raise commands.BadArgument('Nachricht hat keinen Content')
         waitingChannel: discord.TextChannel = ctx.guild.get_channel(WAITING_SUGGESTION_CHANNEL)
         embed = discord.Embed(color=discord.Color.gold(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
         embed.description = msg.content
