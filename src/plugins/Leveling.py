@@ -1,5 +1,6 @@
 import random
 import time
+from datetime import datetime
 
 import discord
 from discord.ext import commands
@@ -124,7 +125,10 @@ class Leveling(commands.Cog):
         if user.bot:
             return await ctx.send(embed=std.getEmbed('Bots können keine XP erhalten!'))
 
-        userData = await ctx.db.fetchrow("SELECT xp FROM extra.levels WHERE id = $1", f'{user.id}{ctx.guild.id}')
+        userData = await ctx.db.fetchrow(
+            "WITH users AS (SELECT xp, userid, row_number() OVER (ORDER BY xp DESC) AS count FROM extra.levels "
+            "WHERE guildid = $1) SELECT * FROM users WHERE userid = $2",
+            ctx.guild.id, user.id)
         if not userData:
             return await ctx.send(embed=std.getErrorEmbed('Dieser User hat noch nie etwas geschrieben.'))
 
@@ -135,10 +139,12 @@ class Leveling(commands.Cog):
         else:
             currentXP = userData['xp'] - self._get_xp_from_lvl(lvl - 1)
 
-        embed = discord.Embed(color=user.color, title=f"**{user.display_name}**")
+        embed = discord.Embed(color=user.color, title=f"**{user.display_name}**",
+                              timestamp=datetime.utcnow())
         embed.set_thumbnail(url=user.avatar_url)
         embed.add_field(name=f"{std.level_emoji} Level", value=str(lvl))
         embed.add_field(name=f"{std.booster4_emoji} XP", value=f"{currentXP}/{lvlXP}")
+        embed.set_footer(text=f'Rang #{userData["count"]}')
         await ctx.send(embed=embed)
 
     @cmd()
