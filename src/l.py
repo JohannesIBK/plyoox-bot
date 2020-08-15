@@ -3,15 +3,6 @@ import sys
 
 from main import Plyoox as Bot
 
-
-def close():
-    try:
-        loop.close()
-        exit()
-    except:
-        exit(1)
-
-
 if sys.platform == "win32":
     with open(r"utils/keys/testbot.env") as f:
         token = f.read()
@@ -29,14 +20,13 @@ try:
     loop.run_until_complete(bot.create_db_pool())
 except:
     print('Es konnte keine Verbindung zu PostgreSQL aufgebaut werden')
-    close()
+    exit()
 
 try:
     loop.run_until_complete(bot.create_redis_pool())
 except:
     print('Es konnte keine Verbindung zu RedisDB aufgebaut werden')
-    loop.close()
-    close()
+    exit()
 
 
 async def run_bot():
