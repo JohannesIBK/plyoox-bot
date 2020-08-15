@@ -173,6 +173,9 @@ class Timers(commands.Cog):
             else:
                 raise commands.MissingPermissions(['administrator / giveawaymanager-role'])
 
+        if ctx.invoked_subcommand is None:
+            return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
+
     @giveaway.command()
     async def start(self, ctx, duration: converters.ParseTime, winner: int, channel: discord.TextChannel, *, win: str):
         data = {
