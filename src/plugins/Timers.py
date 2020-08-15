@@ -149,12 +149,20 @@ class Timers(commands.Cog):
                                                    description=f'**Gewinn:** {win}\n**Gewinner:** Keine Gewinner.\nID: {message.id}'))
         else:
             winnerMention = ' '.join(member.mention for member in winners)
-            await channel.send(f'Gewinner von {data["winType"]} {"ist" if len(winners) == 1 else "sind"}\n{winnerMention}')
+            await channel.send(f'Gewinner von {data["winType"]} {"ist" if len(winners) == 1 else "sind"}\n{winnerMention}',
+                               allowed_mentions=discord.AllowedMentions(users=True))
             await message.edit(embed=discord.Embed(color=std.normal_color, title=f"🎉 Giveaway",
                                                    description=f'**Gewinn:** {win}\n**Gewinner:** {winnerMention}.\nID: {message.id}'))
+            roleID = await self.bot.db.fetchval('SELECT winnerrole FROM config.timers WHERE sid = $1', message.guild.id)
+            role: discord.Role = message.guild.get_role(roleID)
+            if role is not None:
+                for winner in winners:
+                    try:
+                        await winner.add_roles()
+                    except discord.Forbidden:
+                        break
 
     @grp(case_insensitive=True)
-    @checks.isActive('timers')
     async def giveaway(self, ctx):
         if not ctx.author.guild_permissions.administrator:
             manager = await ctx.db.fetchval('SELECT giveawaymanager FROM config.timers WHERE sid = $1', ctx.guild.id)
