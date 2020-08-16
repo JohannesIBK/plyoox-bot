@@ -18,14 +18,10 @@ class Errors(commands.Cog):
         self.helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
 
     async def _help(self, ctx, text = None):
-        if text is None:
-            helpText = self.helpText[ctx.command.name.split(" ")[0]]
-            del helpText[0]
-        else:
-            helpText = [text]
+        helpText: list = self.helpText[ctx.command.name.lower()].copy()
 
-        embed: discord.Embed = discord.Embed(color=std.error_color, title=f'**__Command Help__**',
-                                             description="\n".join(helpText))
+        embed: discord.Embed = discord.Embed(color=std.error_color, title=f'**__Command Hilfe__**',
+                                             description=f'**{text}**\n\n' + "\n".join(helpText).format(p=ctx.prefix))
         return embed
 
     @commands.Cog.listener()
@@ -33,8 +29,8 @@ class Errors(commands.Cog):
         if hasattr(ctx.command, "on_error") or (ctx.command and hasattr(ctx.cog, f"_{ctx.command.cog_name}__error")):
             return
 
-        if isinstance(error, commands.BadArgument):
-            embed = await self._help(ctx, 'Ein Argument wurde falsch angegeben.')
+        if isinstance(error, commands.BadArgument) or isinstance(error, commands.BadUnionArgument):
+            embed = await self._help(ctx, f'Ein Argument wurde falsch angegeben.')
             await ctx.send(embed=embed)
 
         elif isinstance(error, commands.MissingRequiredArgument):
@@ -75,9 +71,6 @@ class Errors(commands.Cog):
 
             elif isinstance(error, asyncio.TimeoutError):
                 await ctx.send(embed=std.getErrorEmbed('Dein Report wurde abgebrochen, da du zu lange gebraucht hast.'))
-
-            elif isinstance(error, TypeError):
-                await ctx.send(embed=std.getErrorEmbed('Ein Fehler bei deiner Eingabe ist aufgetreten. Bitte überprüfe deine Eingabe.'))
 
             else:
                 userEmbed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")
