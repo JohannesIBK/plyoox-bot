@@ -100,7 +100,7 @@ class Moderation(commands.Cog):
 
         messages = await ctx.channel.history(limit=amount + 1).flatten()
         content = '\n'.join(f'{msg.author} ({msg.author.id}): {msg.content}' for msg in messages)
-        file = io.BytesIO(content.encode())
+        file = discord.File(io.BytesIO(content.encode()), 'messages.txt')
 
         deleted: int = len(await ctx.channel.purge(limit=amount + 1))
 
