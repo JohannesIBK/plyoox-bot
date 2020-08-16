@@ -201,13 +201,14 @@ class Timers(commands.Cog):
 
     @giveaway.command()
     async def stop(self, ctx, ID: int):
-        data = await ctx.db.execute('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
+        data = await ctx.db.fetchrow('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         if data is None:
             return await ctx.send(embed=std.getErrorEmbed('Kein Giveaway mit dieser ID gefunden.'))
 
         await ctx.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         await ctx.send(embed=std.getEmbed('Das Giveaway wurde abgebrochen.'))
-        channel: discord.TextChannel = ctx.guild.get_channel(data['channel'])
+        giveawayData = json.loads(data['data'])
+        channel: discord.TextChannel = ctx.guild.get_channel(giveawayData['channel'])
         msg = await channel.fetch_message(data['objid'])
         if msg is not None:
             try:
@@ -217,15 +218,16 @@ class Timers(commands.Cog):
 
     @giveaway.command()
     async def end(self, ctx, ID: int):
-        data = await ctx.db.execute('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
+        data = await ctx.db.fetchrow('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         if data is None:
             await ctx.send(embed=std.getErrorEmbed('Kein Giveaway mit dieser ID gefunden.'))
 
         await ctx.send(embed=std.getEmbed('Das Giveaway wurde abgebrochen.'))
-        channel: discord.TextChannel = ctx.guild.get_channel(data['channel'])
+        giveawayData = json.loads(data['data'])
+        channel: discord.TextChannel = ctx.guild.get_channel(giveawayData['channel'])
         msg = await channel.fetch_message(data['objid'])
         if msg is not None:
-            self.bot.dispatch('giveaway_runout', msg, data['data'])
+            self.bot.dispatch('giveaway_runout', msg, giveawayData)
 
     @cmd()
     @checks.isActive('timers')
