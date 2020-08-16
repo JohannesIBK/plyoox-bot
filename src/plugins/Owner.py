@@ -187,7 +187,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def setVersion(self, ctx, version: str):
         self.bot.version = version
-        await ctx.send(embed=std.getEmbed('Die Version wurde zu {version} geändert.'))
+        await ctx.send(embed=std.getEmbed(f'Die Version wurde zu {version} geändert.'))
 
     @cmd()
     @commands.is_owner()
