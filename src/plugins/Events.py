@@ -15,6 +15,27 @@ class Events(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
 
+    async def checkGuilds(self):
+        await self.bot.wait_until_ready()
+        guilds = self.bot.guilds
+        dbGuilds = (entry['sid'] for entry in await self.bot.db.fetch('SELECT sid FROM config.guilds'))
+
+        for guild in guilds:
+            if guild.id not in dbGuilds:
+                await db.gotAddet(self.bot, guild)
+                bots = len(list(filter(lambda m: m.bot, guild.members)))
+                embed = discord.Embed(color=discord.Color.green(), title="**__SERVER JOINED__**")
+                embed.add_field(name="Name", value=guild.name, inline=False)
+                embed.add_field(name="Member", value=f'User: {len(guild.members)}\nBots: {bots}', inline=False)
+                embed.add_field(name="Owner", value=guild.owner, inline=False)
+                embed.add_field(name="Region", value=guild.region, inline=False)
+                embed.add_field(name="Stats",
+                                value=f'__Rollen:__ {len(guild.roles)}\n__TextChannel:__ {len(guild.text_channels)}\n'
+                                      f'__VoiceChannels:__ {len(guild.voice_channels)}',
+                                inline=False)
+                await self.bot.get_channel(715260033926955070).send(embed=embed)
+
+
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: typing.Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]):
         guild: discord.Guild = channel.guild
