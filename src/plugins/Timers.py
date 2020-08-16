@@ -76,7 +76,7 @@ class Timers(commands.Cog):
         if channel is None:
             return
         message = await channel.fetch_message(messageID)
-        self.bot.dispatch('giveaway_runout', message, json.loads(data))
+        self.bot.dispatch('giveaway_runout', message, data)
 
     async def reminderTimer(self, endTime: int, memberID: int, guildID: int, data, ID: int):
         untilEnd = endTime - time.time()
