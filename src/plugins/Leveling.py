@@ -64,21 +64,23 @@ class Leveling(commands.Cog):
         if noXPRole in userRoles:
             return
 
-        userData = await self.bot.db.fetchrow("SELECT xp, guildid, time FROM extra.levels WHERE id = $1", key)
+        userData = await self.bot.db.fetchrow(
+            'SELECT xp, sid, time, id FROM extra.levels WHERE uid = $1 and sid = $2',
+            author.id, guild.id)
         if not userData:
             return await self.bot.db.execute(
-                "INSERT INTO extra.levels (userid, guildid, xp, time, id) VALUES ($1, $2, $3, $4, $5)",
-                author.id, guild.id, random.randint(15, 25), time.time(), key)
+                "INSERT INTO extra.levels (uid, sid, xp, time) VALUES ($1, $2, $3, $4)",
+                author.id, guild.id, random.randint(15, 25), time.time())
 
-        # if time.time() - userData['time'] < 60:
-        #     return
+        if time.time() - userData['time'] < 60:
+            return
 
         newXP = random.randint(15, 25)
-        await self.bot.db.execute("UPDATE extra.levels SET xp = xp + $1, time = $2 WHERE id = $3", newXP, time.time(), key)
+        await self.bot.db.execute("UPDATE extra.levels SET xp = xp + $1, time = $2 WHERE id = $3", newXP, time.time(), userData['id'])
 
-        bevorLvl = self._get_level_from_xp(userData['xp'])
+        beforeLvl = self._get_level_from_xp(userData['xp'])
         currentLvl = self._get_level_from_xp(userData['xp'] + newXP)
-        if currentLvl > bevorLvl:
+        if currentLvl > beforeLvl:
             addRole = None
             data = await self.bot.db.fetchrow("SELECT channel, roles, message, remove FROM config.leveling WHERE sid = $1", guild.id)
             if data is None:
@@ -126,8 +128,8 @@ class Leveling(commands.Cog):
             return await ctx.send(embed=std.getEmbed('Bots können keine XP erhalten!'))
 
         userData = await ctx.db.fetchrow(
-            "WITH users AS (SELECT xp, userid, row_number() OVER (ORDER BY xp DESC) AS count FROM extra.levels "
-            "WHERE guildid = $1) SELECT * FROM users WHERE userid = $2",
+            "WITH users AS (SELECT xp, uid, row_number() OVER (ORDER BY xp DESC) AS count FROM extra.levels "
+            "WHERE sid = $1) SELECT * FROM users WHERE uid = $2",
             ctx.guild.id, user.id)
         if not userData:
             return await ctx.send(embed=std.getErrorEmbed('Dieser User hat noch nie etwas geschrieben.'))
@@ -163,7 +165,7 @@ class Leveling(commands.Cog):
     @cmd(aliases=["top10"])
     @checks.isActive('leveling')
     async def top(self, ctx):
-        users = await ctx.db.fetch('SELECT * FROM extra.levels WHERE guildid = $1 ORDER BY xp DESC LIMIT 15', ctx.guild.id)
+        users = await ctx.db.fetch('SELECT * FROM extra.levels WHERE sid = $1 ORDER BY xp DESC LIMIT 15', ctx.guild.id)
 
         embed = discord.Embed(color=std.normal_color, title='TOP 10')
         count = 0
@@ -179,7 +181,7 @@ class Leveling(commands.Cog):
             else:
                 currentXP = userData['xp'] - self._get_xp_from_lvl(lvl - 1)
 
-            member: discord.Member = self.bot.get_user(userData['userid'])
+            member: discord.Member = self.bot.get_user(userData['uid'])
             if member is None:
                 continue
 
@@ -194,7 +196,7 @@ class Leveling(commands.Cog):
     @checks.isMod()
     @checks.isActive('leveling')
     async def resetlevel(self, ctx, user: discord.Member):
-        await ctx.db.execute("DELETE FROM extra.levels WHERE id = $1", f'{user.id}{ctx.guild.id}')
+        await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
         await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.'))
 
 
