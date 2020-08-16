@@ -22,7 +22,9 @@ class Commands(commands.Cog):
         commandName = msgSplited.replace(ctx.prefix, '').lower()
         mentions = [ False, False, False ]
 
-        command = await self.bot.db.fetchrow("SELECT c.*, m.commands FROM extra.commands c LEFT JOIN config.modules m WHERE sid = $1 AND name = $2", ctx.guild.id, commandName)
+        command = await self.bot.db.fetchrow(
+            "SELECT c.*, m.commands FROM extra.commands c LEFT JOIN config.modules m ON c.sid = m.sid WHERE c.sid = $1 AND c.name = $2",
+            ctx.guild.id, commandName)
         if command is None or not command['commands']:
             return
 
@@ -63,13 +65,14 @@ class Commands(commands.Cog):
         if command['mentions']:
             mentions = command['mentions']
 
-        if command['embed']:
-            embed = discord.Embed(color=std.plyoox_color, description=command['content'])
-            msg = await ctx.send(embed=embed,
-                                 allowed_mentions=discord.AllowedMentions(everyone=mentions[0], roles=mentions[1], users=mentions[2]))
-        else:
-            msg = await ctx.send(command['content'],
-                                 allowed_mentions=discord.AllowedMentions(everyone=mentions[0], roles=mentions[1], users=mentions[2]))
+        if command['content']:
+            if command['embed']:
+                embed = discord.Embed(color=std.plyoox_color, description=command['content'])
+                msg = await ctx.send(embed=embed,
+                                     allowed_mentions=discord.AllowedMentions(everyone=mentions[0], roles=mentions[1], users=mentions[2]))
+            else:
+                msg = await ctx.send(command['content'],
+                                     allowed_mentions=discord.AllowedMentions(everyone=mentions[0], roles=mentions[1], users=mentions[2]))
 
         if command['delete']:
             await asyncio.sleep(command['delete'])
