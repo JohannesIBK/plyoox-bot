@@ -31,14 +31,15 @@ class Timers(commands.Cog):
             timerType = entry['type']
             endTime = entry['time']
             guildID = entry['sid']
+            timerID = entry['id']
             if timerType in [0, 1]:
                 self.bot.loop.create_task(self.punishTimer(endTime, entry['objid'], guildID, timerType))
 
             elif timerType == 2:
-                self.bot.loop.create_task(self.giveawayTimer(endTime, entry['objid'], guildID, entry['data']))
+                self.bot.loop.create_task(self.giveawayTimer(endTime, entry['objid'], guildID, entry['data'], timerID))
 
             if timerType == 3:
-                self.bot.loop.create_task(self.reminderTimer(endTime, entry['objid'], guildID, entry['data']))
+                self.bot.loop.create_task(self.reminderTimer(endTime, entry['objid'], guildID, entry['data'], timerID))
 
 
     @checkTimers.before_loop
@@ -56,30 +57,35 @@ class Timers(commands.Cog):
         await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3", guild.id, memberID, punishmentType)
         self.bot.dispatch('punishment_runout', guild, memberID, punishmentType)
 
-    async def giveawayTimer(self, endTime: int, messageID: int, guildID: int, data):
+    async def giveawayTimer(self, endTime: int, messageID: int, guildID: int, data, ID):
         untilEnd = endTime - time.time()
         if endTime < 0:
             untilEnd = 0
 
         await asyncio.sleep(untilEnd)
 
-        deleted = await self.bot.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 2', guildID, messageID)
+        deleted = await self.bot.db.execute('DELETE FROM extra.timers WHERE id = $1', ID)
         if deleted == 0:
             return
 
         data = json.loads(data)
-        channel = self.bot.get_channel(int(data['channel']))
+        guild = self.bot.get_guild(guildID)
+        if guild is None:
+            return
+        channel = guild.get_channel(data['channel'])
+        if channel is None:
+            return
         message = await channel.fetch_message(messageID)
         self.bot.dispatch('giveaway_runout', message, json.loads(data))
 
-    async def reminderTimer(self, endTime: int, memberID: int, guildID: int, data):
+    async def reminderTimer(self, endTime: int, memberID: int, guildID: int, data, ID: int):
         untilEnd = endTime - time.time()
         if endTime < 0:
             untilEnd = 0
 
         await asyncio.sleep(untilEnd)
 
-        await self.bot.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 3', guildID, memberID)
+        await self.bot.db.execute('DELETE FROM extra.timers WHERE id = $1', ID)
 
         data = json.loads(data)
         guild: discord.Guild = self.bot.get_guild(guildID)
