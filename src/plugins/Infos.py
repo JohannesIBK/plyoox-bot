@@ -158,7 +158,8 @@ class Infos(commands.Cog):
                                             f'{std.brilliance_emoji if flags.hypesquad_brilliance else ""}'
                                             f'{std.bravery_emoji if flags.hypesquad_bravery else ""}'
                                             f'{std.balance_emoji if flags.hypesquad_balance else ""}'
-                                            f'{std.hypesquad_emoji if flags.hypesquad else ""}')
+                                            f'{std.hypesquad_emoji if flags.hypesquad else ""}'
+                                            if flags.all() else '-----')
 
         if user.activity is not None:
             embed.add_field(name=f'{std.richPresence_emoji} **Aktivität**', value=user.activity.name, inline=False)
