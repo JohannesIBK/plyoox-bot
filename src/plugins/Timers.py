@@ -25,7 +25,7 @@ class Timers(commands.Cog):
 
     @tasks.loop(minutes=10)
     async def checkTimers(self):
-        entrys = await self.bot.db.fetch('SELECT * FROM extra.timers WHERE time - extract(EPOCH FROM now()) <= 900;')
+        entrys = await self.bot.db.fetch('SELECT * FROM extra.timers WHERE time - extract(EPOCH FROM now()) <= 600;')
 
         for entry in entrys:
             timerType = entry['type']
