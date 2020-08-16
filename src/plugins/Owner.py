@@ -26,8 +26,6 @@ class Owner(commands.Cog):
     @cmd(hidden=True, aliases=["guilds"])
     @commands.is_owner()
     async def servers(self, ctx):
-        """Listet alle Server auf"""
-
         def sort(val):
             return len(val.members)
 
