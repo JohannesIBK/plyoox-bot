@@ -35,25 +35,25 @@ class Errors(commands.Cog):
             await ctx.send(embed=embed)
 
         elif isinstance(error, commands.BotMissingPermissions):
-            await ctx.send(embed=std.getErrorEmbed(f'Dem Bot fehlt die Berechtigung(en) {" ".join(error.missing_perms)}'))
+            await ctx.error(f'Dem Bot fehlt die Berechtigung(en) {" ".join(error.missing_perms)}')
 
         elif isinstance(error, commands.MissingPermissions):
-            await ctx.send(embed=std.getErrorEmbed(f'Dir fehlen die Berechtigung(en) `{" ".join(error.missing_perms)}`.'))
+            await ctx.error(f'Dir fehlen die Berechtigung(en) `{" ".join(error.missing_perms)}`.')
 
         elif isinstance(error, commands.CommandNotFound):
             pass
 
         elif isinstance(error, commands.CommandOnCooldown):
             cooldown = error.cooldown
-            await ctx.send(embed=std.getErrorEmbed(f'Dieser Command hat einen Cooldown. '
+            await ctx.error(f'Dieser Command hat einen Cooldown. '
                                                    f'Du kannst ihn nur {cooldown.rate} pro {cooldown.per}s benutzen.\n'
-                                                   f'Versuche es in {round(error.retry_after)}s erneut.'))
+                                                   f'Versuche es in {round(error.retry_after)}s erneut.')
 
         elif isinstance(error, commands.NotOwner):
-            await ctx.send(embed=std.getErrorEmbed('Diesen Command kann nur der Owner des Bots ausführen.'))
+            await ctx.error('Diesen Command kann nur der Owner des Bots ausführen.')
 
         elif isinstance(error, commands.DisabledCommand):
-            await ctx.send(embed=std.getErrorEmbed('Dieser Command ist auf diesem Server deaktiviert.'))
+            await ctx.error('Dieser Command ist auf diesem Server deaktiviert.')
 
         elif isinstance(error, commands.CheckFailure):
             pass
@@ -62,12 +62,12 @@ class Errors(commands.Cog):
             error = error.__cause__
             if isinstance(error, discord.Forbidden):
                 try:
-                    await ctx.send(embed=std.getErrorEmbed('Der Bot hat keine Berechtigung um den Command auszuführen.'))
+                    await ctx.error('Der Bot hat keine Berechtigung um den Command auszuführen.')
                 except:
                     pass
 
             elif isinstance(error, asyncio.TimeoutError):
-                await ctx.send(embed=std.getErrorEmbed('Dein Report wurde abgebrochen, da du zu lange gebraucht hast.'))
+                await ctx.error('Dein Report wurde abgebrochen, da du zu lange gebraucht hast.')
 
             else:
                 userEmbed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")

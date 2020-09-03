@@ -209,10 +209,10 @@ class Timers(commands.Cog):
     async def stop(self, ctx: context.Context, ID: int):
         data = await ctx.db.fetchrow('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         if data is None:
-            return await ctx.send(embed=std.getErrorEmbed('Kein Giveaway mit dieser ID gefunden.'))
+            return await ctx.error('Kein Giveaway mit dieser ID gefunden.')
 
         await ctx.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
-        await ctx.send(embed=std.getEmbed('Das Giveaway wurde abgebrochen.'))
+        await ctx.embed('Das Giveaway wurde abgebrochen.')
         giveawayData = json.loads(data['data'])
         channel: discord.TextChannel = ctx.guild.get_channel(giveawayData['channel'])
         msg = await channel.fetch_message(data['objid'])
@@ -226,9 +226,9 @@ class Timers(commands.Cog):
     async def end(self, ctx: context.Context, ID: int):
         data = await ctx.db.fetchrow('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         if data is None:
-            await ctx.send(embed=std.getErrorEmbed('Kein Giveaway mit dieser ID gefunden.'))
+            await ctx.error('Kein Giveaway mit dieser ID gefunden.')
 
-        await ctx.send(embed=std.getEmbed('Das Giveaway wurde abgebrochen.'))
+        await ctx.embed('Das Giveaway wurde abgebrochen.')
         giveawayData = json.loads(data['data'])
         channel: discord.TextChannel = ctx.guild.get_channel(giveawayData['channel'])
         msg = await channel.fetch_message(data['objid'])
@@ -247,23 +247,23 @@ class Timers(commands.Cog):
         noreminder = await ctx.db.fetchval('SELECT noreminderrole FROM config.timers WHERE sid = $1', ctx.guild.id)
         if noreminder:
             if noreminder in [role.id for role in ctx.author.roles]:
-                return await ctx.send(embed=std.getErrorEmbed('Du darfst keine Reminder verwenden.'))
+                return await ctx.error('Du darfst keine Reminder verwenden.')
 
         if reason is None:
-            return await ctx.send(embed=std.getEmbed('Gib einen Grund für deinen Reminder an.'))
+            return await ctx.error('Es wurde kein Grund angegeben.')
 
         timerCount = await ctx.db.fetchval(
             'SELECT count(*) FROM extra.timers WHERE sid = $1 AND objid = $2',
             ctx.guild.id, ctx.author.id)
 
         if timerCount >= 25:
-            await ctx.send(embed=std.getErrorEmbed('Du hast bereits 25 Timer.'))
+            await ctx.error('Du hast bereits 25 Timer.')
 
         await ctx.db.execute(
             'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5)',
             ctx.guild.id, ctx.author.id, duration, 3, json.dumps({'message': reason, 'channelid': ctx.channel.id}))
 
-        await ctx.send(embed=std.getEmbed('Dein Timer wurde erstellt.'), delete_after=10)
+        await ctx.embed('Dein Timer wurde erstellt.', delete_after=10)
 
     @reminder.command()
     async def list(self, ctx: context.Context):
@@ -273,14 +273,14 @@ class Timers(commands.Cog):
 
         if noreminder:
             if noreminder in [role.id for role in ctx.author.roles]:
-                return await ctx.send(embed=std.getErrorEmbed('Du darfst keine Reminder verwenden.'))
+                return await ctx.error('Du darfst keine Reminder verwenden.')
 
         reminders = await ctx.db.fetch(
             'SELECT * FROM extra.timers WHERE sid = $1 AND objid = $2',
             ctx.guild.id, ctx.author.id)
 
         if not reminders:
-            return await ctx.send(embed=std.getErrorEmbed('Du hast keine Timer auf diesem Server.'))
+            return await ctx.error('Du hast keine Timer auf diesem Server.')
 
         timerListEmbed: discord.Embed = discord.Embed(color=std.normal_color, title='Timer')
         timerListEmbed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
@@ -297,9 +297,9 @@ class Timers(commands.Cog):
             ID, ctx.guild.id, ctx.author.id)
 
         if deleted:
-            return await ctx.send(embed=std.getEmbed('Der Timer wurde gelöscht'))
-        await ctx.send(embed=std.getErrorEmbed('Der Timer konnte nicht gelöscht werden. Du bist nicht der Ersteller des Timers'
-                                               ' oder er existiert nicht.'))
+            return await ctx.embed('Der Timer wurde gelöscht')
+        await ctx.error('Der Timer konnte nicht gelöscht werden. Du bist nicht der Ersteller des Timers'
+                                               ' oder er existiert nicht.')
 
 def setup(bot):
     bot.add_cog(Timers(bot))

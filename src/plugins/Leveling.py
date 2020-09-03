@@ -126,14 +126,14 @@ class Leveling(commands.Cog):
             user = ctx.author
 
         if user.bot:
-            return await ctx.send(embed=std.getEmbed('Bots können keine XP erhalten!'))
+            return await ctx.embed('Bots können keine XP erhalten!')
 
         userData = await ctx.db.fetchrow(
             "WITH users AS (SELECT xp, uid, row_number() OVER (ORDER BY xp DESC) AS count FROM extra.levels "
             "WHERE sid = $1) SELECT * FROM users WHERE uid = $2",
             ctx.guild.id, user.id)
         if not userData:
-            return await ctx.send(embed=std.getErrorEmbed('Dieser User hat noch nie etwas geschrieben.'))
+            return await ctx.embed('Dieser User hat noch nie etwas geschrieben.')
 
         lvl = self._get_level_from_xp(userData['xp'])
         lvlXP = self._get_level_xp(lvl)
@@ -155,7 +155,7 @@ class Leveling(commands.Cog):
     async def levelRoles(self, ctx: context.Context):
         data = await self.bot.db.fetchval("SELECT roles FROM config.leveling WHERE sid = $1", ctx.guild.id)
         if data is None:
-            return await ctx.send(embed=std.getErrorEmbed('Der Server hat keine Levelrollen festgelegt.'))
+            return await ctx.error('Der Server hat keine Levelrollen festgelegt.')
 
         lvlRoles = []
         for roleData in data:
@@ -199,7 +199,7 @@ class Leveling(commands.Cog):
     @checks.isActive('leveling')
     async def resetlevel(self, ctx: context.Context, user: discord.Member):
         await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
-        await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.'))
+        await ctx.embed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.')
 
 
 def setup(bot):

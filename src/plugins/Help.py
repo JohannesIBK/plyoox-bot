@@ -65,7 +65,7 @@ class Help(commands.Cog):
             try:
                 cmdObj: commands.Command = self.bot.get_all_commands[arg]
             except KeyError:
-                return await ctx.send(embed=standards.getErrorEmbed('Für diesen Command ist keine Hilfe verfügbar.'))
+                return await ctx.error('Für diesen Command ist keine Hilfe verfügbar.')
             cmdHelpRaw: list = self.helpText[cmdObj.name.lower()].copy()
             if cmdObj.aliases:
                 cmdHelpRaw.insert(1, f'\n**__Alias:__** {", ".join(f"`{alias}`" for alias in cmdObj.aliases)}')
@@ -87,7 +87,7 @@ class Help(commands.Cog):
             await ctx.send(embed=embed)
 
         else:
-            await ctx.send(embed=standards.getErrorEmbed('Dieser Command exsitiert nicht.'))
+            await ctx.error('Dieser Command exsitiert nicht.')
 
 
 def setup(bot):

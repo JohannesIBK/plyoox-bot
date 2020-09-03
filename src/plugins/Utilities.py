@@ -36,7 +36,7 @@ class Utilities(commands.Cog):
     async def ping(self, ctx: context.Context):
         ping = self.bot.latency * 1000
         start = time.perf_counter()
-        message = await ctx.send(embed=std.getEmbed('Pong!'))
+        message = await ctx.embed('Pong!')
         end = time.perf_counter()
         duration = (end - start) * 1000
         await message.edit(embed=std.getEmbed('Bot: {:.2f}ms\nWebsocket: {:.2f}ms'.format(duration, ping)))
@@ -44,12 +44,12 @@ class Utilities(commands.Cog):
     @cmd()
     async def bin(self, ctx: context.Context, number: int):
         if number > 10000**10:
-            return await ctx.send(embed=std.getErrorEmbed('Die Zahl ist zu groß!'))
-        await ctx.send(embed=std.getEmbed(f'{number} in binär ist `{str(bin(number))[2:]}`'))
+            return await ctx.error('Die Zahl ist zu groß!')
+        await ctx.embed(f'{number} in binär ist `{str(bin(number))[2:]}`')
 
     @cmd()
     async def hex(self, ctx: context.Context, number: int):
-        await ctx.send(embed=std.getEmbed(f'{number} in hexadezimal ist `{str(hex(number))[2:]}`'))
+        await ctx.embed(f'{number} in hexadezimal ist `{str(hex(number))[2:]}`')
 
     @cmd()
     @commands.is_owner()

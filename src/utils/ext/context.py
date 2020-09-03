@@ -2,16 +2,16 @@ import asyncio
 import io
 
 import discord
+from asyncpg.pool import Pool
 from discord.ext import commands
 
-from utils.ext import standards
+from utils.ext import standards as std
 
 
 class Context(commands.Context):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.db_pool = self.bot.db
-        self._db = None
+        self._db = self.bot.db
 
     async def safe_send(self, content, *, escape_mentions=True, **kwargs):
         if escape_mentions:
@@ -27,22 +27,28 @@ class Context(commands.Context):
             return await self.send(content)
 
     @property
-    def db(self):
-        return self._db if self._db else self.db_pool
+    def db(self) -> Pool:
+        return self._db if self._db else self.bot.db
 
     async def release(self):
         if self._db is not None:
             await self.bot.pool.release(self._db)
             self._db = None
 
+    async def error(self, message: str, **kwargs):
+        await self.send(embed=std.getErrorEmbed(message), **kwargs)
+
+    async def embed(self, message: str, **kwargs):
+        await self.send(embed=std.getEmbed(message), **kwargs)
+
     async def prompt(self, message, *, timeout=60.0, delete_after=True, reacquire=True, author_id=None):
         if not self.channel.permissions_for(self.me).add_reactions:
             raise RuntimeError('Der Bot kann keine Reaktionen hinzufügen.')
 
-        fmt = f'{message}\n\nReagiere mit {standards.yes_emoji} um zu bestätigen oder {standards.no_emoji} um abzubrechen.'
+        fmt = f'{message}\n\nReagiere mit {std.yes_emoji} um zu bestätigen oder {std.no_emoji} um abzubrechen.'
 
         author_id = author_id or self.author.id
-        msg = await self.send(embed=discord.Embed(color=standards.normal_color, description=fmt))
+        msg = await self.send(embed=discord.Embed(color=std.normal_color, description=fmt))
 
         confirm = None
 
@@ -54,16 +60,16 @@ class Context(commands.Context):
 
             codepoint = str(payload.emoji)
 
-            if codepoint == standards.yes_emoji:
+            if codepoint == std.yes_emoji:
                 confirm = True
                 return True
-            elif codepoint == standards.no_emoji:
+            elif codepoint == std.no_emoji:
                 confirm = False
                 return True
 
             return False
 
-        for emoji in (standards.yes_emoji, standards.no_emoji):
+        for emoji in (std.yes_emoji, std.no_emoji):
             await msg.add_reaction(emoji)
 
         if reacquire:

@@ -110,7 +110,7 @@ class Fun(commands.Cog):
             user2 = ctx.message.author
 
         if user1 == user2:
-            return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
+            return ctx.embed('Das funktioniert so nicht D:')
 
         score = random.randint(0, 100)
         filled_progbar = round(score / 100 * 10)
@@ -128,7 +128,7 @@ class Fun(commands.Cog):
         if 'discord.gg' in questions.lower() or 'discord.com/invite' in questions.lower():
             return
         if questions.count('|') == 0:
-            return await ctx.send(embed=std.getErrorEmbed('Fargen müssen mit `|` getrennt werden'))
+            return await ctx.error('Fargen müssen mit `|` getrennt werden')
 
         questionsList = questions.split('|')
         choosen: str = random.choice(questionsList)
@@ -161,7 +161,7 @@ class Fun(commands.Cog):
         if 'discord.gg' in reversedText.lower() or 'discord.com/invite' in reversedText.lower():
             return
 
-        embed: discord.Embed = std.getEmbed(reversedText) 
+        embed = std.getEmbed(reversedText)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=ctx.author)
         await ctx.send(embed=embed)
 
@@ -241,19 +241,18 @@ class Fun(commands.Cog):
         songStr = '\n'.join(f'`{song["by"]}` | `{song["song"]}` | `{song["year"]}`' for song in songs)
         if songStr == '':
             songStr = 'Keine Songs gefunden :('
-        await ctx.send(embed=std.getEmbed(songStr[:2000]))
+        await ctx.embed(songStr[:2000])
 
     @cmd()
     @checks.isActive('fun')
     async def pat(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
-            return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
+            return ctx.embed('Das funktioniert so nicht D:')
 
         gifs = self.gifData['pat']
         gif = random.choice(gifs)
 
-        embed: discord.Embed = discord.Embed(color=std.normal_color,
-                                             description=f'{ctx.author.mention} patted {user.mention}')
+        embed = std.getEmbed('{ctx.author.mention} patted {user.mention}')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -261,13 +260,12 @@ class Fun(commands.Cog):
     @checks.isActive('fun')
     async def hug(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
-            return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
+            return ctx.embed('Das funktioniert so nicht D:')
 
         gifs = self.gifData['hug']
         gif = random.choice(gifs)
 
-        embed: discord.Embed = discord.Embed(color=std.normal_color,
-                                             description=f'{ctx.author.mention} hugged {user.mention}')
+        embed = std.getEmbed('{ctx.author.mention} hugged {user.mention}')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -275,7 +273,7 @@ class Fun(commands.Cog):
     @checks.isActive('fun')
     async def highfive(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
-            return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
+            return ctx.embed('Das funktioniert so nicht D:')
 
         gifs: list = self.gifData['highfive']
         gif: str = random.choice(gifs)
@@ -291,8 +289,7 @@ class Fun(commands.Cog):
         gifs: list = self.gifData['rage']
         gif: str = random.choice(gifs)
 
-        embed: discord.Embed = discord.Embed(color=std.normal_color,
-                                             description=f'{ctx.author.mention} rages')
+        embed = std.getEmbed('{ctx.author.mention} rages')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -302,8 +299,7 @@ class Fun(commands.Cog):
         gifs: list = self.gifData['cry']
         gif: str = random.choice(gifs)
 
-        embed: discord.Embed = discord.Embed(color=std.normal_color,
-                                             description=f'{ctx.author.mention} cries')
+        embed = std.getEmbed('{ctx.author.mention} cries')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -351,8 +347,7 @@ class Fun(commands.Cog):
         gifs: list = self.gifData['laugh']
         gif: str = random.choice(gifs)
 
-        embed: discord.Embed = discord.Embed(color=std.normal_color,
-                                             description=f'{ctx.author.mention} laughs')
+        embed = std.getEmbed('{ctx.author.mention} laughs')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 

@@ -186,7 +186,7 @@ class Infos(commands.Cog):
     @cmd()
     async def todayJoined(self, ctx: context.Context):
         joined = len([user.id for user in ctx.guild.members if (datetime.datetime.now() - user.joined_at).days == 0])
-        await ctx.send(embed=std.getEmbed(f'Heute {"ist" if joined == 1 else "sind"} {joined} User auf den Server gejoint.'))
+        await ctx.embed(f'Heute {"ist" if joined == 1 else "sind"} {joined} User auf den Server gejoint.')
 
     @cmd()
     async def joined(self, ctx: context.Context, user: Union[discord.Member, int] = None):
@@ -212,7 +212,7 @@ class Infos(commands.Cog):
                 user = all_members[join_pos]
                 days = (datetime.datetime.now() - user.joined_at).days
             except IndexError:
-                return await ctx.send(embed=std.getErrorEmbed('Kein User auf dieser Join Position.'))
+                return await ctx.error('Kein User auf dieser Join Position.')
 
         embed = discord.Embed(title='Join Position:', color=std.normal_color)
         embed.add_field(name=f"{user}", value=f'Position: {join_pos + 1} (vor {days} Tagen)')
@@ -243,8 +243,7 @@ class Infos(commands.Cog):
     @cmd()
     @checks.hasPerms(manage_guild=True)
     async def roleMembers(self, ctx: context.Context, role: discord.Role):
-
-        await ctx.send(embed=std.getEmbed(f'Die Rolle {role.mention} hat {len(role.members)} Mitglieder.'))
+        await ctx.embed(f'Die Rolle {role.mention} hat {len(role.members)} Mitglieder.')
 
     @cmd()
     async def avatar(self, ctx: context.Context, user: discord.User = None):
@@ -257,7 +256,7 @@ class Infos(commands.Cog):
 
     @cmd()
     async def members(self, ctx: context.Context):
-        await ctx.send(embed=std.getEmbed(f'Der Discord hat momentan `{ctx.guild.member_count}` Mitglieder.'))
+        await ctx.embed(f'Der Discord hat momentan `{ctx.guild.member_count}` Mitglieder.')
 
     @cmd()
     async def dashboard(self, ctx: context.Context):
@@ -265,7 +264,7 @@ class Infos(commands.Cog):
 
     @cmd()
     async def vote(self, ctx: context.Context):
-        await ctx.send(embed=std.getEmbed('Vote [hier](https://top.gg/bot/505433541916622850/vote) für mich :D'))
+        await ctx.embed('Vote [hier](https://top.gg/bot/505433541916622850/vote) für mich :D')
 
 
 def setup(bot):

@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards as std, context
+from utils.ext import context
 from utils.ext.cmds import cmd, grp
 
 
@@ -44,21 +44,21 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def load(self, ctx: commands.Context, cog):
+    async def load(self, ctx: context.Context, cog):
         self.bot.load_extension(cog)
-        await ctx.send(embed=std.getEmbed(f'Das Modul {cog} wurde geladen.'))
+        await ctx.embed(f'Das Modul {cog} wurde geladen.')
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def reload(self, ctx: commands.Context, cog):
+    async def reload(self, ctx: context.Context, cog):
         self.bot.reload_extension(cog)
-        await ctx.send(embed=std.getEmbed(f'Das Modul {cog} wurde neugeladen.'))
+        await ctx.embed(f'Das Modul {cog} wurde neugeladen.')
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def unload(self, ctx: commands.Context, cog):
+    async def unload(self, ctx: context.Context, cog):
         self.bot.unload_extension(cog)
-        await ctx.send(embed=std.getEmbed(f'Das Modul {cog} wurde entladen.'))
+        await ctx.embed(f'Das Modul {cog} wurde entladen.')
 
     @cmd(hidden=True)
     @commands.is_owner()
@@ -72,7 +72,7 @@ class Owner(commands.Cog):
                     count += 1
                 except discord.Forbidden:
                     break
-        await ctx.send(f'{count} haben den Rang erhalten.')
+        await ctx.embed(f'{count} haben den Rang erhalten.')
 
     @cmd(hidden=True)
     @commands.is_owner()
@@ -86,7 +86,7 @@ class Owner(commands.Cog):
             except discord.Forbidden:
                 f_count += 1
 
-        await ctx.send(f'{count} haben den entzogen bekommen, {f_count} haben den Rang behalten.')
+        await ctx.embed(f'{count} haben den entzogen bekommen, {f_count} haben den Rang behalten.')
 
     @cmd(hidden=True)
     @commands.is_owner()
@@ -179,13 +179,13 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def setVersion(self, ctx: context.Context, version: str):
         self.bot.version = version
-        await ctx.send(embed=std.getEmbed(f'Die Version wurde zu {version} geändert.'))
+        await ctx.embed(f'Die Version wurde zu {version} geändert.')
 
     @cmd()
     @commands.is_owner()
     async def reloadLang(self, ctx: context.Context):
         self.bot.get_cog('Help').helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
-        await ctx.send(embed=std.getEmbed('Der Help-Text wurde reloadet.'))
+        await ctx.embed('Der Help-Text wurde reloadet.')
 
     @cmd()
     @commands.is_owner()
@@ -199,9 +199,9 @@ class Owner(commands.Cog):
         elif pgType == 'fetchval':
             resp = await self.bot.db.fetchval(sql)
         else:
-            return await ctx.send(embed=std.getErrorEmbed('Keine valider type'))
+            return await ctx.error('Keine valider type')
 
-        await ctx.send(embed=std.getEmbed(str(resp)))
+        await ctx.embed(str(resp))
 
     @cmd()
     @commands.is_owner()
@@ -210,10 +210,10 @@ class Owner(commands.Cog):
             module_name = importlib.import_module(name)
             importlib.reload(module_name)
         except ModuleNotFoundError:
-            return await ctx.send(f"Couldn't find module named **{name}**")
+            return await ctx.error(f"Couldn't find module named **{name}**")
 
         except Exception as e:
-            return await ctx.send(f'```py\n{e}{traceback.format_exc()}\n```')
+            return await ctx.embed(f'```py\n{e}{traceback.format_exc()}\n```')
 
         await ctx.send(f"Reloaded module **{name}**")
 
@@ -224,7 +224,7 @@ class Owner(commands.Cog):
             with open('utils/json/simpleStorage.json', 'r') as file:
                 data = json.load(file)
 
-            await ctx.send(embed=std.getEmbed(f'Maintenance: {data["maintenance"]}'))
+            await ctx.embed(f'Maintenance: {data["maintenance"]}')
 
     @maintenance.command()
     async def activate(self, ctx: context.Context):
@@ -234,7 +234,7 @@ class Owner(commands.Cog):
             data['maintenance'] = True
             json.dump(data, file)
             file.truncate()
-            await ctx.send(embed=std.getEmbed('Maintenance: True'))
+            await ctx.embed('Maintenance: True')
         await self.bot.change_presence(
             activity=discord.Activity(
                 type=discord.ActivityType.playing,
@@ -250,7 +250,7 @@ class Owner(commands.Cog):
             data['maintenance'] = False
             json.dump(data, file)
             file.truncate()
-            await ctx.send(embed=std.getEmbed('Maintenance: False'))
+            await ctx.embed('Maintenance: False')
 
         await self.bot.change_presence(
             activity=discord.Activity(
@@ -267,12 +267,12 @@ class Owner(commands.Cog):
     @globalban.command()
     async def add(self, ctx: context.Context, user: discord.User, *, Grund: str):
         await self.bot.db.execute('INSERT INTO extra.globalbans (userid, reason) VALUES ($1, $2)', user.id, Grund)
-        await ctx.send('Der User wurde erfolgreich zur Globalban-Liste hinzugefügt.')
+        await ctx.embed('Der User wurde erfolgreich zur Globalban-Liste hinzugefügt.')
 
     @globalban.command()
     async def remove(self, ctx: context.Context, user: discord.User):
         await self.bot.db.execute('DELETE FROM extra.globalbans WHERE userid = $1', user.id)
-        await ctx.send('Der User wurde erfolgreich von der Globalban-Liste entfernt.')
+        await ctx.embed('Der User wurde erfolgreich von der Globalban-Liste entfernt.')
 
     @grp(case_insesitive=True)
     @commands.is_owner()
@@ -290,7 +290,7 @@ class Owner(commands.Cog):
             command = commandsCountSorted[i]
             commandsCountList.append(f'**{command[0]}:** {command[1]}')
 
-        await ctx.send(embed=std.getEmbed('\n'.join(commandsCountList)))
+        await ctx.embed('\n'.join(commandsCountList))
 
     @commandCount.command()
     async def top(self, ctx: context.Context):
@@ -304,7 +304,7 @@ class Owner(commands.Cog):
             command = commandsCountSorted[i]
             commandsCountList.append(f'**{command[0]}:** {command[1]}')
 
-        await ctx.send(embed=std.getEmbed('\n'.join(commandsCountList)))
+        await ctx.embed('\n'.join(commandsCountList))
 
 
 def setup(bot):
