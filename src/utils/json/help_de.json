@@ -172,7 +172,8 @@
     " » {p}activate automoderation",
     " » {p}activate welcomer",
     " » {p}activate globalbans",
-    " » {p}activate logging"
+    " » {p}activate logging",
+    " » {p}activate timer"
   ],
   "deactivate": [
     "Deaktiviert ein Modul und seine Commands.",
@@ -182,7 +183,8 @@
     " » {p}deactivate automoderation",
     " » {p}deactivate welcomer",
     " » {p}deactivate globalbans",
-    " » {p}deactivate logging"
+    " » {p}deactivate logging",
+    " » {p}deactivate timer"
   ],
   "points": [
     "Erlaubt das Abfragen von Punkten eines bestimmten Users.",
@@ -240,13 +242,14 @@
     ".mu txeT ned therD",
     "\n**__Command:__** {p}reverse < **`Text`** >",
     "\n**__Beispiel:__**",
-    " » {p}caseing Dreht den Text um."
+    " » {p}reverse Dreht den Text um."
   ],
   "avatar": [
     "Schickt den Avatar eines USers in den Channel.",
     "\n**__Command:__** {p}avatar [ `User` ]",
     "\n**__Beispiel:__**",
-    " » {p}avatar @Plyoxx#0000"
+    " » {p}avatar @Plyoxx#0000",
+    " » {p}avatar 768781420067028994"
   ],
   "resetlevel": [
     "Resetet das Level eines Users.",
@@ -380,6 +383,7 @@
     "\n**__Command:__** {p}vote"
   ],
   "unban": [
+    "Entbannt einen Useer",
     "\n**__Command:__** {p}unban < **`User`** > [ `Grund` ]",
     "\n**__Beispiele:__**",
     " » {p}unban @Plyoxx#0000",
@@ -388,5 +392,15 @@
   "cat": [
     "Ohhh ist die süß <3",
     "\n**__Command:__** {p}cat"
+  ],
+  "check": [
+    "Zeigt derzeitige Warnungen oder Bestrafungen an.",
+    "\n**__Command:__** {p}unban < **`User`** >",
+    " » {p}check @Plyoxx#0000",
+    " » {p}check 505433541916622850"
+  ],
+  "laugh": [
+    ":joy: :rofl:",
+    "\n**__Command:__** {p}laugh"
   ]
 }

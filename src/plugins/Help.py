@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards
+from utils.ext import standards, context
 from utils.ext.cmds import cmd
 
 
@@ -15,7 +15,7 @@ class Help(commands.Cog):
         self.helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
 
     @cmd()
-    async def help(self, ctx, command = None):
+    async def help(self, ctx: context.Context, command = None):
         arg = ''
         if command is not None:
             arg: str = command.lower()
@@ -34,7 +34,7 @@ class Help(commands.Cog):
                 prefix = data['prefix']
 
             embed: discord.Embed = discord.Embed(title=f'{standards.question_emoji} Command Hilfe',
-                                                 description=f'[Dashboard](https://plyoox.net/) | [Support](https://discordapp.com/invite/5qPPvQe)\nPrefix: `{prefix}`',
+                                                 description=f'[Dashboard](https://plyoox.net/) | [Support Discord](https://discordapp.com/invite/5qPPvQe)\nPrefix: `{prefix}`',
                                                  color=standards.help_color)
             embed.set_footer(icon_url=ctx.me.avatar_url)
             disabledModules = []

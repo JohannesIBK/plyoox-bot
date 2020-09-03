@@ -19,7 +19,6 @@ class Private(commands.Cog):
         self.channelIDs = [CHANNEL_ID]
         self.state = True
 
-
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if not self.state:

@@ -15,7 +15,7 @@ from other import db
 from utils.ext import context
 
 # ---------------------------------------------------------------
-handler = RotatingFileHandler(filename='discord.log', maxBytes=1024 * 10, encoding='utf-8', mode='w')
+handler = RotatingFileHandler(filename='logs/discord.log', maxBytes=1024 * 10, encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 
 logger = logging.getLogger('discord')
@@ -31,7 +31,7 @@ cogs = [
     "plugins.Leveling",
     "plugins.Utilities",
     "plugins.Commands",
-    # "plugins.Errors",
+    "plugins.Errors",
     "plugins.Fun",
     "plugins.Events",
     "plugins.Infos",
@@ -69,7 +69,7 @@ class Plyoox(commands.Bot):
                          allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
 
         self.startTime: float = time.time()
-        self.version: str = 'v2.5.0'
+        self.version: str = 'v2.6.0'
         self.owner_id: int = 263347878150406144
         self.get_all_commands: dict = {}
         self.logger = logger
@@ -87,7 +87,7 @@ class Plyoox(commands.Bot):
                 self.reload_extension(cog)
 
         if self.user.id == 505433541916622850:
-            self.load_extension('cogs.BotLists')
+            self.load_extension('plugins.BotLists')
 
         for cmd in self.commands:
             self.get_all_commands.update({cmd.name.lower(): cmd})

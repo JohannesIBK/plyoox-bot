@@ -213,6 +213,8 @@ class Logging(commands.Cog):
                         inline=False)
 
         if msg is None:
+            if not msgData['content']:
+                return
             embed.add_field(name=f'{std.richPresence_emoji} **__Neue Nachricht__**',
                             value=msgData['content'])
         else:
@@ -223,6 +225,8 @@ class Logging(commands.Cog):
                                 value=msgData['content'], inline=False)
                 embed.add_field(name=f'{std.richPresence_emoji} **__Alte Nachricht__**',
                                 value=msg.content, inline=False)
+            else:
+                return
 
         if data['id'] and data['token']:
             try:

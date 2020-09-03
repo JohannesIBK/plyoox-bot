@@ -8,8 +8,8 @@ import discord
 from discord.ext import commands, tasks
 
 import main
-from utils.ext import standards as std, checks, converters
-from utils.ext.cmds import grp, cmd
+from utils.ext import standards as std, checks, converters, context
+from utils.ext.cmds import grp
 
 
 # BAN       0
@@ -169,7 +169,7 @@ class Timers(commands.Cog):
                         break
 
     @grp(case_insensitive=True)
-    async def giveaway(self, ctx):
+    async def giveaway(self, ctx: context.Context):
         if not ctx.author.guild_permissions.administrator:
             manager = await ctx.db.fetchval('SELECT giveawaymanager FROM config.timers WHERE sid = $1', ctx.guild.id)
             if manager:
@@ -183,7 +183,7 @@ class Timers(commands.Cog):
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
 
     @giveaway.command()
-    async def start(self, ctx, duration: converters.ParseTime, winner: int, channel: discord.TextChannel, *, win: str):
+    async def start(self, ctx: context.Context, duration: converters.ParseTime, winner: int, channel: discord.TextChannel, *, win: str):
         data = {
             'winner': winner,
             'winType': win,
@@ -206,7 +206,7 @@ class Timers(commands.Cog):
             ctx.guild.id, msg.id, duration, json.dumps(data))
 
     @giveaway.command()
-    async def stop(self, ctx, ID: int):
+    async def stop(self, ctx: context.Context, ID: int):
         data = await ctx.db.fetchrow('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         if data is None:
             return await ctx.send(embed=std.getErrorEmbed('Kein Giveaway mit dieser ID gefunden.'))
@@ -223,7 +223,7 @@ class Timers(commands.Cog):
                 pass
 
     @giveaway.command()
-    async def end(self, ctx, ID: int):
+    async def end(self, ctx: context.Context, ID: int):
         data = await ctx.db.fetchrow('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         if data is None:
             await ctx.send(embed=std.getErrorEmbed('Kein Giveaway mit dieser ID gefunden.'))
@@ -235,24 +235,71 @@ class Timers(commands.Cog):
         if msg is not None:
             self.bot.dispatch('giveaway_runout', msg, giveawayData)
 
-    @cmd()
+    @grp(aliases=['timer'])
     @checks.isActive('timers')
-    @commands.cooldown(rate=1, per=30.0, type=commands.BucketType.user)
-    async def reminder(self, ctx, duration: converters.ParseTime, *, reason: str):
+    async def reminder(self, ctx: context.Context):
+        if ctx.invoked_subcommand is None:
+            return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
+
+    @reminder.command(cooldown_after_parsing=True)
+    @commands.cooldown(rate=2 , per=30.0, type=commands.BucketType.user)
+    async def create(self, ctx: context.Context, duration: converters.ParseTime, *, reason: str):
         noreminder = await ctx.db.fetchval('SELECT noreminderrole FROM config.timers WHERE sid = $1', ctx.guild.id)
         if noreminder:
             if noreminder in [role.id for role in ctx.author.roles]:
-                return await ctx.send(embed=std.getErrorEmbed('Du darfst keien Reminder verwenden.'))
+                return await ctx.send(embed=std.getErrorEmbed('Du darfst keine Reminder verwenden.'))
 
         if reason is None:
             return await ctx.send(embed=std.getEmbed('Gib einen Grund für deinen Reminder an.'))
+
+        timerCount = await ctx.db.fetchval(
+            'SELECT count(*) FROM extra.timers WHERE sid = $1 AND objid = $2',
+            ctx.guild.id, ctx.author.id)
+
+        if timerCount >= 25:
+            await ctx.send(embed=std.getErrorEmbed('Du hast bereits 25 Timer.'))
 
         await ctx.db.execute(
             'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5)',
             ctx.guild.id, ctx.author.id, duration, 3, json.dumps({'message': reason, 'channelid': ctx.channel.id}))
 
-        await ctx.send(embed=std.getEmbed('Dein Timer wurde erstellt.'))
+        await ctx.send(embed=std.getEmbed('Dein Timer wurde erstellt.'), delete_after=10)
 
+    @reminder.command()
+    async def list(self, ctx: context.Context):
+        noreminder = await ctx.db.fetchval(
+            'SELECT noreminderrole FROM config.timers WHERE sid = $1',
+            ctx.guild.id, ctx.author.id)
+
+        if noreminder:
+            if noreminder in [role.id for role in ctx.author.roles]:
+                return await ctx.send(embed=std.getErrorEmbed('Du darfst keine Reminder verwenden.'))
+
+        reminders = await ctx.db.fetch(
+            'SELECT * FROM extra.timers WHERE sid = $1 AND objid = $2',
+            ctx.guild.id, ctx.author.id)
+
+        if not reminders:
+            return await ctx.send(embed=std.getErrorEmbed('Du hast keine Timer auf diesem Server.'))
+
+        timerListEmbed: discord.Embed = discord.Embed(color=std.normal_color, title='Timer')
+        timerListEmbed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
+        for timer in reminders:
+            reason = json.loads(timer['data'])['message']
+            timerListEmbed.add_field(name='TimerID: ' + str(timer['id']), value=f'```{reason}```')
+
+        await ctx.send(embed=timerListEmbed)
+
+    @reminder.command()
+    async def remove(self, ctx: context.Context, ID: int):
+        deleted = await ctx.db.fetchval(
+            'DELETE FROM extra.timers WHERE ID = $1 AND sid = $2 AND objid = $3',
+            ID, ctx.guild.id, ctx.author.id)
+
+        if deleted:
+            return await ctx.send(embed=std.getEmbed('Der Timer wurde gelöscht'))
+        await ctx.send(embed=std.getErrorEmbed('Der Timer konnte nicht gelöscht werden. Du bist nicht der Ersteller des Timers'
+                                               ' oder er existiert nicht.'))
 
 def setup(bot):
     bot.add_cog(Timers(bot))

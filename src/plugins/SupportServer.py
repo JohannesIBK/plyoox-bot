@@ -4,7 +4,7 @@ import json
 import discord
 from discord.ext import commands
 
-from utils.ext import standards as std
+from utils.ext import standards as std, context
 from utils.ext.cmds import grp
 
 ACCEPTED_SUGGESTION_CHANNEL = 739109521452040193
@@ -20,11 +20,11 @@ class PlyooxSupport(commands.Cog):
 
     @grp(aliases=['sg'])
     @commands.is_owner()
-    async def suggestion(self, ctx):
+    async def suggestion(self, ctx: context.Context):
         pass
 
     @suggestion.command()
-    async def accept(self, ctx, ID: int):
+    async def accept(self, ctx: context.Context, ID: int):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -48,7 +48,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def deny(self, ctx, ID: int):
+    async def deny(self, ctx: context.Context, ID: int):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -72,7 +72,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def wait(self, ctx, ID: int):
+    async def wait(self, ctx: context.Context, ID: int):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -96,7 +96,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def publish(self, ctx, ID: int):
+    async def publish(self, ctx: context.Context, ID: int):
         msg: discord.Message = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
         embed.color = discord.Color.blue()
@@ -110,7 +110,26 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def developed(self, ctx, ID: int):
+    async def publishall(self, ctx: context.Context):
+        channel: discord.TextChannel = ctx.guild.get_channel(DEVELOPED_SUGGESTION_CHANNEL)
+        implementedChannel: discord.TextChannel = ctx.guild.get_channel(IMPLEMENTED_SUGGESTION_CHANNEL)
+        messages = await channel.history(limit=500).flatten()
+    
+        for msg in messages[::-1]:
+            if not msg.embeds:
+                continue
+            embed = msg.embeds[0]
+            embed.color = discord.Color.blue()  
+            if msg.attachments:
+                attachment = await msg.attachments[0].to_file()
+                await implementedChannel.send(embed=embed, file=attachment)
+            else:
+                await implementedChannel.send(embed=embed)
+            await msg.delete()
+        await ctx.message.delete()
+        
+    @suggestion.command()
+    async def developed(self, ctx: context.Context, ID: int):
         msg: discord.Message = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
         embed.color = discord.Color.dark_teal()
@@ -124,7 +143,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def move(self, ctx, ID: int, toChannel: discord.TextChannel):
+    async def move(self, ctx: context.Context, ID: int, toChannel: discord.TextChannel):
         msg: discord.Message = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
 
@@ -144,7 +163,7 @@ class PlyooxSupport(commands.Cog):
         await msg.delete()
 
     @suggestion.command()
-    async def append(self, ctx, ID: int, suggestionID: int, channel: discord.TextChannel):
+    async def append(self, ctx: context.Context, ID: int, suggestionID: int, channel: discord.TextChannel):
         msg: discord.Message = await channel.fetch_message(ID)
         suggestionMsg: discord.Message = await ctx.channel.fetch_message(suggestionID)
         embed = msg.embeds[0]
@@ -154,7 +173,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def dev(self, ctx, ID: int, *, text):
+    async def dev(self, ctx: context.Context, ID: int, *, text):
         msg: discord.Message = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
         embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=text)

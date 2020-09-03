@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import checks, standards as std
+from utils.ext import checks, standards as std, context
 from utils.ext.cmds import cmd
 
 
@@ -27,10 +27,9 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def color(self, ctx):
+    async def color(self, ctx: context.Context):
         rgbs = []
-        for i in range(0, 3, 1):
+        for _ in range(0, 3, 1):
             rgbs.append(random.choice(range(256)))
         color = discord.Colour.from_rgb(rgbs[0], rgbs[1], rgbs[2])
         colorHex = "#%02x%02x%02x" % (rgbs[0], rgbs[1], rgbs[2])
@@ -38,14 +37,13 @@ class Fun(commands.Cog):
                                            description=f'Es wurde eine zufällige Farbe generiert:\nFarbcode in RGB {rgbs} und HEX-Code {colorHex}'))
 
     @cmd()
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     @checks.isActive('fun')
-    async def minesweeper(self, ctx):
+    async def minesweeper(self, ctx: context.Context):
         columns = 10
         rows = 10
         bombs = 10
 
-        grid = [[0 for _ in range(columns)] for _ in range(rows)]
+        grid: list = [[0 for _ in range(columns)] for _ in range(rows)]
 
         loop_count = 0
         while loop_count < bombs:
@@ -101,15 +99,13 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def dice(self, ctx):
+    async def dice(self, ctx: context.Context):
         zahl = random.choice([":one:", ":two:", ":three:", ":four:", ":five:", ":six:"])
         await ctx.send(zahl)
 
     @cmd()
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     @checks.isActive('fun')
-    async def ship(self, ctx, user1: discord.Member, user2: discord.Member = None):
+    async def ship(self, ctx: context.Context, user1: discord.Member, user2: discord.Member = None):
         if user2 is None:
             user2 = ctx.message.author
 
@@ -128,8 +124,9 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def thisorthat(self, ctx, *, questions: str):
+    async def thisorthat(self, ctx: context.Context, *, questions: str):
+        if 'discord.gg' in questions.lower() or 'discord.com/invite' in questions.lower():
+            return
         if questions.count('|') == 0:
             return await ctx.send(embed=std.getErrorEmbed('Fargen müssen mit `|` getrennt werden'))
 
@@ -139,16 +136,14 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def coinflip(self, ctx):
+    async def coinflip(self, ctx: context.Context):
         flip = ['<:coin:718169101821804564>', '<:supporter:703906781859938364>']
         emoji = random.choice(flip)
         await ctx.send(emoji)
 
     @cmd(aliases=['slots'])
-    @commands.cooldown(rate=3, per=3.0, type=commands.BucketType.user)
     @checks.isActive('fun')
-    async def slot(self, ctx):
+    async def slot(self, ctx: context.Context):
         emojis = {"🍎", "🍊", '🍉', '🍇', '🍓', '🍒'}
 
         selected = random.sample(emojis, 3)
@@ -160,15 +155,21 @@ class Fun(commands.Cog):
             await ctx.send(f"{''.join(selected)} Verloren 😢")
 
     @cmd()
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     @checks.isActive('fun')
-    async def reverse(self, ctx, *, text: str):
-        await ctx.send(text[::-1], allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+    async def reverse(self, ctx: context.Context, *, text: str):
+        reversedText = text[::-1]
+        if 'discord.gg' in reversedText.lower() or 'discord.com/invite' in reversedText.lower():
+            return
+
+        embed: discord.Embed = std.getEmbed(reversedText) 
+        embed.set_footer(icon_url=ctx.author.avatar_url, text=ctx.author)
+        await ctx.send(embed=embed)
 
     @cmd()
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
     @checks.isActive('fun')
-    async def caseing(self, ctx, *, text: str):
+    async def caseing(self, ctx: context.Context, *, text: str):
+        if 'discord.gg' in text.lower() or 'discord.com/invite' in text.lower():
+            return
         newText = []
         lastUpper = False
 
@@ -184,12 +185,13 @@ class Fun(commands.Cog):
                     lastUpper = False
             newText.append(t)
 
-        await ctx.send(' '.join(newText), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+        embed: discord.Embed = std.getEmbed(' '.join(newText)) 
+        embed.set_footer(icon_url=ctx.author.avatar_url, text=ctx.author)
+        await ctx.send(embed=embed)
 
     @cmd(aliases=['ts'])
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def twitchsings(self, ctx, *, args):
+    async def twitchsings(self, ctx: context.Context, *, args):
         parser = Arguments()
         parser.add_argument('--lang', '-l')
         parser.add_argument('--year', '-y', type=int)
@@ -243,13 +245,12 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def pat(self, ctx, user: discord.Member):
+    async def pat(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
             return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
 
-        gifs: list = self.gifData['pat']
-        gif: str = random.choice(gifs)
+        gifs = self.gifData['pat']
+        gif = random.choice(gifs)
 
         embed: discord.Embed = discord.Embed(color=std.normal_color,
                                              description=f'{ctx.author.mention} patted {user.mention}')
@@ -258,13 +259,12 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def hug(self, ctx, user: discord.Member):
+    async def hug(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
             return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
 
-        gifs: list = self.gifData['hug']
-        gif: str = random.choice(gifs)
+        gifs = self.gifData['hug']
+        gif = random.choice(gifs)
 
         embed: discord.Embed = discord.Embed(color=std.normal_color,
                                              description=f'{ctx.author.mention} hugged {user.mention}')
@@ -273,8 +273,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def highfive(self, ctx, user: discord.Member):
+    async def highfive(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
             return ctx.send(std.getEmbed('Das funktioniert so nicht D:'))
 
@@ -288,8 +287,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def rage(self, ctx):
+    async def rage(self, ctx: context.Context):
         gifs: list = self.gifData['rage']
         gif: str = random.choice(gifs)
 
@@ -300,7 +298,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def cry(self, ctx):
+    async def cry(self, ctx: context.Context):
         gifs: list = self.gifData['cry']
         gif: str = random.choice(gifs)
 
@@ -311,8 +309,7 @@ class Fun(commands.Cog):
 
     @cmd(name='8ball')
     @checks.isActive('fun')
-    @commands.cooldown(rate=1, per=3.0, type=commands.BucketType.user)
-    async def _8ball(self, ctx, *, Frage: str):
+    async def _8ball(self, ctx: context.Context, *, Frage: str):
         answers = [
             'Ja.',
             'Kann sein.',
@@ -340,11 +337,22 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def cat(self, ctx):
+    async def cat(self, ctx: context.Context):
         gifs: list = self.gifData['cat']
         gif: str = random.choice(gifs)
 
         embed: discord.Embed = discord.Embed(color=std.normal_color)
+        embed.set_image(url=gif)
+        await ctx.send(embed=embed)
+
+    @cmd()
+    @checks.isActive('fun')
+    async def laugh(self, ctx: context.Context):
+        gifs: list = self.gifData['laugh']
+        gif: str = random.choice(gifs)
+
+        embed: discord.Embed = discord.Embed(color=std.normal_color,
+                                             description=f'{ctx.author.mention} laughs')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 

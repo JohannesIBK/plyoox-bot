@@ -3,7 +3,7 @@ from discord.ext import commands
 
 import main
 from utils import rules
-from utils.ext import checks, standards as std
+from utils.ext import checks, standards as std, context
 from utils.ext.cmds import grp, cmd
 
 
@@ -13,7 +13,7 @@ class Servermoderation(commands.Cog):
 
     @cmd(name="prefix")
     @checks.isAdmin()
-    async def prefix(self, ctx, prefix: str):
+    async def prefix(self, ctx: context.Context, prefix: str):
         if len(prefix) > 3:
             return await ctx.send(embed=std.getErrorEmbed('Der Prefix darf maximal 3 Zeichen lang sein.'))
 
@@ -23,96 +23,107 @@ class Servermoderation(commands.Cog):
 
     @grp(case_insensitive=True)
     @checks.isAdmin()
-    async def activate(self, ctx):
+    async def activate(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
 
     @activate.command()
     @commands.bot_has_permissions(manage_roles=True)
-    async def leveling(self, ctx):
+    async def leveling(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET leveling = true WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'leveling': True})
         await ctx.send(embed=std.getEmbed('Das Levelsystem wurde erfolgreich aktiviert.'))
 
     @activate.command()
-    async def fun(self, ctx):
+    async def fun(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET fun = true WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Das Games-Modul wurde erfolgreich aktiviert.'))
 
     @activate.command()
     @commands.bot_has_permissions(ban_members=True, kick_members=True, manage_roles=True, manage_messages=True)
-    async def automod(self, ctx):
+    async def automod(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET automod = true WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'automod': True})
         await ctx.send(embed=std.getEmbed('Der AutoMod wurde erfolgreich aktiviert."'))
 
     @activate.command()
     @commands.bot_has_permissions()
-    async def welcomer(self, ctx):
+    async def welcomer(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET welcomer = true WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Der Welcomer wurde erfolgreich aktiviert."'))
 
     @activate.command()
     @commands.bot_has_permissions(ban_members=True)
-    async def globalbans(self, ctx):
+    async def globalbans(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET globalbans = true WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Globalbans wurden erfolgreich aktiviert.'))
 
     @activate.command()
     @commands.bot_has_permissions(ban_members=True)
-    async def logging(self, ctx):
+    async def logging(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET logging = true WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Logging wurden erfolgreich aktiviert.'))
 
+    @activate.command()
+    @commands.bot_has_permissions(ban_members=True)
+    async def timer(self, ctx: context.Context):
+        await ctx.db.execute("UPDATE config.modules SET timers = true WHERE sid = $1", ctx.guild.id)
+        await ctx.send(embed=std.getEmbed('Timer wurden erfolgreich aktiviert.'))
+
     @grp(case_insensitive=True)
     @checks.isAdmin()
-    async def deactivate(self, ctx):
+    async def deactivate(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
 
     @deactivate.command(name='leveling')
-    async def _leveling(self, ctx):
+    async def _leveling(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET leveling = false WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'leveling': False})
         await ctx.send(embed=std.getEmbed('Das Levelsystem wurde deaktiviert.'))
 
     @deactivate.command(name='fun')
-    async def _fun(self, ctx):
+    async def _fun(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET fun = false WHERE sid = $1", ctx.guild.id)
 
         await ctx.send(embed=std.getEmbed('Das Fun-Modul wurde deaktiviert'))
 
     @deactivate.command(name="automod")
-    async def _automod(self, ctx):
+    async def _automod(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET automod = false WHERE sid = $1", ctx.guild.id)
         await self.bot.update_redis(ctx.guild.id, {'automod': False})
         await ctx.send(embed=std.getEmbed('Der Automod wurde deaktiviert'))
 
     @deactivate.command(name='welcomer')
-    async def _welcomer(self, ctx):
+    async def _welcomer(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET welcomer = false WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Der Welcomer wurde erfolgreich deaktiviert.'))
 
     @deactivate.command(name='globalbans')
-    async def _globalban(self, ctx):
+    async def _globalban(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET globalbans = false WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Globalbans wurden erfolgreich deaktiviert."'))
 
     @deactivate.command(name='logging')
-    async def _globalban(self, ctx):
+    async def _globalban(self, ctx: context.Context):
         await ctx.db.execute("UPDATE config.modules SET logging = false WHERE sid = $1", ctx.guild.id)
         await ctx.send(embed=std.getEmbed('Logging wurden erfolgreich deaktiviert."'))
 
+    @deactivate.command(name='timer')
+    async def _timer(self, ctx: context.Context):
+        await ctx.db.execute("UPDATE config.modules SET logging = false WHERE sid = $1", ctx.guild.id)
+        await ctx.send(embed=std.getEmbed('Timer wurden erfolgreich deaktiviert."'))
+
     @cmd()
     @checks.isAdmin()
-    async def rules(self, ctx):
+    async def rules(self, ctx: context.Context):
         await ctx.message.delete()
         msg = rules.rules
         await ctx.send(msg)
 
     @cmd()
     @checks.isAdmin()
-    async def rules1(self, ctx):
+    async def rules1(self, ctx: context.Context):
         await ctx.message.delete()
         embed = discord.Embed(color=0xc90c0c)
         embed.add_field(name="**__Regeln des Discord Servers__**",
@@ -146,7 +157,7 @@ class Servermoderation(commands.Cog):
     @checks.isAdmin()
     @commands.cooldown(1, 900, type=commands.BucketType.guild)
     @commands.bot_has_permissions(manage_channels=True)
-    async def setupMute(self, ctx):
+    async def setupMute(self, ctx: context.Context):
         guild: discord.Guild = ctx.guild
 
         muteRoleID: int = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
@@ -186,7 +197,7 @@ class Servermoderation(commands.Cog):
     # @cmd()
     # @checks.isAdmin()
     # @commands.bot_has_permissions(administrator=True)
-    # async def lockGuild(self, ctx):
+    # async def lockGuild(self, ctx: context.Context):
     #     guild: discord.Guild = ctx.guild
     #
     #     await ctx.send(embed=std.getEmbed('Channel werden geschlossen...'))

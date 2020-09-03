@@ -9,8 +9,10 @@ from utils.ext import standards as std, checks, context, logs
 
 DISCORD_INVITE = '(discord(app\.com\/invite|\.com(\/invite)?|\.gg)\/?[a-zA-Z0-9-]{2,32})'
 EXTERNAL_LINK = '((https?:\/\/(www\.)?|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})'
+EVERYONE_MENTION = '@(here|everyone)'
 discordRegex = re.compile(DISCORD_INVITE, re.IGNORECASE)
 linkRegex = re.compile(EXTERNAL_LINK, re.IGNORECASE)
+everyoneRegex = re.compile(EVERYONE_MENTION)
 
 
 def findWord(word):
@@ -65,7 +67,7 @@ async def managePunishment(ctx, punishment, reason):
                                  ctx.guild.id, user.id, 1, unixTime, json.dumps({'reason': reason}))
             await user.add_roles(muteRole, reason=reason)
 
-    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user, ignoreMMSG=True)
+    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user, ignoreMMSG=True, ignoreNoLogging=True)
 
 
 async def add_points(ctx: context, addPoints, modType, user: discord.Member = None):
@@ -284,12 +286,14 @@ async def automod(ctx):
             else:
                 return await managePunishment(ctx, state, 'Caps')
 
-    if len(msg.raw_mentions) + len(msg.raw_role_mentions) >= 3:
+    if len(msg.raw_mentions) + len(msg.raw_role_mentions) + len(everyoneRegex.findall(msg.content)) >= 3:
         if await checks.ignores_automod(ctx):
             return
 
         lenMentions = sum(m != ctx.author.id for m in msg.raw_mentions) + len(msg.raw_role_mentions)
-        data = await bot.db.fetchrow("SELECT state, points, count, whitelist FROM automod.mentions WHERE sid = $1", guild.id)
+        data = await bot.db.fetchrow(
+            "SELECT state, points, count, whitelist, everyone FROM automod.mentions WHERE sid = $1",
+            guild.id)
         if not data:
             return
 
@@ -299,6 +303,9 @@ async def automod(ctx):
         if data['whitelist'] is not None:
             if channel.id in data['whitelist']:
                 return
+
+        if data['everyone']:
+            lenMentions += len(everyoneRegex.findall(msg.content))
 
         if lenMentions >= data['count']:
             if state == 5:

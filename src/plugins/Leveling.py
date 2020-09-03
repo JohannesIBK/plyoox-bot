@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import checks, standards as std
+from utils.ext import checks, standards as std, context
 from utils.ext.cmds import cmd
 from utils.ext.formatter import formatMessage
 
@@ -52,7 +52,6 @@ class Leveling(commands.Cog):
 
         author: discord.Member = msg.author
         guild: discord.Guild = msg.guild
-        key = f'{author.id}{guild.id}'
         userRoles = [role.id for role in author.roles]
 
         noXPChannels = await self.bot.get(guild.id, 'noxpchannels')
@@ -99,12 +98,14 @@ class Leveling(commands.Cog):
                     removeRoles = list(filter(lambda role: role[1] != currentLvl, roles)) or None
                     await author.add_roles(addRole)
                     if removeRoles:
-                        await author.remove_roles(*[guild.get_role(role[0]) for role in removeRoles])
+                        await author.remove_roles(*[guild.get_role(role[0]) for role in removeRoles if guild.get_role(role[0])])
                 else:
                     addLvlRoles = []
                     for role in data['roles']:
                         if role[0] not in userRoles and role[1] <= currentLvl:
-                            addLvlRoles.append(guild.get_role(role[0]))
+                            newRole = guild.get_role(role[0])
+                            if newRole:
+                                addLvlRoles.append(newRole)
                     await author.add_roles(*addLvlRoles)
 
             lvlMsg = data['message']
@@ -120,7 +121,7 @@ class Leveling(commands.Cog):
 
     @cmd(aliases=['rank'])
     @checks.isActive('leveling')
-    async def level(self, ctx, user: discord.Member = None):
+    async def level(self, ctx: context.Context, user: discord.Member = None):
         if user is None:
             user = ctx.author
 
@@ -151,7 +152,7 @@ class Leveling(commands.Cog):
 
     @cmd()
     @checks.isActive('leveling')
-    async def levelRoles(self, ctx):
+    async def levelRoles(self, ctx: context.Context):
         data = await self.bot.db.fetchval("SELECT roles FROM config.leveling WHERE sid = $1", ctx.guild.id)
         if data is None:
             return await ctx.send(embed=std.getErrorEmbed('Der Server hat keine Levelrollen festgelegt.'))
@@ -160,11 +161,12 @@ class Leveling(commands.Cog):
         for roleData in data:
             role = ctx.guild.get_role(roleData[0])
             lvlRoles.append([role, roleData[1]])
+        lvlRoles.sort(key=lambda lvlRole: lvlRole[1])
         await ctx.send(embed=discord.Embed(color=std.normal_color, title='Level-Rollen', description='\n'.join(f'{lvlRole[0].mention} | {lvlRole[1]}' for lvlRole in lvlRoles)))
 
     @cmd(aliases=["top10"])
     @checks.isActive('leveling')
-    async def top(self, ctx):
+    async def top(self, ctx: context.Context):
         users = await ctx.db.fetch('SELECT * FROM extra.levels WHERE sid = $1 ORDER BY xp DESC LIMIT 15', ctx.guild.id)
 
         embed = discord.Embed(color=std.normal_color, title='TOP 10')
@@ -195,7 +197,7 @@ class Leveling(commands.Cog):
     @cmd(aliases=["rl"])
     @checks.isMod()
     @checks.isActive('leveling')
-    async def resetlevel(self, ctx, user: discord.Member):
+    async def resetlevel(self, ctx: context.Context, user: discord.Member):
         await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
         await ctx.send(embed=std.getEmbed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.'))
 

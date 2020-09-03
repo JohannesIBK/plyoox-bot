@@ -1,9 +1,12 @@
-import asyncio
-import sys
+# kphoen
 
+import asyncio
+import os.path
+
+import server
 from main import Plyoox as Bot
 
-if sys.platform == "win32":
+if os.path.isfile('test.txt'):
     with open(r"utils/keys/testbot.env") as f:
         token = f.read()
     print("\n\nStarting Test...\n")
@@ -29,14 +32,12 @@ except:
     exit()
 
 
-async def run_bot():
-    try:
-        await bot.start(token)
-    except KeyboardInterrupt:
-        loop.run_until_complete(bot.logout())
-    finally:
-        await bot.db.close()
-        print('Bot disconnected')
+try:
+    web = server.app(bot, bot.db)
+    web.listen(8888)
+    asyncio.ensure_future(bot.start(token))
+except KeyboardInterrupt:
+    loop.run_until_complete(bot.logout())
+    print('Bot disconnected')
 
-
-loop.run_until_complete(run_bot())
+loop.run_forever()

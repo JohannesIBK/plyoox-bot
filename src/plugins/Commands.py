@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import checks, standards as std
+from utils.ext import checks, standards as std, context
 from utils.ext.cmds import grp
 
 
@@ -17,7 +17,7 @@ class Commands(commands.Cog):
         self.bot = bot
         self.cooldowns = defaultdict()
 
-    async def command_list(self, ctx):
+    async def command_list(self, ctx: context.Context):
         msgSplited = ctx.message.content.split(" ")[0]
         commandName = msgSplited.replace(ctx.prefix, '').lower()
         mentions = [ False, False, False ]
@@ -74,16 +74,17 @@ class Commands(commands.Cog):
                 msg = await ctx.send(command['content'],
                                      allowed_mentions=discord.AllowedMentions(everyone=mentions[0], roles=mentions[1], users=mentions[2]))
 
-        if command['delete']:
+        if command['delete'] is not None:
             await asyncio.sleep(command['delete'])
-            await msg.delete()
             await ctx.message.delete()
+            if command['content']:
+                await msg.delete()
 
     @commands.Cog.listener()
-    async def on_message(self, msg: discord.Message):
+    async def on_message(self, msg: discord.Message):        
         if msg.author.bot:
             return
-
+        
         if msg.guild is None:
             return
 
@@ -100,12 +101,12 @@ class Commands(commands.Cog):
 
     @grp(name="command")
     @checks.isAdmin()
-    async def command_cmd(self, ctx):
+    async def command_cmd(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
             return await ctx.invoke(self.bot.get_command('help'), "command")
 
     @command_cmd.command()
-    async def add(self, ctx, name, *, content):
+    async def add(self, ctx: context.Context, name, *, content):
         name = name.lower()
 
         all_commands = await ctx.db.fetchval("SELECT name FROM extra.commands WHERE sid = $1", ctx.guild.id)
@@ -127,7 +128,7 @@ class Commands(commands.Cog):
                                            description='Der Command wurde erfolgreich hinzugefügt.'))
 
     @command_cmd.command()
-    async def edit(self, ctx, name, *, content):
+    async def edit(self, ctx: context.Context, name, *, content):
         name = name.lower()
 
         cmd = await ctx.db.fetchval("SELECT name, content FROM extra.commands WHERE sid = $1 AND name = $2", ctx.guild.id, name)
@@ -140,7 +141,7 @@ class Commands(commands.Cog):
                                            description='Der Command wurde erfolgreich bearbeitet.'))
 
     @command_cmd.command(aliases=['delete', 'del'])
-    async def remove(self, ctx, name):
+    async def remove(self, ctx: context.Context, name):
         name = name.lower()
 
         all_commands = await ctx.db.fetchval("SELECT name FROM extra.commands WHERE sid = $1", ctx.guild.id)
@@ -158,7 +159,7 @@ class Commands(commands.Cog):
                                            description='Der Command wurde erfolgreich entfernt.'))
 
     @command_cmd.command()
-    async def list(self, ctx):
+    async def list(self, ctx: context.Context):
         all_commands = await ctx.db.fetch("SELECT name FROM extra.commands WHERE sid = $1", ctx.guild.id)
 
         if not all_commands:

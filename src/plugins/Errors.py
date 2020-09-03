@@ -1,15 +1,12 @@
 import asyncio
 import codecs
 import json
-import logging
 
 import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards as std
-
-log = logging.getLogger(__name__)
+from utils.ext import standards as std, context
 
 
 class Errors(commands.Cog):
@@ -17,7 +14,7 @@ class Errors(commands.Cog):
         self.bot = bot
         self.helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
 
-    async def _help(self, ctx, text = None):
+    async def _help(self, ctx: context.Context, text = None):
         helpText: list = self.helpText[ctx.command.name.lower()].copy()
 
         embed: discord.Embed = discord.Embed(color=std.error_color, title=f'**__Command Hilfe__**',
@@ -25,7 +22,7 @@ class Errors(commands.Cog):
         return embed
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: context.Context, error):
         if hasattr(ctx.command, "on_error") or (ctx.command and hasattr(ctx.cog, f"_{ctx.command.cog_name}__error")):
             return
 
@@ -78,8 +75,8 @@ class Errors(commands.Cog):
                 try:
                     await ctx.send(embed=userEmbed)
                 except Exception as e:
-                    log.exception(f'Error\n{type(e).__name__}: {e}')
-                    channel: discord.TextChannel = ctx.guild.get_channel(718554837771616316)
+                    self.bot.logger.exception(f'Error\n{type(e).__name__}: {e}')
+                    channel: discord.TextChannel = self.bot.get_guild(694790265382109224).get_channel(718554837771616316)
                     embed = discord.Embed(color=discord.Color.red())
                     embed.add_field(name=ctx.guild.name,
                                     value=ctx.command.name)

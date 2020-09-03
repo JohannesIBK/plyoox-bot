@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards as std, checks
+from utils.ext import standards as std, checks, context
 from utils.ext.cmds import cmd
 
 
@@ -48,6 +48,32 @@ class Infos(commands.Cog):
             return string
 
     @staticmethod
+    def _getBadges(flags: discord.PublicUserFlags):
+        flagList = []
+        if flags.staff:
+            flagList.append(std.staff_emoji)
+        if flags.partner:
+            flagList.append(std.partner_emoji)
+        if flags.bug_hunter:
+            flagList.append(std.bughunter_badge)
+        if flags.early_supporter:
+            flagList.append(std.supporter_emoji)
+        if flags.hypesquad:
+            flagList.append(std.hypesquad_emoji)
+        if flags.hypesquad_balance:
+            flagList.append(std.balance_emoji)
+        if flags.hypesquad_brilliance:
+            flagList.append(std.brilliance_emoji)
+        if flags.hypesquad_bravery:
+            flagList.append(std.bravery_emoji)
+        if flags.verified_bot_developer:
+            flagList.append(std.botdev_emoji)
+        if flags.bug_hunter_level_2:
+            flagList.append(std.bughunter2_badge)
+
+        return flagList
+
+    @staticmethod
     def statusEmoji(status):
         status = str(status).lower()
         if status == 'online':
@@ -60,7 +86,7 @@ class Infos(commands.Cog):
             return std.dnd_emoji
 
     @cmd(aliases=["serverinfo", "guild"])
-    async def server(self, ctx, guildID: int = None):
+    async def server(self, ctx: context.Context, guildID: int = None):
         guild: discord.Guild = ctx.guild
         if guildID is not None:
             new_guild = self.bot.get_guild(guildID)
@@ -111,7 +137,7 @@ class Infos(commands.Cog):
         await ctx.send(embed=embed)
 
     @cmd(aliases=['user', 'whois'])
-    async def info(self, ctx, user: discord.Member = None):
+    async def info(self, ctx: context.Context, user: discord.Member = None):
         def sort(val):
             return val.joined_at
 
@@ -123,7 +149,7 @@ class Infos(commands.Cog):
         since_joined_guild = (datetime.datetime.now() - user.joined_at).days
         roles = self._getRoles(user.roles)
         members = ctx.guild.members
-        flags = user.public_flags
+        flags = self._getBadges(user.public_flags)
         members.sort(key=sort)
         join_pos = members.index(user) + 1
 
@@ -134,32 +160,23 @@ class Infos(commands.Cog):
                             f'{std.mention_emoji} **Erwähnung:** {user.mention}'
         embed.add_field(name=f'{std.date_emoji} **Daten**',
                         value=f'**__Account__**\n'
-                              f'**Erstellt:** {joined_dc}\n'
-                              f'**Tage seitdem:** {days_dc}'
+                              f'Erstellt: {joined_dc}\n'
+                              f'Tage seitdem: {days_dc}'
                               f'\n\n'
                               f'**__Server__**\n'
-                              f'**Beigetreten:** {joined_guild}\n'
-                              f'**Tage seitdem:** {since_joined_guild}\n'
-                              f'**Join-Position:** {join_pos}',
+                              f'Beigetreten: {joined_guild}\n'
+                              f'Tage seitdem: {since_joined_guild}\n'
+                              f'Join-Position: {join_pos}',
                         inline=False)
         embed.add_field(name=f"{std.info_emoji} **Status**",
-                        value=f"**Desktop:** {self.statusEmoji(user.desktop_status)}\n"
-                              f"**Handy:** {self.statusEmoji(user.mobile_status)}\n"
-                              f'**Web:** {self.statusEmoji(user.web_status)}\n',
+                        value=f'Desktop: {self.statusEmoji(user.desktop_status)}\n'
+                              f'Handy: {self.statusEmoji(user.mobile_status)}\n'
+                              f'Web: {self.statusEmoji(user.web_status)}\n',
                         inline=False)
-        embed.add_field(name=f'{std.mention_emoji} **Rollen**',
-                        value=f'({len(user.roles) - 1}) {roles}',
+        embed.add_field(name=f'{std.mention_emoji} **Rollen** ({len(user.roles) - 1})',
+                        value=f'{roles}',
                         inline=False)
-        embed.add_field(name='Flags', value=f'{std.botdev_emoji if flags.verified_bot_developer else ""}'
-                                            f'{std.staff_emoji if flags.staff else ""}'
-                                            f'{std.partner_emoji if flags.partner else ""}'
-                                            f'{std.bughunter_badge if flags.bug_hunter else ""}'
-                                            f'{std.supporter_emoji if flags.early_supporter else ""}'
-                                            f'{std.brilliance_emoji if flags.hypesquad_brilliance else ""}'
-                                            f'{std.bravery_emoji if flags.hypesquad_bravery else ""}'
-                                            f'{std.balance_emoji if flags.hypesquad_balance else ""}'
-                                            f'{std.hypesquad_emoji if flags.hypesquad else ""}'
-                                            if flags.all() else '-----')
+        embed.add_field(name=f'{std.folder_emoji} **Abzeichen** ({len(flags)})', value=' '.join(flags) if flags else '-----')
 
         if user.activity is not None:
             embed.add_field(name=f'{std.richPresence_emoji} **Aktivität**', value=user.activity.name, inline=False)
@@ -167,12 +184,12 @@ class Infos(commands.Cog):
         await ctx.send(embed=embed)
 
     @cmd()
-    async def todayJoined(self, ctx):
+    async def todayJoined(self, ctx: context.Context):
         joined = len([user.id for user in ctx.guild.members if (datetime.datetime.now() - user.joined_at).days == 0])
         await ctx.send(embed=std.getEmbed(f'Heute {"ist" if joined == 1 else "sind"} {joined} User auf den Server gejoint.'))
 
     @cmd()
-    async def joined(self, ctx, user: Union[discord.Member, int] = None):
+    async def joined(self, ctx: context.Context, user: Union[discord.Member, int] = None):
         def sort(list_user):
             return list_user.joined_at
 
@@ -203,7 +220,7 @@ class Infos(commands.Cog):
         await ctx.send(embed=embed)
 
     @cmd()
-    async def bot(self, ctx):
+    async def bot(self, ctx: context.Context):
         uptime = datetime.timedelta(seconds=round(time.time() - self.bot.startTime))
         python_version = '{}.{}.{}'.format(*sys.version_info[:3])
 
@@ -225,12 +242,12 @@ class Infos(commands.Cog):
 
     @cmd()
     @checks.hasPerms(manage_guild=True)
-    async def roleMembers(self, ctx, role: discord.Role):
+    async def roleMembers(self, ctx: context.Context, role: discord.Role):
 
         await ctx.send(embed=std.getEmbed(f'Die Rolle {role.mention} hat {len(role.members)} Mitglieder.'))
 
     @cmd()
-    async def avatar(self, ctx, user: discord.User = None):
+    async def avatar(self, ctx: context.Context, user: discord.User = None):
         if user is None:
             user = ctx.author
         embed: discord.Embed = discord.Embed(color=std.normal_color)
@@ -239,15 +256,15 @@ class Infos(commands.Cog):
         await ctx.send(embed=embed)
 
     @cmd()
-    async def members(self, ctx):
+    async def members(self, ctx: context.Context):
         await ctx.send(embed=std.getEmbed(f'Der Discord hat momentan `{ctx.guild.member_count}` Mitglieder.'))
 
     @cmd()
-    async def dashboard(self, ctx):
+    async def dashboard(self, ctx: context.Context):
         await ctx.send('https://plyoox.net/')
 
     @cmd()
-    async def vote(self, ctx):
+    async def vote(self, ctx: context.Context):
         await ctx.send(embed=std.getEmbed('Vote [hier](https://top.gg/bot/505433541916622850/vote) für mich :D'))
 
 

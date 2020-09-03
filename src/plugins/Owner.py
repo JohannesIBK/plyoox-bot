@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards as std
+from utils.ext import standards as std, context
 from utils.ext.cmds import cmd, grp
 
 
@@ -25,7 +25,7 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True, aliases=["guilds"])
     @commands.is_owner()
-    async def servers(self, ctx):
+    async def servers(self, ctx: context.Context):
         def sort(val):
             return len(val.members)
 
@@ -62,7 +62,7 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def addRole(self, ctx, Rolle: discord.Role):
+    async def addRole(self, ctx: context.Context, Rolle: discord.Role):
         count = 0
         members = [member for member in ctx.guild.members if len(member.roles) == 1 and not member.bot]
         for member in members:
@@ -76,7 +76,7 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def removeRole(self, ctx, Rolle: discord.Role):
+    async def removeRole(self, ctx: context.Context, Rolle: discord.Role):
         count = 0
         f_count = 0
         for member in Rolle.members:
@@ -90,18 +90,18 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def leave(self, ctx):
+    async def leave(self, ctx: context.Context):
         await ctx.guild.leave()
 
     @cmd(hidden=True, aliases=['quit'])
     @commands.is_owner()
-    async def shutdown(self, ctx):
+    async def shutdown(self, ctx: context.Context):
         await ctx.send("Shutdown")
         await self.bot.logout()
 
     @cmd()
     @commands.is_owner()
-    async def permissions(self, ctx):
+    async def permissions(self, ctx: context.Context):
         permissions = ctx.channel.permissions_for(ctx.me)
 
         embed = discord.Embed(title='Permissions', color=0x3498db)
@@ -120,7 +120,7 @@ class Owner(commands.Cog):
 
     @cmd(pass_context=True, name='eval', aliases=["exec"])
     @commands.is_owner()
-    async def _eval(self, ctx, *, body: str):
+    async def _eval(self, ctx: context.Context, *, body: str):
         def cleanup_code(content):
             if content.startswith('```') and content.endswith('```'):
                 return '\n'.join(content.split('\n')[1:-1])
@@ -171,31 +171,25 @@ class Owner(commands.Cog):
 
     @cmd()
     @commands.is_owner()
-    async def logdata(self, ctx):
+    async def logdata(self, ctx: context.Context):
         file = discord.File("discord.log", filename="discord.log")
         await ctx.send(file=file)
 
     @cmd()
     @commands.is_owner()
-    async def setXP(self, ctx, memb: discord.Member, XP: int):
-        await ctx.db.execute("UPDATE extra.levels SET xp = $1, time = 0 WHERE userid = $2 AND guildid = $3",
-                             XP, memb.id, ctx.guild.id)
-
-    @cmd()
-    @commands.is_owner()
-    async def setVersion(self, ctx, version: str):
+    async def setVersion(self, ctx: context.Context, version: str):
         self.bot.version = version
         await ctx.send(embed=std.getEmbed(f'Die Version wurde zu {version} geändert.'))
 
     @cmd()
     @commands.is_owner()
-    async def reloadLang(self, ctx):
-        self.bot.get_cog('Help').helpText = json.load(codecs.open(r'other/help_de.json', encoding='utf-8'))
+    async def reloadLang(self, ctx: context.Context):
+        self.bot.get_cog('Help').helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
         await ctx.send(embed=std.getEmbed('Der Help-Text wurde reloadet.'))
 
     @cmd()
     @commands.is_owner()
-    async def sql(self, ctx, pgType: str, *, sql: str):
+    async def sql(self, ctx: context.Context, pgType: str, *, sql: str):
         if pgType == 'exec':
             resp = await self.bot.db.execute(sql)
         elif pgType == 'fetch':
@@ -211,7 +205,7 @@ class Owner(commands.Cog):
 
     @cmd()
     @commands.is_owner()
-    async def reloadutils(self, ctx, name: str):
+    async def reloadutils(self, ctx: context.Context, name: str):
         try:
             module_name = importlib.import_module(name)
             importlib.reload(module_name)
@@ -225,7 +219,7 @@ class Owner(commands.Cog):
 
     @grp(aliases=['maint'], case_insensitive=True)
     @commands.is_owner()
-    async def maintenance(self, ctx):
+    async def maintenance(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
             with open('utils/json/simpleStorage.json', 'r') as file:
                 data = json.load(file)
@@ -233,7 +227,7 @@ class Owner(commands.Cog):
             await ctx.send(embed=std.getEmbed(f'Maintenance: {data["maintenance"]}'))
 
     @maintenance.command()
-    async def activate(self, ctx):
+    async def activate(self, ctx: context.Context):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -249,7 +243,7 @@ class Owner(commands.Cog):
 
 
     @maintenance.command()
-    async def deactivate(self, ctx):
+    async def deactivate(self, ctx: context.Context):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -266,27 +260,27 @@ class Owner(commands.Cog):
 
     @grp(case_insensitive=True)
     @commands.is_owner()
-    async def globalban(self, ctx):
+    async def globalban(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
 
     @globalban.command()
-    async def add(self, ctx, user: discord.User, *, Grund: str):
+    async def add(self, ctx: context.Context, user: discord.User, *, Grund: str):
         await self.bot.db.execute('INSERT INTO extra.globalbans (userid, reason) VALUES ($1, $2)', user.id, Grund)
         await ctx.send('Der User wurde erfolgreich zur Globalban-Liste hinzugefügt.')
 
     @globalban.command()
-    async def remove(self, ctx, user: discord.User):
+    async def remove(self, ctx: context.Context, user: discord.User):
         await self.bot.db.execute('DELETE FROM extra.globalbans WHERE userid = $1', user.id)
         await ctx.send('Der User wurde erfolgreich von der Globalban-Liste entfernt.')
 
     @grp(case_insesitive=True)
     @commands.is_owner()
-    async def commandCount(self, ctx):
+    async def commandCount(self, ctx: context.Context):
         pass
 
     @commandCount.command()
-    async def reverse(self, ctx):
+    async def reverse(self, ctx: context.Context):
         commandsCount = self.bot.commandsCount
         commandsCountSorted = sorted(commandsCount.items(), key=operator.itemgetter(1))
         commandsCountList = []
@@ -299,7 +293,7 @@ class Owner(commands.Cog):
         await ctx.send(embed=std.getEmbed('\n'.join(commandsCountList)))
 
     @commandCount.command()
-    async def top(self, ctx):
+    async def top(self, ctx: context.Context):
         commandsCount = self.bot.commandsCount
         commandsCountSorted = sorted(commandsCount.items(), key=operator.itemgetter(1))
         commandsCountSorted.reverse()

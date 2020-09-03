@@ -18,7 +18,7 @@ class Events(commands.Cog):
     async def checkGuilds(self):
         await self.bot.wait_until_ready()
         guilds = self.bot.guilds
-        dbGuilds = (entry['sid'] for entry in await self.bot.db.fetch('SELECT sid FROM config.guilds'))
+        dbGuilds = (entry['sid'] for entry in await self.bot.db.fetch('SELECT sid FROM config.guild'))
 
         for guild in guilds:
             if guild.id not in dbGuilds:
@@ -28,7 +28,7 @@ class Events(commands.Cog):
                 embed.add_field(name="Name", value=guild.name, inline=False)
                 embed.add_field(name="Member", value=f'User: {len(guild.members)}\nBots: {bots}', inline=False)
                 embed.add_field(name="Owner", value=guild.owner, inline=False)
-                embed.add_field(name="Region", value=guild.region, inline=False)
+                embed.add_field(name="Region", value=str(guild.region), inline=False)
                 embed.add_field(name="Stats",
                                 value=f'__Rollen:__ {len(guild.roles)}\n__TextChannel:__ {len(guild.text_channels)}\n'
                                       f'__VoiceChannels:__ {len(guild.voice_channels)}',
@@ -136,7 +136,7 @@ class Events(commands.Cog):
                         return await self.bot.db.execute("UPDATE config.leveling SET noxpchannels = array_remove(noxpchannels, $1) WHERE sid = $2", noXpChannel, guild.id)
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild):
+    async def on_guild_join(self, guild: discord.Guild):
         await db.gotAddet(self.bot, guild)
 
         bots = len(list(filter(lambda m: m.bot, guild.members)))
@@ -144,7 +144,7 @@ class Events(commands.Cog):
         embed.add_field(name="Name", value=guild.name, inline=False)
         embed.add_field(name="Member", value=f'User: {len(guild.members)}\nBots: {bots}', inline=False)
         embed.add_field(name="Owner", value=guild.owner, inline=False)
-        embed.add_field(name="Region", value=guild.region, inline=False)
+        embed.add_field(name="Region", value=str(guild.region), inline=False)
         embed.add_field(name="Stats",
                         value=f'__Rollen:__ {len(guild.roles)}\n__TextChannel:__ {len(guild.text_channels)}\n__VoiceChannels:__ {len(guild.voice_channels)}',
                         inline=False)

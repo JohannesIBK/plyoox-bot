@@ -1,6 +1,4 @@
 import datetime
-import string
-from random import random
 from typing import Union
 
 import discord
@@ -40,6 +38,7 @@ partner_emoji = '<:partner:703906812348334130>'
 staff_emoji = '<:staff:703906898851790859>'
 botdev_emoji = '<:botdev:703907073402077205>'
 bughunter_badge = '<:bughunter:703906553325158440>'
+bughunter2_badge = '<:bughunter2:747904909378060319>'
 nitro_emoji = '<:nitro:703907279795257444>'
 hypesquad_emoji = '<:hypesquad:314068430854684672>'
 
@@ -127,16 +126,21 @@ def getUserEmbed(reason, guildName: str, duration = 'permanent', punishType = 1)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text='Plyoox Moderation', icon_url=avatar_url)
 
+    if duration == 'permanent':
+        messageStart = 'Du wurdest permanent '
+    else:
+        messageStart = f'Du wurdest bis {duration} '
+
+    if reason == 'No Reason':
+        reason = ''
+    else:
+        reason = f'für `{reason}` '
+
     if punishType == 0:
-        embed.description = f'Du wurdest `{duration}` vom Server `{guildName}` für `{reason}` ausgeschlossen.'
+        embed.description = messageStart + f'vom Server `{guildName}` {reason}ausgeschlossen.'
     elif punishType == 1:
-        embed.description = f'Du wurdest vom Server `{guildName}` für `{reason}` gekickt.'
+        embed.description = f'Du wurdest vom Server `{guildName}` {reason}gekickt.'
     elif punishType == 2:
-        embed.description = f'Du wurdest `{duration}` auf dem Server `{guildName}` für `{reason}` gemutet.'
+        embed.description = messageStart + f'auf dem Server `{guildName}` {reason}gemutet.'
 
     return embed
-
-
-def randomString(stringLength=6):
-    letters = string.ascii_letters + string.digits
-    return ''.join(random.choice(letters) for _ in range(stringLength))
