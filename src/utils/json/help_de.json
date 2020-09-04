@@ -374,7 +374,7 @@
     "\n**__Command:__** {p}reminder < **`Dauer`** > < **`Text`** >",
     "\n**__Infos:__**",
     " » Dauer in Minuten (min), Stunden (h), Tagen (d), Monaten (mdn), oder Jahr (y).",
-    "\n**__Beispiel:__**",
+    "\n**__Beispiele:__**",
     " » {p}reminder 15min Plyoox promoten",
     " » {p}reminder 3mon Rechungen bezahlen"
   ],
@@ -402,5 +402,12 @@
   "laugh": [
     ":joy: :rofl:",
     "\n**__Command:__** {p}laugh"
+  ],
+  "copyblacklist": [
+    "Kopiert die Blacklist eines anderen Servers. Du musst auf beiden Servern Admin sein.",
+    "\n**__Command:__** {p}copyblacklist < **`ServerID`** > [ `Überschreiben: Nein` ]",
+    "\n**__Beispiele:__**",
+    " » {p}copyblacklist 505438986672537620 True",
+    " » {p}copyblacklist 505438986672537620"
   ]
 }
