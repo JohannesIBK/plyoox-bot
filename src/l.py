@@ -1,19 +1,24 @@
 # kphoen
+# sorin
 
 import asyncio
-import os.path
+import argparse
 
 import server
 from main import Plyoox as Bot
 
-if os.path.isfile('test.txt'):
-    with open(r"utils/keys/testbot.env") as f:
-        token = f.read()
-    print("\n\nStarting Test...\n")
-else:
+parser = argparse.ArgumentParser()
+parser.add_argument('--prod', type=bool, default=False, required=False)
+args = parser.parse_args()
+
+if args.prod:
     with open(r"utils/keys/bot.env") as f:
         token = f.read()
     print("\n\nBot startet...\n")
+else:
+    with open(r"utils/keys/testbot.env") as f:
+        token = f.read()
+    print("\n\nStarting Test...\n")
 
 
 loop = asyncio.get_event_loop()
