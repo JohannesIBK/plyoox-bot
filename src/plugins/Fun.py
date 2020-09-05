@@ -143,10 +143,13 @@ class Fun(commands.Cog):
 
     @cmd(aliases=['slots'])
     @checks.isActive('fun')
+    @commands.cooldown(rate=3, per=1, type=commands.BucketType.member)
     async def slot(self, ctx: context.Context):
-        emojis = {"🍎", "🍊", '🍉', '🍇', '🍓', '🍒'}
+        emojis = ("🍎", '🍉', '🍇', '🍓', '🍒')
 
-        selected = random.sample(emojis, 3)
+        selected = ''
+        for _ in range(3):
+            selected += random.choice(emojis)
         rolled = len(set(selected))
 
         if rolled == 1:
