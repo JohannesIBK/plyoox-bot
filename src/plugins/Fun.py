@@ -350,7 +350,7 @@ class Fun(commands.Cog):
         gifs: list = self.gifData['laugh']
         gif: str = random.choice(gifs)
 
-        embed = std.getEmbed('{ctx.author.mention} laughs')
+        embed = std.getEmbed(f'{ctx.author.mention} laughs')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
