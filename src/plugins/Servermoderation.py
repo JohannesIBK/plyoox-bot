@@ -211,7 +211,6 @@ class Servermoderation(commands.Cog):
         if words is None:
             return await ctx.error('Der Server hat keine Wörter eingespeichert.')
 
-
         if overwrite:
             await ctx.db.execute(
                 'UPDATE automod.blacklist SET words = $1 WHERE sid = $2',
@@ -220,6 +219,8 @@ class Servermoderation(commands.Cog):
             await ctx.db.execute(
                 'UPDATE automod.blacklist SET words = array_cat(words, $1) WHERE sid = $2',
                 words, ctx.guild.id)
+
+        await ctx.embed('Die Blacklist wurde geupdated.')
 
 
     # @cmd()

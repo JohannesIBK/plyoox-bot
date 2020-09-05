@@ -371,7 +371,10 @@
   ],
   "reminder": [
     "Setze eine Timer um deine Termine einzuhalten!",
-    "\n**__Command:__** {p}reminder < **`Dauer`** > < **`Text`** >",
+    "\n**__Commands:__**",
+    " » {p}reminder create < **`Dauer`** > < **`Text`** >",
+    " » {p}reminder list",
+    " » {p}reminder delete < **`ID`** >",
     "\n**__Infos:__**",
     " » Dauer in Minuten (min), Stunden (h), Tagen (d), Monaten (mdn), oder Jahr (y).",
     "\n**__Beispiele:__**",
