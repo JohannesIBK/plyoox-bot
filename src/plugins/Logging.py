@@ -4,11 +4,12 @@ from typing import Union
 import discord
 from discord.ext import commands
 
+import main
 from utils.ext import standards as std
 
 
 class Logging(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: main.Plyoox):
         self.bot = bot
 
     async def createWebhook(self, guildID):
@@ -18,7 +19,7 @@ class Logging(commands.Cog):
         if channel is None:
             return
         if guild.me.permissions_in(channel).manage_webhooks:
-            webhook: discord.Webhook = await channel.create_webhook(name=self.bot.user.name, avatar=self.bot.user.avatar_url)
+            webhook: discord.Webhook = await channel.create_webhook(name=self.bot.user.name, avatar=self.bot.user.avatar_url_as(format='webp').read())
             await self.bot.db.execute('UPDATE config.logging SET token = $1, id = $2 WHERE sid = $3', webhook.token, webhook.id, guild.id)
 
 
@@ -59,7 +60,7 @@ class Logging(commands.Cog):
         if data['id'] and data['token']:
             try:
                 webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
-                webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
             except discord.NotFound:
                 await self.createWebhook(guild.id)
 
@@ -85,7 +86,7 @@ class Logging(commands.Cog):
         if data['id'] and data['token']:
             try:
                 webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
-                webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
             except discord.NotFound:
                 await self.createWebhook(guild.id)
 
@@ -114,7 +115,7 @@ class Logging(commands.Cog):
         if data['id'] and data['token']:
             try:
                 webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
-                webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
             except discord.NotFound:
                 await self.createWebhook(user.guild.id)
 
@@ -145,7 +146,7 @@ class Logging(commands.Cog):
         if data['id'] and data['token']:
             try:
                 webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
-                webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
             except discord.NotFound:
                 await self.createWebhook(user.guild.id)
 
@@ -182,7 +183,7 @@ class Logging(commands.Cog):
         if data['id'] and data['token']:
             try:
                 webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
-                webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
             except discord.NotFound:
                 await self.createWebhook(msg.guild.id)
 
@@ -231,7 +232,7 @@ class Logging(commands.Cog):
         if data['id'] and data['token']:
             try:
                 webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
-                webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
             except discord.NotFound:
                 await self.createWebhook(int(payload.data['guild_id']))
 
@@ -263,7 +264,7 @@ class Logging(commands.Cog):
             if data['id'] and data['token']:
                 try:
                     webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
-                    webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                    await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
                 except discord.NotFound:
                     await self.createWebhook(before.guild.id)
 
@@ -294,7 +295,7 @@ class Logging(commands.Cog):
             if data['id'] and data['token']:
                 try:
                     webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
-                    webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                    await webhook.send(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
                 except discord.NotFound:
                     await self.createWebhook(before.guild.id)
 
