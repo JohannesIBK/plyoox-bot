@@ -255,7 +255,7 @@ class Fun(commands.Cog):
         gifs = self.gifData['pat']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed('{ctx.author.mention} patted {user.mention}')
+        embed = std.getEmbed(f'{ctx.author.mention} patted {user.mention}')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -292,7 +292,7 @@ class Fun(commands.Cog):
         gifs: list = self.gifData['rage']
         gif: str = random.choice(gifs)
 
-        embed = std.getEmbed('{ctx.author.mention} rages')
+        embed = std.getEmbed(f'{ctx.author.mention} rages')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -302,7 +302,7 @@ class Fun(commands.Cog):
         gifs: list = self.gifData['cry']
         gif: str = random.choice(gifs)
 
-        embed = std.getEmbed('{ctx.author.mention} cries')
+        embed = std.getEmbed(f'{ctx.author.mention} cries')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
