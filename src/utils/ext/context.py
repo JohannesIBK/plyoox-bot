@@ -32,7 +32,7 @@ class Context(commands.Context):
 
     async def release(self):
         if self._db is not None:
-            await self.bot.pool.release(self._db)
+            await self.bot.db.release(self._db)
             self._db = None
 
     async def error(self, message: str, **kwargs):
