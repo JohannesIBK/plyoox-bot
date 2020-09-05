@@ -11,7 +11,8 @@ from utils.ext import standards as std
 class Context(commands.Context):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._db = self.bot.db
+        self.pool = self.bot.db
+        self._db = None
 
     async def safe_send(self, content, *, escape_mentions=True, **kwargs):
         if escape_mentions:
@@ -28,7 +29,7 @@ class Context(commands.Context):
 
     @property
     def db(self) -> Pool:
-        return self._db if self._db else self.bot.db
+        return self._db if self._db else self.pool
 
     async def release(self):
         if self._db is not None:
