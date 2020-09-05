@@ -268,7 +268,7 @@ class Fun(commands.Cog):
         gifs = self.gifData['hug']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed('{ctx.author.mention} hugged {user.mention}')
+        embed = std.getEmbed(f'{ctx.author.mention} hugged {user.mention}')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
