@@ -110,7 +110,7 @@ class Fun(commands.Cog):
             user2 = ctx.message.author
 
         if user1 == user2:
-            return ctx.embed('Das funktioniert so nicht D:')
+            return await ctx.embed('Das funktioniert so nicht D:')
 
         score = random.randint(0, 100)
         filled_progbar = round(score / 100 * 10)
@@ -250,7 +250,7 @@ class Fun(commands.Cog):
     @checks.isActive('fun')
     async def pat(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
-            return ctx.embed('Das funktioniert so nicht D:')
+            return await ctx.embed('Das funktioniert so nicht D:')
 
         gifs = self.gifData['pat']
         gif = random.choice(gifs)
@@ -263,7 +263,7 @@ class Fun(commands.Cog):
     @checks.isActive('fun')
     async def hug(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
-            return ctx.embed('Das funktioniert so nicht D:')
+            return await ctx.embed('Das funktioniert so nicht D:')
 
         gifs = self.gifData['hug']
         gif = random.choice(gifs)
@@ -276,7 +276,7 @@ class Fun(commands.Cog):
     @checks.isActive('fun')
     async def highfive(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
-            return ctx.embed('Das funktioniert so nicht D:')
+            return await ctx.embed('Das funktioniert so nicht D:')
 
         gifs: list = self.gifData['highfive']
         gif: str = random.choice(gifs)
