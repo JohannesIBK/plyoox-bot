@@ -386,7 +386,7 @@
     "\n**__Command:__** {p}vote"
   ],
   "unban": [
-    "Entbannt einen Useer",
+    "Entbannt einen User",
     "\n**__Command:__** {p}unban < **`User`** > [ `Grund` ]",
     "\n**__Beispiele:__**",
     " » {p}unban @Plyoxx#0000",
