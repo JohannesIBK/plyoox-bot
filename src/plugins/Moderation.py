@@ -118,7 +118,13 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def ban(self, ctx: context.Context, user: Union[discord.Member, discord.User], *, reason: converters.ActionReason = 'No Reason'):
+    async def ban(self, ctx: context.Context, user: Union[discord.Member, discord.User, int], *, reason: converters.ActionReason = 'No Reason'):
+        if isinstance(user, int):
+            try:
+                user = await self.bot.fetch_user(user)
+            except discord.NotFound:
+                return await ctx.error('Der User wurde nicht gefunden.')
+
         if not await self.punishUser(user):
             return await ctx.error('Du kannst diesen User nicht bannen.')
 
