@@ -19,7 +19,8 @@ class Logging(commands.Cog):
         if channel is None:
             return
         if guild.me.permissions_in(channel).manage_webhooks:
-            webhook: discord.Webhook = await channel.create_webhook(name=self.bot.user.name, avatar=self.bot.user.avatar_url_as(format='webp').read())
+            avatar = await self.bot.user.avatar_url_as(format='webp').read()
+            webhook: discord.Webhook = await channel.create_webhook(name=self.bot.user.name, avatar=avatar)
             await self.bot.db.execute('UPDATE config.logging SET token = $1, id = $2 WHERE sid = $3', webhook.token, webhook.id, guild.id)
 
 
