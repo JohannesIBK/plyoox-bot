@@ -269,7 +269,7 @@ class Timers(commands.Cog):
     async def list(self, ctx: context.Context):
         noreminder = await ctx.db.fetchval(
             'SELECT noreminderrole FROM config.timers WHERE sid = $1',
-            ctx.guild.id, ctx.author.id)
+            ctx.guild.id)
 
         if noreminder:
             if noreminder in [role.id for role in ctx.author.roles]:
