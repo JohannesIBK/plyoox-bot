@@ -15,6 +15,7 @@ class Leveling(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
 
+    # method to get the xp from a level
     @staticmethod
     def _get_xp_from_lvl(lvl: int):
         xp = 100
@@ -22,10 +23,12 @@ class Leveling(commands.Cog):
             xp += Leveling._get_level_xp(_)
         return xp
 
+    # get the needed xp for a level
     @staticmethod
     def _get_level_xp(lvl):
         return 5 * (lvl ** 2) + 50 * lvl + 100
 
+    # get the current level of all xp
     @staticmethod
     def _get_level_from_xp(xp: int):
         level = 0
@@ -36,17 +39,22 @@ class Leveling(commands.Cog):
 
     # --------------------------------listeners--------------------------------
 
+    # run in every message
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
+        # ignore other bots
         if msg.author.bot:
             return
 
+        # ignore if its a dm
         if msg.guild is None:
             return
 
+        # if the author is for some reason not a guild member
         if not isinstance(msg.author, discord.Member):
             return
 
+        # if the module is not activated - return
         if not await self.bot.get(msg.guild.id, 'leveling'):
             return
 
@@ -54,15 +62,18 @@ class Leveling(commands.Cog):
         guild: discord.Guild = msg.guild
         userRoles = [role.id for role in author.roles]
 
+        # check if the channel is set up to become no xp
         noXPChannels = await self.bot.get(guild.id, 'noxpchannels')
         if noXPChannels:
             if msg.channel.id in noXPChannels:
                 return
 
+        # check if the user has a role that is not allowed to get xp
         noXPRole = await self.bot.get(guild.id, 'noxprole')
         if noXPRole in userRoles:
             return
 
+        # fetch user data from the database; if user is not saved, create one
         userData = await self.bot.db.fetchrow(
             'SELECT xp, sid, time, id FROM extra.levels WHERE uid = $1 and sid = $2',
             author.id, guild.id)
@@ -71,26 +82,32 @@ class Leveling(commands.Cog):
                 "INSERT INTO extra.levels (uid, sid, xp, time) VALUES ($1, $2, $3, $4)",
                 author.id, guild.id, random.randint(15, 25), time.time())
 
+        #  check if the last message is longer or a minute ago; should prevent spamming
         if time.time() - userData['time'] < 60:
             return
 
+        # add the new xp to the user
         newXP = random.randint(15, 25)
         await self.bot.db.execute("UPDATE extra.levels SET xp = xp + $1, time = $2 WHERE id = $3", newXP, time.time(), userData['id'])
 
         beforeLvl = self._get_level_from_xp(userData['xp'])
         currentLvl = self._get_level_from_xp(userData['xp'] + newXP)
+        # check if the user has leveled up
         if currentLvl > beforeLvl:
             addRole = None
             data = await self.bot.db.fetchrow("SELECT channel, roles, message, remove FROM config.leveling WHERE sid = $1", guild.id)
             if data is None:
                 return
 
+            # check if level roles are set up
             if data['roles']:
                 roles = data['roles']
+                # get a role if one is set uup for that level
                 addRoleID = list(filter(lambda role: role[1] == currentLvl, roles))
                 if addRoleID:
                     addRole = guild.get_role(addRoleID[0][0])
                 roles.sort(key = lambda role: role[1])
+                # if the server admin activated remove old level roles
                 if data['remove']:
                     if not addRole:
                         return
@@ -108,10 +125,13 @@ class Leveling(commands.Cog):
                                 addLvlRoles.append(newRole)
                     await author.add_roles(*addLvlRoles)
 
+            # get saved channel and message from the guild
             lvlMsg = data['message']
             channel = guild.get_channel(data['channel'])
+            # formt level message
             lvlMsg = formatMessage(lvlMsg, author, currentLvl, addRole)
             if lvlMsg is not None:
+                # check if a channel for the messages is set uo
                 if channel is not None:
                     await channel.send(lvlMsg)
                 else:
