@@ -26,10 +26,10 @@ class Invites(Base):
             self.partner = []
             self.points = None
         else:
-            self.state = record['invitestate']
-            self.points = record['invitepoints']
-            self.whitelist = record['invitewhitelist'] or []
-            self.partner = record['invitepatner'] or []
+            self.state = record.get('invitestate')
+            self.points = record.get('invitepoints')
+            self.whitelist = record.get('invitewhitelist') or []
+            self.partner = record.get('invitepatner') or []
 
     async def reload(self, record = None):
         if record is None:
@@ -43,10 +43,10 @@ class Invites(Base):
             self.partner = []
             self.points = None
         else:
-            self.state = record['invitestate']
-            self.points = record['invitepoints']
-            self.whitelist = record['invitewhitelist'] or []
-            self.partner = record['invitepatner'] or []
+            self.state = record.get('invitestate')
+            self.points = record.get('invitepoints')
+            self.whitelist = record.get('invitewhitelist') or []
+            self.partner = record.get('invitepatner') or []
 
 class Blacklist(Base):
     __slots__ = 'words'
@@ -63,10 +63,10 @@ class Blacklist(Base):
             self.words = []
             self.points = None
         else:
-            self.state = record['blackliststate']
-            self.points = record['blacklistpoints']
-            self.whitelist = record['blacklistwhitelist'] or []
-            self.words = record['blacklistwords'] or []
+            self.state = record.get('blackliststate')
+            self.points = record.get('blacklistpoints')
+            self.whitelist = record.get('blacklistwhitelist') or []
+            self.words = record.get('blacklistwords') or []
 
     async def reload(self, record = None):
         if record is None:
@@ -79,10 +79,10 @@ class Blacklist(Base):
             self.whitelist = []
             self.words = []
         else:
-            self.state = record['blackliststate']
-            self.points = record['blacklistpoints']
-            self.whitelist = record['blacklistwhitelist'] or []
-            self.words = record['blacklistwords'] or []
+            self.state = record.get('blackliststate')
+            self.points = record.get('blacklistpoints')
+            self.whitelist = record.get('blacklistwhitelist') or []
+            self.words = record.get('blacklistwords') or []
 
 class Caps(Base):
     def __init__(self, bot, record, sid):
@@ -94,9 +94,9 @@ class Caps(Base):
             self.whitelist = []
             self.points = None
         else:
-            self.state = record['capsstate']
-            self.points = record['capspoints']
-            self.whitelist = record['capswhitelist'] or []
+            self.state = record.get('capsstate')
+            self.points = record.get('capspoints')
+            self.whitelist = record.get('capswhitelist') or []
 
     async def reload(self, record = None):
         if record is None:
@@ -108,9 +108,9 @@ class Caps(Base):
             self.state = 0
             self.whitelist = []
         else:
-            self.state = record['capsstate']
-            self.points = record['capspoints']
-            self.whitelist = record['capswhitelist'] or []
+            self.state = record.get('capsstate')
+            self.points = record.get('capspoints')
+            self.whitelist = record.get('capswhitelist') or []
 
 class Links(Base):
     __slots__ = ('links', 'iswhitelist')
@@ -129,11 +129,11 @@ class Links(Base):
             self.iswhitelist = None
             self.points = None
         else:
-            self.state = record['linksstate']
-            self.points = record['linkspoints']
-            self.whitelist = record['linkswhitelist'] or []
-            self.links = record['linkslinks'] or []
-            self.iswhitelist = record['linksiswhitelist']
+            self.state = record.get('linksstate')
+            self.points = record.get('linkspoints')
+            self.whitelist = record.get('linkswhitelist') or []
+            self.links = record.get('linkslinks') or []
+            self.iswhitelist = record.get('linksiswhitelist')
 
     async def reload(self, record = None):
         if record is None:
@@ -148,11 +148,11 @@ class Links(Base):
             self.iswhitelist = None
             self.points = None
         else:
-            self.state = record['linksstate']
-            self.points = record['linkspoints']
-            self.whitelist = record['linkswhitelist'] or []
-            self.links = record['linkslinks'] or []
-            self.iswhitelist = record['linksiswhitelist']
+            self.state = record.get('linksstate')
+            self.points = record.get('linkspoints')
+            self.whitelist = record.get('linkswhitelist') or []
+            self.links = record.get('linkslinks') or []
+            self.iswhitelist = record.get('linksiswhitelist')
 
 class Mentions(Base):
     __slots__ = ('count', 'everyone')
@@ -171,11 +171,11 @@ class Mentions(Base):
             self.everyone = None
             self.points = None
         else:
-            self.state = record['mentionsstate']
-            self.points = record['mentionspoints']
-            self.whitelist = record['mentionswhitelist'] or []
-            self.count = record['mentionscount']
-            self.everyone = record['mentionseveryone']
+            self.state = record.get('mentionsstate')
+            self.points = record.get('mentionspoints')
+            self.whitelist = record.get('mentionswhitelist') or []
+            self.count = record.get('mentionscount')
+            self.everyone = record.get('mentionseveryone')
 
     async def reload(self, record = None):
         if record is None:
@@ -188,11 +188,11 @@ class Mentions(Base):
             self.whitelist = []
             self.count = 5
         else:
-            self.state = record['mentionsstate']
-            self.points = record['mentionspoints']
-            self.whitelist = record['mentionswhitelist'] or []
-            self.count = record['mentionscount']
-            self.everyone = record['mentionseveryone']
+            self.state = record.get('mentionsstate')
+            self.points = record.get('mentionspoints')
+            self.whitelist = record.get('mentionswhitelist') or []
+            self.count = record.get('mentionscount')
+            self.everyone = record.get('mentionseveryone')
 
 class Config:
     __slots__ = (
@@ -229,17 +229,17 @@ class Config:
             self.modroles = None
             self._muterole = None
         else:
-            self.logchannelID = record['logchannel']
-            self.gmm = record['gmm']
-            self.maxpoints = record['maxpoints']
-            self.action = record['action']
-            self.logchannelID = record['logging']
-            self.bantime = record['bantime']
-            self.mutetime = record['mutetime']
-            self.ignoredroles = record['ignoredroles'] or []
-            self.helperroles = record['helperroles'] or []
-            self.modroles = record['modroles'] or []
-            self._muterole = record['muterole']
+            self.logchannelID = record.get('logchannel')
+            self.gmm = record.get('gmm')
+            self.maxpoints = record.get('maxpoints')
+            self.action = record.get('action')
+            self.logchannelID = record.get('logging')
+            self.bantime = record.get('bantime')
+            self.mutetime = record.get('mutetime')
+            self.ignoredroles = record.get('ignoredroles') or []
+            self.helperroles = record.get('helperroles') or []
+            self.modroles = record.get('modroles') or []
+            self._muterole = record.get('muterole')
 
     @property
     def logchannel(self) -> discord.TextChannel:
@@ -266,16 +266,16 @@ class Config:
             self.modroles = None
             self._muterole = None
         else:
-            self.logchannelID = record['logchannel']
-            self.gmm = record['gmm']
-            self.maxpoints = record['maxpoints']
-            self.action = record['action']
-            self.logchannelID = record['logging']
-            self.bantime = record['bantime']
-            self.mutetime = record['mutetime']
-            self.ignoredroles = record['ignoredroles'] or []
-            self.helperroles = record['helperroles'] or []
-            self.modroles = record['modroles'] or []
+            self.logchannelID = record.get('logchannel')
+            self.gmm = record.get('gmm')
+            self.maxpoints = record.get('maxpoints')
+            self.action = record.get('action')
+            self.logchannelID = record.get('logging')
+            self.bantime = record.get('bantime')
+            self.mutetime = record.get('mutetime')
+            self.ignoredroles = record.get('ignoredroles') or []
+            self.helperroles = record.get('helperroles') or []
+            self.modroles = record.get('modroles') or []
 
 
 class Automod:
