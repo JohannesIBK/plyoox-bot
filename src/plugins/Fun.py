@@ -105,7 +105,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def ship(self, ctx: context.Context, user1: discord.Member, user2: discord.Member = None):
+    async def ship(self, ctx: context.Context, user1: commands.MemberConverter, user2: commands.MemberConverter = None):
         if user2 is None:
             user2 = ctx.message.author
 
@@ -188,7 +188,7 @@ class Fun(commands.Cog):
                     lastUpper = False
             newText.append(t)
 
-        embed: discord.Embed = std.getEmbed(' '.join(newText)) 
+        embed = std.getEmbed(' '.join(newText))
         embed.set_footer(icon_url=ctx.author.avatar_url, text=ctx.author)
         await ctx.send(embed=embed)
 
@@ -248,7 +248,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def pat(self, ctx: context.Context, user: discord.Member):
+    async def pat(self, ctx: context.Context, user: commands.MemberConverter):
         if user == ctx.author:
             return await ctx.embed('Das funktioniert so nicht D:')
 
@@ -261,7 +261,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def hug(self, ctx: context.Context, user: discord.Member):
+    async def hug(self, ctx: context.Context, user: commands.MemberConverter):
         if user == ctx.author:
             return await ctx.embed('Das funktioniert so nicht D:')
 
@@ -274,15 +274,14 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def highfive(self, ctx: context.Context, user: discord.Member):
+    async def highfive(self, ctx: context.Context, user: commands.MemberConverter):
         if user == ctx.author:
             return await ctx.embed('Das funktioniert so nicht D:')
 
         gifs: list = self.gifData['highfive']
         gif: str = random.choice(gifs)
 
-        embed: discord.Embed = discord.Embed(color=std.normal_color,
-                                             description=f'{ctx.author.mention} gives {user.mention} a highfive')
+        embed = discord.Embed(color=std.normal_color, description=f'{ctx.author.mention} gives {user.mention} a highfive')
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -340,7 +339,7 @@ class Fun(commands.Cog):
         gifs: list = self.gifData['cat']
         gif: str = random.choice(gifs)
 
-        embed: discord.Embed = discord.Embed(color=std.normal_color)
+        embed = discord.Embed(color=std.normal_color)
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 

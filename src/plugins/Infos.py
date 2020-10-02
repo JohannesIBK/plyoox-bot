@@ -89,10 +89,10 @@ class Infos(commands.Cog):
     async def server(self, ctx: context.Context, guildID: int = None):
         guild: discord.Guild = ctx.guild
         if guildID is not None:
-            new_guild = self.bot.get_guild(guildID)
-            if new_guild is not None:
-                if ctx.author.id == self.bot.owner_id:
-                    guild = new_guild
+            if ctx.author.id == self.bot.owner_id:
+                foreignGuild = self.bot.get_guild(guildID)
+                if foreignGuild is not None:
+                    guild = foreignGuild
 
         roles = self._getRoles(guild.roles)
         emojis = self._getEmojis(guild.emojis)
@@ -137,7 +137,7 @@ class Infos(commands.Cog):
         await ctx.send(embed=embed)
 
     @cmd(aliases=['user', 'whois'])
-    async def info(self, ctx: context.Context, user: discord.Member = None):
+    async def info(self, ctx: context.Context, user: commands.MemberConverter = None):
         def sort(val):
             return val.joined_at
 
@@ -189,7 +189,7 @@ class Infos(commands.Cog):
         await ctx.embed(f'Heute {"ist" if joined == 1 else "sind"} {joined} User auf den Server gejoint.')
 
     @cmd()
-    async def joined(self, ctx: context.Context, user: Union[discord.Member, int] = None):
+    async def joined(self, ctx: context.Context, user: Union[commands.MemberConverter, int] = None):
         def sort(list_user):
             return list_user.joined_at
 
@@ -246,7 +246,7 @@ class Infos(commands.Cog):
         await ctx.embed(f'Die Rolle {role.mention} hat {len(role.members)} Mitglieder.')
 
     @cmd()
-    async def avatar(self, ctx: context.Context, user: discord.User = None):
+    async def avatar(self, ctx: context.Context, user: commands.MemberConverter = None):
         if user is None:
             user = ctx.author
         embed: discord.Embed = discord.Embed(color=std.normal_color)

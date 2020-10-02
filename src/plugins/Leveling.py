@@ -114,7 +114,7 @@ class Leveling(commands.Cog):
 
     @cmd(aliases=['rank'])
     @checks.isActive('leveling')
-    async def level(self, ctx: context.Context, user: discord.Member = None):
+    async def level(self, ctx: context.Context, user: commands.MemberConverter = None):
         if user is None:
             user = ctx.author
 
@@ -155,6 +155,7 @@ class Leveling(commands.Cog):
             role = ctx.guild.get_role(roleData[0])
             lvlRoles.append([role, roleData[1]])
         lvlRoles.sort(key=lambda lvlRole: lvlRole[1])
+
         await ctx.send(embed=discord.Embed(color=std.normal_color, title='Level-Rollen', description='\n'.join(f'{lvlRole[0].mention} | {lvlRole[1]}' for lvlRole in lvlRoles)))
 
     @cmd(aliases=["top10"])
@@ -176,7 +177,7 @@ class Leveling(commands.Cog):
             else:
                 currentXP = userData['xp'] - self._get_xp_from_lvl(lvl - 1)
 
-            member: discord.Member = self.bot.get_user(userData['uid'])
+            member = ctx.guild.get_member(userData['uid'])
             if member is None:
                 continue
 
@@ -190,7 +191,7 @@ class Leveling(commands.Cog):
     @cmd(aliases=["rl"])
     @checks.isMod()
     @checks.isActive('leveling')
-    async def resetlevel(self, ctx: context.Context, user: discord.Member):
+    async def resetlevel(self, ctx: context.Context, user: commands.MemberConverter):
         await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
         await ctx.embed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.')
 

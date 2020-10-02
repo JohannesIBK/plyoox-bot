@@ -282,7 +282,7 @@ class Timers(commands.Cog):
         if not reminders:
             return await ctx.error('Du hast keine Timer auf diesem Server.')
 
-        timerListEmbed: discord.Embed = discord.Embed(color=std.normal_color, title='Timer')
+        timerListEmbed = discord.Embed(color=std.normal_color, title='Timer')
         timerListEmbed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
         for timer in reminders:
             reason = json.loads(timer['data'])['message']

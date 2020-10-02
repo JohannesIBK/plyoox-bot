@@ -215,7 +215,7 @@ class Events(commands.Cog):
                 await channel.send(msg)
 
         if data["joinrole"] is not None:
-            role: discord.Role = guild.get_role(data["joinrole"])
+            role = guild.get_role(data["joinrole"])
             try:
                 await member.add_roles(role)
             except:
@@ -228,7 +228,7 @@ class Events(commands.Cog):
 
         if punishData is not None:
             muteroleID: int = punishData['muterole']
-            muterole: discord.Role = guild.get_role(muteroleID)
+            muterole = guild.get_role(muteroleID)
             if muterole is not None:
                 await member.add_roles(muterole)
 

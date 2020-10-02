@@ -61,13 +61,13 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def addRole(self, ctx: context.Context, Rolle: discord.Role):
+    async def addRole(self, ctx: context.Context, role: commands.RoleConverter):
         count = 0
         members = [member for member in ctx.guild.members if len(member.roles) == 1 and not member.bot]
         for member in members:
             if ctx.me.top_role > member.top_role:
                 try:
-                    await member.add_roles(Rolle)
+                    await member.add_roles(role)
                     count += 1
                 except discord.Forbidden:
                     break
@@ -75,12 +75,12 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def removeRole(self, ctx: context.Context, Rolle: discord.Role):
+    async def removeRole(self, ctx: context.Context, role: commands.RoleConverter):
         count = 0
         f_count = 0
-        for member in Rolle.members:
+        for member in role.members:
             try:
-                await member.remove_roles(Rolle)
+                await member.remove_roles(role)
                 count += 1
             except discord.Forbidden:
                 f_count += 1
@@ -264,13 +264,13 @@ class Owner(commands.Cog):
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
 
     @globalban.command()
-    async def add(self, ctx: context.Context, user: discord.User, *, Grund: str):
-        await self.bot.db.execute('INSERT INTO extra.globalbans (userid, reason) VALUES ($1, $2)', user.id, Grund)
+    async def add(self, ctx: context.Context, userID: int, *, Grund: str):
+        await self.bot.db.execute('INSERT INTO extra.globalbans (userid, reason) VALUES ($1, $2)', userID, Grund)
         await ctx.embed('Der User wurde erfolgreich zur Globalban-Liste hinzugefügt.')
 
     @globalban.command()
-    async def remove(self, ctx: context.Context, user: discord.User):
-        await self.bot.db.execute('DELETE FROM extra.globalbans WHERE userid = $1', user.id)
+    async def remove(self, ctx: context.Context, userID: int):
+        await self.bot.db.execute('DELETE FROM extra.globalbans WHERE userid = $1', userID)
         await ctx.embed('Der User wurde erfolgreich von der Globalban-Liste entfernt.')
 
     @grp(case_insesitive=True)
