@@ -90,5 +90,8 @@ class BotCache:
         cache = GuildConfig(self.bot, sid, records)
         self.cache.update({sid: cache})
 
+    def remove(self, sid):
+        self.cache.pop(sid)
+
 
 
