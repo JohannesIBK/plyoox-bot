@@ -24,7 +24,7 @@ class PlyooxSupport(commands.Cog):
         pass
 
     @suggestion.command()
-    async def accept(self, ctx: context.Context, ID: int):
+    async def accept(self, ctx: context.Context, ID: int, *, message = None):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -38,6 +38,8 @@ class PlyooxSupport(commands.Cog):
         acceptedChannel: discord.TextChannel = ctx.guild.get_channel(ACCEPTED_SUGGESTION_CHANNEL)
         embed = discord.Embed(color=discord.Color.green(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
         embed.set_footer(text=f'#{data["suggestion"]} | {msg.author}')
+        if message:
+            embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=message)
         embed.description = msg.content
         if msg.attachments:
             attachment = await msg.attachments[0].to_file()
@@ -48,7 +50,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def deny(self, ctx: context.Context, ID: int):
+    async def deny(self, ctx: context.Context, ID: int, *, message = None):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -62,7 +64,9 @@ class PlyooxSupport(commands.Cog):
         deniedChannel: discord.TextChannel = ctx.guild.get_channel(DENIED_SUGGESTION_CHANNEL)
         embed = discord.Embed(color=discord.Color.red(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
         embed.description = msg.content
-        embed.set_footer(text='#' + str(data['suggestion']) )
+        embed.set_footer(text='#' + str(data['suggestion']))
+        if message:
+            embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=message)
         if msg.attachments:
             attachment = await msg.attachments[0].to_file()
             await deniedChannel.send(embed=embed, file=attachment)
@@ -72,7 +76,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def wait(self, ctx: context.Context, ID: int):
+    async def wait(self, ctx: context.Context, ID: int, *, message = None):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -87,6 +91,8 @@ class PlyooxSupport(commands.Cog):
         embed = discord.Embed(color=discord.Color.gold(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
         embed.description = msg.content
         embed.set_footer(text=f'#{data["suggestion"]} | {msg.author}')
+        if message:
+            embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=message)
         if msg.attachments:
             attachment = await msg.attachments[0].to_file()
             await waitingChannel.send(embed=embed, file=attachment)
