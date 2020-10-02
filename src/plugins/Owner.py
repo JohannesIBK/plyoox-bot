@@ -18,7 +18,6 @@ from utils.ext.cmds import cmd, grp
 
 class Owner(commands.Cog):
     def __init__(self, bot: main.Plyoox):
-        super().__init__()
         self.bot = bot
 
     # --------------------------------commands--------------------------------
