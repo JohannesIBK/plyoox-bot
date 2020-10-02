@@ -178,7 +178,7 @@ async def automod(ctx):
         blacklist = automod.blacklist
         for word in blacklist.words:
             if findWord(word)(msg.content.lower()):
-                if not await checks.ignores_automod(ctx):
+                if not await checks.ignoresAutomod(ctx):
 
                     if channel.id in blacklist.whitelist:
                         return
@@ -190,7 +190,7 @@ async def automod(ctx):
 
     if discordRegex.findall(msg.content):
         invites = automod.invites
-        if await checks.ignores_automod(ctx):
+        if await checks.ignoresAutomod(ctx):
             return
 
         if not invites.state:
@@ -228,7 +228,7 @@ async def automod(ctx):
 
     elif linkRegex.findall(msg.content):
         links = automod.links
-        if await checks.ignores_automod(ctx):
+        if await checks.ignoresAutomod(ctx):
             return
 
         if not links.state:
@@ -259,7 +259,7 @@ async def automod(ctx):
 
     if not msg.clean_content.islower() and len(msg.content) > 15:
         caps = automod.caps
-        if await checks.ignores_automod(ctx):
+        if await checks.ignoresAutomod(ctx):
             return
 
         lenCaps = len(re.findall(r'[A-ZÄÖÜ]', msg.clean_content))
@@ -278,7 +278,7 @@ async def automod(ctx):
 
     if len(msg.raw_mentions) + len(msg.raw_role_mentions) + len(everyoneRegex.findall(msg.content)) >= 3:
         mentions = automod.mentions
-        if await checks.ignores_automod(ctx):
+        if await checks.ignoresAutomod(ctx):
             return
 
         lenMentions = sum(m != ctx.author.id for m in msg.raw_mentions) + len(msg.raw_role_mentions)
