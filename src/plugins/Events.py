@@ -157,7 +157,7 @@ class Events(commands.Cog):
         await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1", guild.id)
         await self.bot.db.execute("DELETE FROM extra.commands WHERE sid = $1", guild.id)
 
-        await self.bot.redis.delete(guild.id)
+        await self.bot.cache.remove(guild.id)
 
         bots = len(list(filter(lambda m: m.bot, guild.members)))
         embed = discord.Embed(color=discord.Color.red(), title="**__SERVER LEAVED__**")
