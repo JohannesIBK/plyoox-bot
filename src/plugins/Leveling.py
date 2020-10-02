@@ -114,7 +114,7 @@ class Leveling(commands.Cog):
 
     @cmd(aliases=['rank'])
     @checks.isActive('leveling')
-    async def level(self, ctx: context.Context, user: commands.MemberConverter = None):
+    async def level(self, ctx: context.Context, user: discord.Member = None):
         if user is None:
             user = ctx.author
 
@@ -191,7 +191,7 @@ class Leveling(commands.Cog):
     @cmd(aliases=["rl"])
     @checks.isMod()
     @checks.isActive('leveling')
-    async def resetlevel(self, ctx: context.Context, user: commands.MemberConverter):
+    async def resetlevel(self, ctx: context.Context, user: discord.Member):
         await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
         await ctx.embed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.')
 

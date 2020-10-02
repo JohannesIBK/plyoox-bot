@@ -71,7 +71,7 @@ class Moderation(commands.Cog):
         if (after.edited_at - before.created_at).seconds <= 30:
             await self.bot.process_commands(after)
 
-    async def punishUser(self, user: Union[commands.MemberConverter, commands.UserConverter]):
+    async def punishUser(self, user: Union[discord.Member, discord.User]):
         if user.id == self.bot.user.id:
             return False
 
@@ -118,7 +118,7 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def ban(self, ctx: context.Context, user: Union[commands.MemberConverter, commands.UserConverter, int], *, reason: converters.ActionReason = 'No Reason'):
+    async def ban(self, ctx: context.Context, user: Union[discord.Member, discord.User, int], *, reason: converters.ActionReason = 'No Reason'):
         if isinstance(user, int):
             try:
                 user = await self.bot.fetch_user(user)
@@ -143,7 +143,7 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(kick_members=True)
     @checks.isMod(helper=True)
-    async def kick(self, ctx: context.Context, user: commands.MemberConverter, *, reason: converters.ActionReason = 'No Reason'):
+    async def kick(self, ctx: context.Context, user: discord.Member, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.error('Du kannst diesen User nicht kicken.')
 
@@ -162,7 +162,7 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def softban(self, ctx: context.Context, user: commands.MemberConverter, *, reason: converters.ActionReason = 'No Reason'):
+    async def softban(self, ctx: context.Context, user: discord.Member, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.error('Du kannst diesen User nicht kicken.')
 
@@ -182,7 +182,7 @@ class Moderation(commands.Cog):
     @cmd()
     @commands.bot_has_permissions(ban_members=True)
     @checks.isMod()
-    async def tempban(self, ctx: context.Context, user: commands.MemberConverter, duration: converters.ParseTime, *, reason: converters.ActionReason = 'No Reason'):
+    async def tempban(self, ctx: context.Context, user: discord.Member, duration: converters.ParseTime, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.error('Du kannst diesen User nicht bannen.')
 
@@ -206,7 +206,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def tempmute(self, ctx: context.Context, user: commands.MemberConverter, duration: converters.ParseTime, *, reason: converters.ActionReason = 'No Reason'):
+    async def tempmute(self, ctx: context.Context, user: discord.Member, duration: converters.ParseTime, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.error('Du kannst diesen User nicht muten.')
 
@@ -236,7 +236,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def mute(self, ctx: context.Context, user: commands.MemberConverter, *, reason: converters.ActionReason = 'No Reason'):
+    async def mute(self, ctx: context.Context, user: discord.Member, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.error('Du kannst diesen User nicht muten.')
 
@@ -261,7 +261,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def unmute(self, ctx: context.Context, user: commands.MemberConverter, *, reason: converters.ActionReason = 'No Reason'):
+    async def unmute(self, ctx: context.Context, user: discord.Member, *, reason: converters.ActionReason = 'No Reason'):
         muteRoleID = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', ctx.guild.id)
         muteRole = ctx.guild.get_role(muteRoleID)
         if muteRole is None:
@@ -282,7 +282,7 @@ class Moderation(commands.Cog):
 
     @cmd()
     @checks.isMod(helper=True)
-    async def warn(self, ctx: context.Context, user: commands.MemberConverter, points: int, *, reason: converters.ActionReason = 'No Reason'):
+    async def warn(self, ctx: context.Context, user: discord.Member, points: int, *, reason: converters.ActionReason = 'No Reason'):
         if not await self.punishUser(user):
             return await ctx.error('Du kannst diesen User nicht warnen.')
 
@@ -293,7 +293,7 @@ class Moderation(commands.Cog):
 
     @cmd()
     @checks.isMod()
-    async def points(self, ctx: context.Context, user: commands.MemberConverter):
+    async def points(self, ctx: context.Context, user: discord.Member):
         if not await self.punishUser(user):
             return await ctx.error('Du kannst diesem User keine Punkte geben.')
 
@@ -305,7 +305,7 @@ class Moderation(commands.Cog):
 
     @cmd()
     @checks.isMod()
-    async def resetPoints(self, ctx: context.Context, user: commands.MemberConverter):
+    async def resetPoints(self, ctx: context.Context, user: discord.Member):
         await ctx.bot.db.execute('DELETE FROM automod.users WHERE sid = $1 AND uid = $2', ctx.guild.id, user.id)
         await ctx.message.delete()
         await ctx.embed('Die Punkte des Users wurden zurückgesetzt.', delete_after=5)
@@ -330,7 +330,7 @@ class Moderation(commands.Cog):
 
     @cmd()
     @checks.isMod()
-    async def check(self, ctx: context.Context, user: Union[converters.BannedMember, commands.UserConverter]):
+    async def check(self, ctx: context.Context, user: Union[converters.BannedMember, discord.User]):
         if not isinstance(user, discord.User):
             banData = await ctx.bot.db.fetchrow('SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 0', user.user.id, ctx.guild.id)
             if banData is None:

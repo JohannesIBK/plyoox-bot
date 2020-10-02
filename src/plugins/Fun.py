@@ -105,7 +105,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def ship(self, ctx: context.Context, user1: commands.MemberConverter, user2: commands.MemberConverter = None):
+    async def ship(self, ctx: context.Context, user1: discord.Member, user2: discord.Member = None):
         if user2 is None:
             user2 = ctx.message.author
 
@@ -248,7 +248,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def pat(self, ctx: context.Context, user: commands.MemberConverter):
+    async def pat(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
             return await ctx.embed('Das funktioniert so nicht D:')
 
@@ -261,7 +261,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def hug(self, ctx: context.Context, user: commands.MemberConverter):
+    async def hug(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
             return await ctx.embed('Das funktioniert so nicht D:')
 
@@ -274,7 +274,7 @@ class Fun(commands.Cog):
 
     @cmd()
     @checks.isActive('fun')
-    async def highfive(self, ctx: context.Context, user: commands.MemberConverter):
+    async def highfive(self, ctx: context.Context, user: discord.Member):
         if user == ctx.author:
             return await ctx.embed('Das funktioniert so nicht D:')
 

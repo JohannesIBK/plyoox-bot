@@ -61,7 +61,7 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def addRole(self, ctx: context.Context, role: commands.RoleConverter):
+    async def addRole(self, ctx: context.Context, role: discord.Role):
         count = 0
         members = [member for member in ctx.guild.members if len(member.roles) == 1 and not member.bot]
         for member in members:
@@ -75,7 +75,7 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def removeRole(self, ctx: context.Context, role: commands.RoleConverter):
+    async def removeRole(self, ctx: context.Context, role: discord.Role):
         count = 0
         f_count = 0
         for member in role.members:
