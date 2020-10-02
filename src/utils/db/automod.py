@@ -34,7 +34,7 @@ class Invites(Base):
     async def reload(self, record = None):
         if record is None:
             record = await self.bot.db.fetchrow(
-                'SELECT sid, invitepatner, invitewhitelist, invitepoints, invitestate FROM automod.automod1 WHERE sid = $1',
+                'SELECT sid, invitepatner, invitewhitelist, invitepoints, invitestate FROM automod.automod WHERE sid = $1',
                 self.sid)
 
         if record is None:
@@ -71,7 +71,7 @@ class Blacklist(Base):
     async def reload(self, record = None):
         if record is None:
             record = await self.bot.db.fetchrow(
-                'SELECT sid, blacklistpoints, blackliststate, blacklistwhitelist, blacklistwords FROM automod.automod1 WHERE sid = $1',
+                'SELECT sid, blacklistpoints, blackliststate, blacklistwhitelist, blacklistwords FROM automod.automod WHERE sid = $1',
                 self.sid)
 
         if record is None:
@@ -101,7 +101,7 @@ class Caps(Base):
     async def reload(self, record = None):
         if record is None:
             record = await self.bot.db.fetchrow(
-                'SELECT capspoints, capsstate, capswhitelist FROM automod.automod1 WHERE sid = $1',
+                'SELECT capspoints, capsstate, capswhitelist FROM automod.automod WHERE sid = $1',
                 self.sid)
 
         if record is None:
@@ -138,7 +138,7 @@ class Links(Base):
     async def reload(self, record = None):
         if record is None:
             record = await self.bot.db.fetchrow(
-                'SELECT linksiswhitelist, linkslinks, linkspoints, linksstate, linkswhitelist FROM automod.automod1 WHERE sid = $1',
+                'SELECT linksiswhitelist, linkslinks, linkspoints, linksstate, linkswhitelist FROM automod.automod WHERE sid = $1',
                 self.sid)
 
         if record is None:
@@ -180,7 +180,7 @@ class Mentions(Base):
     async def reload(self, record = None):
         if record is None:
             record = await self.bot.db.fetchrow(
-                'SELECT mentionscount, mentionseveryone, mentionspoints, mentionsstate, mentionswhitelist FROM automod.automod1 WHERE sid = $1',
+                'SELECT mentionscount, mentionseveryone, mentionspoints, mentionsstate, mentionswhitelist FROM automod.automod WHERE sid = $1',
                 self.sid)
 
         if record is None:
@@ -298,7 +298,7 @@ class Automod:
         self.mentions = Mentions(bot, record, sid)
 
     async def reload(self):
-        record = await self.bot.db.fetchrow('SELECT * FROM automod.automod1 WHERE sid = $1', self.sid)
+        record = await self.bot.db.fetchrow('SELECT * FROM automod.automod WHERE sid = $1', self.sid)
         await self.config.reload(),
         await self.blacklist.reload(record),
         await self.links.reload(record),
