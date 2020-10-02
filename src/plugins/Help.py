@@ -34,7 +34,7 @@ class Help(commands.Cog):
                 prefix = data['prefix']
 
             embed = discord.Embed(title=f'{standards.question_emoji} Command Hilfe',
-                                                 description=f'[Dashboard](https://plyoox.net/) | [Support Discord](https://discordapp.com/invite/5qPPvQe)\nPrefix: `{prefix}`',
+                                                 description=f'[Dashboard](https://plyoox.net/) | [Support Discord](https://discordapp.com/invite/5qPPvQe) | [Invite](https://go.plyoox.net/invite) \nPrefix: `{prefix}`',
                                                  color=standards.help_color)
             embed.set_footer(icon_url=ctx.me.avatar_url)
             disabledModules = []
