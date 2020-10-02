@@ -27,8 +27,14 @@ class Errors(commands.Cog):
             return
 
         if isinstance(error, commands.BadArgument) or isinstance(error, commands.BadUnionArgument):
-            embed = await self._help(ctx, f'Ein Argument wurde falsch angegeben.')
-            await ctx.send(embed=embed)
+            # embed = await self._help(ctx, f'Ein Argument wurde falsch angegeben.')
+            # await ctx.send(embed=embed)
+            if isinstance(error, commands.RoleNotFound):
+                return await ctx.error('Die Rolle wurde nicht gefunden.')
+            if isinstance(error, commands.MemberNotFound):
+                return await ctx.error('Das Mitglied wurde nicht gefunden.')
+            if isinstance(error, commands.UserNotFound):
+                return await ctx.error('Der User wurde nicht gefunden (nicht im Cache).')
 
         elif isinstance(error, commands.MissingRequiredArgument):
             embed = await self._help(ctx, f'Das Argument `{error.param.name}` wurde nicht angegeben.')
