@@ -195,7 +195,8 @@ class Leveling(commands.Cog):
         if user.bot:
             return await ctx.error('Dieser User ist ein Bot.')
         await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
-        await ctx.embed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.')
+        await ctx.message.delete()
+        await ctx.embed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.', delete_after=5)
 
 
 def setup(bot):
