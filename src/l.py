@@ -13,10 +13,12 @@ args = parser.parse_args()
 
 if args.prod:
     with open(r"utils/keys/bot.env") as f:
+        port = 5432
         token = f.read()
     print("\n\nBot startet...\n")
 else:
     with open(r"utils/keys/testbot.env") as f:
+        port = 15432
         token = f.read()
     print("\n\nStarting Test...\n")
 
@@ -25,17 +27,10 @@ loop = asyncio.get_event_loop()
 bot = Bot()
 
 try:
-    loop.run_until_complete(bot.create_db_pool())
+    loop.run_until_complete(bot.create_db_pool(port))
 except:
     print('Es konnte keine Verbindung zu PostgreSQL aufgebaut werden')
     exit()
-
-try:
-    loop.run_until_complete(bot.create_redis_pool())
-except:
-    print('Es konnte keine Verbindung zu RedisDB aufgebaut werden')
-    exit()
-
 
 try:
     web = server.app(bot, bot.db)
