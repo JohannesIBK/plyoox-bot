@@ -34,7 +34,7 @@ class Context(commands.Context):
 
     @property
     async def cache(self):
-        return self.bot.cache.get(self.guild.id)
+        return await self.bot.cache.get(self.guild.id)
 
     async def release(self):
         if self._db is not None:
