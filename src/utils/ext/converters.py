@@ -8,7 +8,7 @@ class ParseTime(commands.Converter):
     async def convert(self, ctx, timeStr):
         if timeStr.endswith('y'):
             try:
-                years = int(timeStr.replace('d', ''))
+                years = int(timeStr.replace('y', ''))
                 if years != 1:
                     raise commands.BadArgument('Die Zeit ist zu groß/klein!')
 
