@@ -5,26 +5,19 @@ from utils.ext import context
 
 
 def isMod(*, helper: bool = False):
-    async def predicate(ctx):
+    async def predicate(ctx: context.Context):
         perms = ctx.author.permissions_in(ctx.channel)
         if ctx.message.author.id == 263347878150406144 or perms.manage_guild:
             return True
 
+        data = await ctx.cache.get(ctx.guild.id)
+        config = data.automod
+        if data is None or data.automod is None:
+            return
+        roles = []
+        roles.extend(config.config.modroles)
         if helper:
-            data = await ctx.bot.db.fetchrow('SELECT modroles, helperroles FROM automod.config WHERE sid = $1', ctx.guild.id)
-            if data is None:
-                return
-            roles = []
-            if data['modroles'] is not None:
-                roles.extend(data['modroles'])
-            if data['helperroles'] is not None:
-                roles.extend(data['helperroles'])
-        else:
-            roles = await ctx.bot.db.fetchval('SELECT modroles FROM automod.config WHERE sid = $1', ctx.guild.id)
-        if not roles:
-            if helper:
-                raise commands.MissingPermissions(['Du musst ein Moderator oder Helfer sein, um den Command auszuführen'])
-            raise commands.MissingPermissions(['Du musst ein Moderator sein, um den Command auszuführen'])
+            roles.extend(config.config.helperroles)
 
         userRoles = [role.id for role in ctx.author.roles]
         if any(role in roles for role in userRoles):
@@ -70,11 +63,15 @@ def isBriiaan():
 
 
 def isActive(modul):
-    async def predicate(ctx):
-        status = await ctx.db.fetchrow(
-            "SELECT fun, leveling, timers FROM config.modules WHERE sid = $1", ctx.guild.id)
-        modul_bool = status[modul]
-        if modul_bool:
+    async def predicate(ctx: context.Context):
+        config = await ctx.cache.get(ctx.guild.id)
+        if config is None or not config.modules:
+            return False
+        if modul == 'fun' and config.modules.fun:
+            return True
+        if modul == 'leveling' and config.modules.leveling:
+            return True
+        if modul == 'timers' and config.modules.timers:
             return True
         else:
             raise commands.DisabledCommand
@@ -91,22 +88,20 @@ def hasPermsByName(ctx, member, permsSearch):
         return True
 
 
-async def ignores_automod(ctx: context):
+async def ignoresAutomod(ctx: context.Context):
     if not ctx.me.top_role.position > ctx.message.author.top_role.position:
         return True
     if ctx.author.permissions_in(ctx.channel).manage_messages:
         return True
 
-    data = await ctx.db.fetchrow('SELECT modroles, ignoredroles FROM automod.config WHERE sid = $1', ctx.guild.id)
-    if data is None:
+    data = await ctx.cache.get(ctx.guild.id)
+
+    if data is None or data.automod.config is None:
         return False
 
     roles = []
-    if data['ignoredroles'] is not None:
-        roles.extend(data['ignoredroles'])
-
-    if data['modroles'] is not None:
-        roles.extend(data['modroles'] )
+    roles.extend(data.automod.config.modroles)
+    roles.extend(data.automod.config.helperroles)
 
     authorRoles = [role.id for role in ctx.author.roles]
     if any(roleID in roles for roleID in authorRoles):
