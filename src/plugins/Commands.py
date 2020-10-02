@@ -95,8 +95,8 @@ class Commands(commands.Cog):
         if ctx.command:
             return
 
-        prefixes = [f'<@!{self.bot.user.id}> ', f'<@{self.bot.user.id}> ', await self.bot.get(msg.guild.id, 'prefix')]
-        if msg.content.startswith(tuple(prefixes)):
+        config = await self.bot.cache.get(msg.guild.id)
+        if msg.content.startswith(tuple(config.prefix)):
             await self.command_list(ctx)
 
     @grp(name="command")

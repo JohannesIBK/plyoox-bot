@@ -5,6 +5,7 @@ import time
 
 import discord
 
+from main import Plyoox
 from utils.ext import standards as std, checks, context, logs
 
 DISCORD_INVITE = '(discord(app\.com\/invite|\.com(\/invite)?|\.gg)\/?[a-zA-Z0-9-]{2,32})'
@@ -21,6 +22,11 @@ def findWord(word):
 
 async def managePunishment(ctx, punishment, reason):
     await ctx.message.delete()
+    config = await ctx.bot.cache.get(ctx.guild.id)
+    if not config.automod:
+        return
+    config = config.automod.config
+
     user: discord.Member = ctx.author
     msg = ctx.message.content if len(ctx.message.content) < 1015 else f'{ctx.message.content[:1015]}...'
     reason = f'Automoderation: {reason}'
@@ -31,8 +37,6 @@ async def managePunishment(ctx, punishment, reason):
     userEmbed.add_field(name=f'{std.list_emoji} **__Message__**', value=msg, inline=False)
     embed.add_field(name=f'{std.channel_emoji} **__Channel__**', value=ctx.channel.mention, inline=False)
     embed.add_field(name=f'{std.list_emoji} **__Message__**', value=msg, inline=False)
-
-    data = await ctx.bot.db.fetchrow('SELECT bantime, mutetime, muterole FROM automod.config WHERE sid = $1', ctx.guild.id)
 
     if punishment == 1:
         if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
@@ -48,30 +52,33 @@ async def managePunishment(ctx, punishment, reason):
         if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
             embed.title = 'AUTOMODERATION [TEMPBAN]'
             userEmbed.title = 'AUTOMODERATION [TEMPBAN]'
-            unixTime = time.time() + data['bantime']
+            unixTime = time.time() + config.bantime
             embed.add_field(name=f'{std.date_emoji} **__Entbann__**', value=datetime.datetime.fromtimestamp(unixTime).strftime('%d. %m. %Y um %H:%M:%S'))
             await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
                                  ctx.guild.id, user.id, 0, unixTime, json.dumps({'reason': reason}))
             await ctx.guild.ban(user, reason=reason)
     elif punishment == 4:
         if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
-            muteRole = ctx.guild.get_role(data['muterole'])
-            if muteRole is None:
+            if config.muterole is None:
                 return
 
             embed.title = 'AUTOMODERATION [TEMPMUTE]'
             userEmbed.title = 'AUTOMODERATION [TEMPMUTE]'
-            unixTime = time.time() + data['mutetime']
+            unixTime = time.time() + config.mutetime
             embed.add_field(name=f'{std.date_emoji} **__Entmute__**', value=datetime.datetime.fromtimestamp(unixTime).strftime('%d. %m. %Y um %H:%M:%S'))
             await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
                                  ctx.guild.id, user.id, 1, unixTime, json.dumps({'reason': reason}))
-            await user.add_roles(muteRole, reason=reason)
+            await user.add_roles(config.muterole, reason=reason)
 
     await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user, ignoreMMSG=True, ignoreNoLogging=True)
 
 
 async def add_points(ctx: context, addPoints, modType, user: discord.Member = None):
     await ctx.message.delete()
+    config = await ctx.bot.cache.get(ctx.guild.id)
+    if not config.automod:
+        return
+    config = config.automod.config
 
     if user is not None:
         punishedUser: discord.Member = user
@@ -83,17 +90,16 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
         punishedUser.id, ctx.guild.id, addPoints, time.time(), f'Automoderation: {modType}')
 
     points  = await ctx.bot.db.fetchval('SELECT sum(points) FROM automod.users WHERE uid = $1 AND sid = $2 AND $3 - time < 2592000', punishedUser.id, ctx.guild.id, time.time())
-    data = await ctx.bot.db.fetchrow("SELECT action, maxpoints, muterole, mutetime, bantime FROM automod.config WHERE sid = $1", ctx.guild.id)
     msg: discord.Message = ctx.message
 
-    action = data['action']
-    maxPoints = data['maxpoints']
+    action = config.action
+    maxPoints = config.maxpoints
     unixTimeMute = unixTimeBan = time.time() + 86400
 
-    if data['mutetime']:
-        unixTimeMute: float = time.time() + data['mutetime']
-    if data['bantime']:
-        unixTimeBan: float = time.time() + data['bantime']
+    if config.mutetime:
+        unixTimeMute: float = time.time() + config.mutetime
+    if config.bantime:
+        unixTimeBan: float = time.time() + config.bantime
 
     message = msg.content if len(msg.content) < 1015 else f'{ctx.message.content[:1015]}...'
 
@@ -142,13 +148,12 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
                 return
         if action == 4:
             if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
-                muteRole = ctx.guild.get_role(data['muterole'])
-                if muteRole is None:
+                if config.muterole is None:
                     return
 
                 embed.add_field(name=f'{std.date_emoji} **__Entmute__**', value=datetime.datetime.fromtimestamp(unixTimeMute).strftime('%d. %m. %Y um %H:%M:%S'))
                 embed.title = 'AUTOMODERATION [TEMPMUTE]'
-                await punishedUser.add_roles(muteRole, reason='Automoderation')
+                await punishedUser.add_roles(config.muterole, reason='Automoderation')
                 await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
                 await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
                                      ctx.guild.id, punishedUser.id, 1, unixTimeMute, json.dumps({'reason': 'Automoderation: Punktesystem'}))
@@ -158,50 +163,44 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
 
 
 async def automod(ctx):
-    bot = ctx.bot
+    bot: Plyoox = ctx.bot
     guild: discord.Guild = ctx.guild
     msg: discord.Message = ctx.message
     channel: discord.TextChannel = ctx.channel
-    blState = await bot.get(guild.id, 'state')
+    config = await bot.cache.get(ctx.guild.id)
+    modules =  config.modules
+    automod = config.automod
 
-    if not await bot.get(guild.id, 'automod'):
+    if not modules.automod or not config.automod:
         return
 
-    if blState:
-        words = await bot.get(guild.id, 'words')
-        if words:
-            for word in words:
-                if findWord(word)(msg.content.lower()):
-                    if not await checks.ignores_automod(ctx):
-                        data = await bot.db.fetchrow('SELECT points, whitelist FROM automod.blacklist WHERE sid = $1', guild.id)
+    if automod.blacklist.state:
+        blacklist = automod.blacklist
+        for word in blacklist.words:
+            if findWord(word)(msg.content.lower()):
+                if not await checks.ignores_automod(ctx):
 
-                        if data['whitelist'] is not None:
-                            if channel.id in data['whitelist']:
-                                return
+                    if channel.id in blacklist.whitelist:
+                        return
 
-                        if blState == 5:
-                            return await add_points(ctx, data['points'], 'Blacklisted Word')
-                        else:
-                            return await managePunishment(ctx, blState, 'Blacklisted Word')
+                    if blacklist.state == 5:
+                        return await add_points(ctx, blacklist.points, 'Blacklisted Word')
+                    else:
+                        return await managePunishment(ctx, blacklist.state, 'Blacklisted Word')
 
     if discordRegex.findall(msg.content):
+        invites = automod.invites
         if await checks.ignores_automod(ctx):
             return
 
-        data = await bot.db.fetchrow("SELECT state, whitelist, partner, points FROM automod.invites WHERE sid = $1", guild.id)
-        if not data:
+        if not invites.state:
             return
 
-        if not (state := data['state']):
+        if channel.id in invites.whitelist:
             return
-
-        if data['whitelist'] is not None:
-            if channel.id in data['whitelist']:
-                return
 
         whitelistedServers = [guild.id]
-        if partner := data['partner']:
-            whitelistedServers.extend([int(guildID) for guildID in partner])
+        whitelistedServers.extend([int(guildID) for guildID in invites.partner])
 
         hasInvite: bool = False
         for invite in discordRegex.findall(msg.content):
@@ -211,104 +210,90 @@ async def automod(ctx):
                 continue
 
             except discord.Forbidden:
-                if state == 5:
-                    return await add_points(ctx, data['points'], 'Invite')
+                if invites.state == 5:
+                    return await add_points(ctx, invites.points, 'Invite')
                 else:
-                    return await managePunishment(ctx, state, 'Invite')
+                    return await managePunishment(ctx, invites.state, 'Invite')
 
             if invite.guild.id not in whitelistedServers:
                 hasInvite = True
                 break
 
         if hasInvite:
-            if state == 5:
-                return await add_points(ctx, data['points'], 'Invite')
+            if invites.state == 5:
+                return await add_points(ctx, invites.points, 'Invite')
             else:
-                return await managePunishment(ctx, state, 'Invite')
+                return await managePunishment(ctx, invites.state, 'Invite')
 
 
     elif linkRegex.findall(msg.content):
+        links = automod.links
         if await checks.ignores_automod(ctx):
             return
 
-        data = await bot.db.fetchrow('SELECT points, state, links, whitelist, iswhitelist FROM automod.links WHERE sid = $1', guild.id)
-        if not data:
+        if not links.state:
             return
 
-        if not (state := data['state']):
+        if channel.id in links.whitelist:
             return
 
-        if data['whitelist'] is not None:
-            if channel.id in data['whitelist']:
-                return
-
-        links = ['discord.gg', 'discord.com', 'discordapp.com', 'plyoox.net']
-        if (linksData := data['links']) is not None:
-            links.extend(linksData)
+        linksList = ['discord.gg', 'discord.com', 'discordapp.com', 'plyoox.net']
+        linksList.extend(links.links)
 
         linksObj = linkRegex.findall(msg.content)
         for linkObj in linksObj:
             link = linkObj[0].replace(linkObj[1], '')
-            if data['iswhitelist']:
-                if link not in links:
-                    if state == 5:
-                        return await add_points(ctx, data['points'], 'Link')
+            if links.iswhitelist:
+                if link not in linksList:
+                    if links.state == 5:
+                        return await add_points(ctx, links.points, 'Link')
                     else:
-                        return await managePunishment(ctx, state, 'Link')
+                        return await managePunishment(ctx, links.state, 'Link')
             else:
                 if link in links:
-                    if state == 5:
-                        return await add_points(ctx, data['points'], 'Link')
+                    if links.state == 5:
+                        return await add_points(ctx, links.points, 'Link')
                     else:
-                        return await managePunishment(ctx, state, 'Link')
+                        return await managePunishment(ctx, links.state, 'Link')
 
 
     if not msg.clean_content.islower() and len(msg.content) > 15:
+        caps = automod.caps
         if await checks.ignores_automod(ctx):
             return
 
         lenCaps = len(re.findall(r'[A-ZÄÖÜ]', msg.clean_content))
         percent = lenCaps / len(msg.content)
         if percent > 0.7:
-            data = await bot.db.fetchrow("SELECT points, state, whitelist FROM automod.caps WHERE sid = $1", msg.guild.id)
-            if not data:
+            if not caps.state:
                 return
 
-            if not (state := data['state']):
+            if channel.id in caps.whitelist:
                 return
 
-            if data['whitelist'] is not None:
-                if channel.id in data['whitelist']:
-                    return
-
-            if state == 5:
-                return await add_points(ctx, data['points'], 'Caps')
+            if caps.state == 5:
+                return await add_points(ctx, caps.points, 'Caps')
             else:
-                return await managePunishment(ctx, state, 'Caps')
+                return await managePunishment(ctx, caps.state, 'Caps')
 
     if len(msg.raw_mentions) + len(msg.raw_role_mentions) + len(everyoneRegex.findall(msg.content)) >= 3:
+        mentions = automod.mentions
         if await checks.ignores_automod(ctx):
             return
 
         lenMentions = sum(m != ctx.author.id for m in msg.raw_mentions) + len(msg.raw_role_mentions)
-        data = await bot.db.fetchrow(
-            "SELECT state, points, count, whitelist, everyone FROM automod.mentions WHERE sid = $1",
-            guild.id)
-        if not data:
+
+        if not mentions.state:
             return
 
-        if not (state := data['state']):
+        if channel.id in mentions.whitelist:
             return
 
-        if data['whitelist'] is not None:
-            if channel.id in data['whitelist']:
-                return
-
-        if data['everyone']:
+        if mentions.everyone:
             lenMentions += len(everyoneRegex.findall(msg.content))
 
-        if lenMentions >= data['count']:
-            if state == 5:
-                return await add_points(ctx, data['points'], 'Mentions')
+        if lenMentions >= mentions.count:
+            if mentions.state == 5:
+                return await add_points(ctx, mentions.points, 'Mentions')
             else:
-                return await managePunishment(ctx, state, 'Caps')
+                return await managePunishment(ctx, mentions.state, 'Caps')

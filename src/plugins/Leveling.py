@@ -47,20 +47,19 @@ class Leveling(commands.Cog):
         if not isinstance(msg.author, discord.Member):
             return
 
-        if not await self.bot.get(msg.guild.id, 'leveling'):
+        guildConfig = await self.bot.cache.get(msg.guild.id)
+        if guildConfig is None:
             return
+        config = guildConfig.leveling
 
         author: discord.Member = msg.author
         guild: discord.Guild = msg.guild
         userRoles = [role.id for role in author.roles]
 
-        noXPChannels = await self.bot.get(guild.id, 'noxpchannels')
-        if noXPChannels:
-            if msg.channel.id in noXPChannels:
-                return
+        if msg.channel.id in config.noxpchannelIDs:
+            return
 
-        noXPRole = await self.bot.get(guild.id, 'noxprole')
-        if noXPRole in userRoles:
+        if config.noxproleID in userRoles:
             return
 
         userData = await self.bot.db.fetchrow(
@@ -81,39 +80,33 @@ class Leveling(commands.Cog):
         currentLvl = self._get_level_from_xp(userData['xp'] + newXP)
         if currentLvl > beforeLvl:
             addRole = None
-            data = await self.bot.db.fetchrow("SELECT channel, roles, message, remove FROM config.leveling WHERE sid = $1", guild.id)
-            if data is None:
-                return
 
-            if data['roles']:
-                roles = data['roles']
-                addRoleID = list(filter(lambda role: role[1] == currentLvl, roles))
-                if addRoleID:
-                    addRole = guild.get_role(addRoleID[0][0])
-                roles.sort(key = lambda role: role[1])
-                if data['remove']:
-                    if not addRole:
-                        return
+            roles = config.roles
+            addRoleID = list(filter(lambda role: role[1] == currentLvl, roles))
+            if addRoleID:
+                addRole = guild.get_role(addRoleID[0][0])
+            roles.sort(key = lambda role: role[1])
+            if config.remove:
+                if not addRole:
+                    return
 
-                    removeRoles = list(filter(lambda role: role[1] != currentLvl, roles)) or None
-                    await author.add_roles(addRole)
-                    if removeRoles:
-                        await author.remove_roles(*[guild.get_role(role[0]) for role in removeRoles if guild.get_role(role[0])])
-                else:
-                    addLvlRoles = []
-                    for role in data['roles']:
-                        if role[0] not in userRoles and role[1] <= currentLvl:
-                            newRole = guild.get_role(role[0])
-                            if newRole:
-                                addLvlRoles.append(newRole)
-                    await author.add_roles(*addLvlRoles)
+                removeRoles = list(filter(lambda role: role[1] != currentLvl, roles)) or None
+                await author.add_roles(addRole)
+                if removeRoles:
+                    await author.remove_roles(*[guild.get_role(role[0]) for role in removeRoles if guild.get_role(role[0])])
+            else:
+                addLvlRoles = []
+                for role in roles:
+                    if role[0] not in userRoles and role[1] <= currentLvl:
+                        newRole = guild.get_role(role[0])
+                        if newRole:
+                            addLvlRoles.append(newRole)
+                await author.add_roles(*addLvlRoles)
 
-            lvlMsg = data['message']
-            channel = guild.get_channel(data['channel'])
-            lvlMsg = formatMessage(lvlMsg, author, currentLvl, addRole)
+            lvlMsg = formatMessage(config.message, author, currentLvl, addRole)
             if lvlMsg is not None:
-                if channel is not None:
-                    await channel.send(lvlMsg)
+                if config.channel is not None:
+                    await config.channel.send(lvlMsg)
                 else:
                     await msg.channel.send(lvlMsg)
 
