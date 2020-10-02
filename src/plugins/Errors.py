@@ -1,4 +1,3 @@
-import asyncio
 import codecs
 import json
 
@@ -15,11 +14,8 @@ class Errors(commands.Cog):
         self.helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
 
     async def _help(self, ctx: context.Context, text = None):
-        helpText: list = self.helpText[ctx.command.name.lower()].copy()
-
-        embed = discord.Embed(color=std.error_color, title=f'**__Command Hilfe__**',
-                                             description=f'**{text}**\n\n' + "\n".join(helpText).format(p=ctx.prefix))
-        return embed
+        helpText: list = self.helpText[ctx.command.full_parent_name.lower().split(' ')[0]].copy()
+        return discord.Embed(color=std.error_color, title=f'**__Command Hilfe__**', description=f'**{text}**\n\n' + "\n".join(helpText).format(p=ctx.prefix))
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: context.Context, error):
@@ -27,14 +23,15 @@ class Errors(commands.Cog):
             return
 
         if isinstance(error, commands.BadArgument) or isinstance(error, commands.BadUnionArgument):
-            # embed = await self._help(ctx, f'Ein Argument wurde falsch angegeben.')
-            # await ctx.send(embed=embed)
             if isinstance(error, commands.RoleNotFound):
                 return await ctx.error('Die Rolle wurde nicht gefunden.')
             if isinstance(error, commands.MemberNotFound):
                 return await ctx.error('Das Mitglied wurde nicht gefunden.')
             if isinstance(error, commands.UserNotFound):
                 return await ctx.error('Der User wurde nicht gefunden (nicht im Cache).')
+            else:
+                embed = await self._help(ctx, f'Ein Argument wurde falsch angegeben.')
+                await ctx.send(embed=embed)
 
         elif isinstance(error, commands.MissingRequiredArgument):
             embed = await self._help(ctx, f'Das Argument `{error.param.name}` wurde nicht angegeben.')
@@ -52,8 +49,8 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.CommandOnCooldown):
             cooldown = error.cooldown
             await ctx.error(f'Dieser Command hat einen Cooldown. '
-                                                   f'Du kannst ihn nur {cooldown.rate} pro {cooldown.per}s benutzen.\n'
-                                                   f'Versuche es in {round(error.retry_after)}s erneut.')
+                           f'Du kannst ihn nur {cooldown.rate} pro {cooldown.per}s benutzen.\n'
+                           f'Versuche es in {round(error.retry_after)}s erneut.')
 
         elif isinstance(error, commands.NotOwner):
             await ctx.error('Diesen Command kann nur der Owner des Bots ausführen.')
@@ -71,9 +68,6 @@ class Errors(commands.Cog):
                     await ctx.error('Der Bot hat keine Berechtigung um den Command auszuführen.')
                 except:
                     pass
-
-            elif isinstance(error, asyncio.TimeoutError):
-                await ctx.error('Dein Report wurde abgebrochen, da du zu lange gebraucht hast.')
 
             else:
                 userEmbed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")
