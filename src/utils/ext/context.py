@@ -5,7 +5,7 @@ import discord
 from asyncpg.pool import Pool
 from discord.ext import commands
 
-from utils.db.cache import GuildConfig
+from utils.db.cache import GuildConfig, BotCache
 from utils.ext import standards as std
 
 
@@ -33,8 +33,8 @@ class Context(commands.Context):
         return self._db if self._db else self.pool
 
     @property
-    async def cache(self):
-        return await self.bot.cache.get(self.guild.id)
+    def cache(self) -> BotCache:
+        return self.bot.cache
 
     async def release(self):
         if self._db is not None:
