@@ -86,14 +86,16 @@ class Infos(commands.Cog):
             return std.dnd_emoji
 
     @cmd(aliases=["serverinfo", "guild"])
-    async def server(self, ctx: context.Context, guildID: int = None):
+    async def server(self, ctx: context.Context, guildID = None):
         guild = ctx.guild
         if guildID is not None:
             if ctx.author.id == self.bot.owner_id:
-                foreignGuild = self.bot.get_guild(guildID)
-                if foreignGuild is not None:
-                    guild = foreignGuild
-
+                try:
+                    foreignGuild = self.bot.get_guild(int(guildID))
+                    if foreignGuild is not None:
+                        guild = foreignGuild
+                except TypeError:
+                    pass
 
         roles = self._getRoles(guild.roles)
         emojis = self._getEmojis(guild.emojis)
