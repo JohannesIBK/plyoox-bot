@@ -88,13 +88,13 @@ class Timers(commands.Cog):
         await self.bot.db.execute('DELETE FROM extra.timers WHERE id = $1', ID)
 
         data = json.loads(data)
-        guild: discord.Guild = self.bot.get_guild(guildID)
+        guild = self.bot.get_guild(guildID)
         if guild is None:
             return
-        member: discord.Member = guild.get_member(memberID)
+        member = guild.get_member(memberID)
         if member is None:
             return
-        channel: discord.TextChannel = guild.get_channel(int(data['channelid']))
+        channel = guild.get_channel(int(data['channelid']))
         try:
             await channel.send(f'Hier ist deine Erinnerung {member.mention}!', embed=std.getEmbed(data['message']))
         except discord.Forbidden:
@@ -117,8 +117,8 @@ class Timers(commands.Cog):
 
         if punishType == 1:
             muteroleID: int = await self.bot.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
-            muterole: discord.Role = guild.get_role(muteroleID)
-            member: discord.Member = guild.get_member(memberID)
+            muterole = guild.get_role(muteroleID)
+            member = guild.get_member(memberID)
 
             if muterole is None or member is None:
                 return
@@ -160,7 +160,7 @@ class Timers(commands.Cog):
             await message.edit(embed=discord.Embed(color=std.normal_color, title=f"🎉 Giveaway",
                                                    description=f'**Gewinn:** {win}\n**Gewinner:** {winnerMention}.\nID: {message.id}'))
             roleID = await self.bot.db.fetchval('SELECT winnerrole FROM config.timers WHERE sid = $1', message.guild.id)
-            role: discord.Role = message.guild.get_role(roleID)
+            role = message.guild.get_role(roleID)
             if role is not None:
                 for winner in winners:
                     try:
@@ -190,8 +190,8 @@ class Timers(commands.Cog):
             'channel': channel.id
         }
 
-        embed: discord.Embed = discord.Embed(color=std.normal_color, title=f'🎉 Giveaway', description=f'**Gewinn:** {win}\nReagiere mit 🎉 um dem Giveaway beizutreten.\n')
-        msg: discord.Message = await channel.send(embed=embed)
+        embed = discord.Embed(color=std.normal_color, title=f'🎉 Giveaway', description=f'**Gewinn:** {win}\nReagiere mit 🎉 um dem Giveaway beizutreten.\n')
+        msg = await channel.send(embed=embed)
         await msg.add_reaction('🎉')
         await ctx.send(embed=std.getEmbed('Das Giveaway wurde gestartet.'))
         embed = discord.Embed(color=std.normal_color,
@@ -214,7 +214,7 @@ class Timers(commands.Cog):
         await ctx.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         await ctx.embed('Das Giveaway wurde abgebrochen.')
         giveawayData = json.loads(data['data'])
-        channel: discord.TextChannel = ctx.guild.get_channel(giveawayData['channel'])
+        channel = ctx.guild.get_channel(giveawayData['channel'])
         msg = await channel.fetch_message(data['objid'])
         if msg is not None:
             try:
@@ -230,7 +230,7 @@ class Timers(commands.Cog):
 
         await ctx.embed('Das Giveaway wurde abgebrochen.')
         giveawayData = json.loads(data['data'])
-        channel: discord.TextChannel = ctx.guild.get_channel(giveawayData['channel'])
+        channel = ctx.guild.get_channel(giveawayData['channel'])
         msg = await channel.fetch_message(data['objid'])
         if msg is not None:
             self.bot.dispatch('giveaway_runout', msg, giveawayData)

@@ -33,7 +33,7 @@ class Help(commands.Cog):
             if data['prefix'] is not None:
                 prefix = data['prefix']
 
-            embed: discord.Embed = discord.Embed(title=f'{standards.question_emoji} Command Hilfe',
+            embed = discord.Embed(title=f'{standards.question_emoji} Command Hilfe',
                                                  description=f'[Dashboard](https://plyoox.net/) | [Support Discord](https://discordapp.com/invite/5qPPvQe)\nPrefix: `{prefix}`',
                                                  color=standards.help_color)
             embed.set_footer(icon_url=ctx.me.avatar_url)
@@ -77,7 +77,7 @@ class Help(commands.Cog):
         elif arg.lower() in modules:
             cogHelp: commands.Cog = modules[arg.lower()][1]
             command: commands.Command
-            embed: discord.Embed = discord.Embed(color=standards.help_color, title=f'{standards.question_emoji} Modul-Hilfe')
+            embed = discord.Embed(color=standards.help_color, title=f'{standards.question_emoji} Modul-Hilfe')
 
             for command in cogHelp.get_commands():
                 cmdHelpRaw: list = self.helpText[command.name.lower()].copy()

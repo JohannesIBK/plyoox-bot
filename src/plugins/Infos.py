@@ -87,12 +87,13 @@ class Infos(commands.Cog):
 
     @cmd(aliases=["serverinfo", "guild"])
     async def server(self, ctx: context.Context, guildID: int = None):
-        guild: discord.Guild = ctx.guild
+        guild = ctx.guild
         if guildID is not None:
             if ctx.author.id == self.bot.owner_id:
                 foreignGuild = self.bot.get_guild(guildID)
                 if foreignGuild is not None:
                     guild = foreignGuild
+
 
         roles = self._getRoles(guild.roles)
         emojis = self._getEmojis(guild.emojis)
@@ -249,7 +250,7 @@ class Infos(commands.Cog):
     async def avatar(self, ctx: context.Context, user: commands.MemberConverter = None):
         if user is None:
             user = ctx.author
-        embed: discord.Embed = discord.Embed(color=std.normal_color)
+        embed = discord.Embed(color=std.normal_color)
         embed.set_author(name=user, url=user.avatar_url, icon_url=user.avatar_url)
         embed.set_image(url=user.avatar_url)
         await ctx.send(embed=embed)

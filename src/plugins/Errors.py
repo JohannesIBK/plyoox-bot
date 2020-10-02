@@ -17,7 +17,7 @@ class Errors(commands.Cog):
     async def _help(self, ctx: context.Context, text = None):
         helpText: list = self.helpText[ctx.command.name.lower()].copy()
 
-        embed: discord.Embed = discord.Embed(color=std.error_color, title=f'**__Command Hilfe__**',
+        embed = discord.Embed(color=std.error_color, title=f'**__Command Hilfe__**',
                                              description=f'**{text}**\n\n' + "\n".join(helpText).format(p=ctx.prefix))
         return embed
 
@@ -76,7 +76,7 @@ class Errors(commands.Cog):
                     await ctx.send(embed=userEmbed)
                 except Exception as e:
                     self.bot.logger.exception(f'Error\n{type(e).__name__}: {e}')
-                    channel: discord.TextChannel = self.bot.get_guild(694790265382109224).get_channel(718554837771616316)
+                    channel = self.bot.get_guild(694790265382109224).get_channel(718554837771616316)
                     embed = discord.Embed(color=discord.Color.red())
                     embed.add_field(name=ctx.guild.name,
                                     value=ctx.command.name)
@@ -88,7 +88,7 @@ class Errors(commands.Cog):
                     if ctx.cog.qualified_name == 'Owner':
                         return
 
-                    channel: discord.TextChannel = self.bot.get_guild(694790265382109224).get_channel(718554837771616316)
+                    channel = self.bot.get_guild(694790265382109224).get_channel(718554837771616316)
                     embed = discord.Embed(color=discord.Color.red())
                     embed.add_field(name=ctx.guild.name,
                                     value=ctx.command.name)

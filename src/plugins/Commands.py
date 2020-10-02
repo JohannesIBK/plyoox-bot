@@ -21,6 +21,7 @@ class Commands(commands.Cog):
         msgSplited = ctx.message.content.split(" ")[0]
         commandName = msgSplited.replace(ctx.prefix, '').lower()
         mentions = [ False, False, False ]
+        msg = None
 
         command = await self.bot.db.fetchrow(
             "SELECT c.*, m.commands FROM extra.commands c LEFT JOIN config.modules m ON c.sid = m.sid WHERE c.sid = $1 AND c.name = $2",
@@ -74,7 +75,7 @@ class Commands(commands.Cog):
                 msg = await ctx.send(command['content'],
                                      allowed_mentions=discord.AllowedMentions(everyone=mentions[0], roles=mentions[1], users=mentions[2]))
 
-        if command['delete'] is not None:
+        if command['delete'] is not None and msg is not None:
             await asyncio.sleep(command['delete'])
             await ctx.message.delete()
             if command['content']:
@@ -106,11 +107,10 @@ class Commands(commands.Cog):
             return await ctx.invoke(self.bot.get_command('help'), "command")
 
     @command_cmd.command()
-    async def add(self, ctx: context.Context, name, *, content):
+    async def add(self, ctx: context.Context, name: str, *, content: str):
         name = name.lower()
 
         all_commands = await ctx.db.fetchval("SELECT name FROM extra.commands WHERE sid = $1", ctx.guild.id)
-
         if all_commands is not None:
             if len(all_commands) > 50:
                 return await ctx.error('Der Server darf maximal 50 Commands besitzen.')
@@ -127,7 +127,7 @@ class Commands(commands.Cog):
         await ctx.embed('Der Command wurde erfolgreich hinzugefügt.')
 
     @command_cmd.command()
-    async def edit(self, ctx: context.Context, name, *, content):
+    async def edit(self, ctx: context.Context, name: str, *, content: str):
         name = name.lower()
 
         cmd = await ctx.db.fetchval("SELECT name, content FROM extra.commands WHERE sid = $1 AND name = $2", ctx.guild.id, name)

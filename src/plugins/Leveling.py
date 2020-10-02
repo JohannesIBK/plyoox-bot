@@ -52,8 +52,8 @@ class Leveling(commands.Cog):
             return
         config = guildConfig.leveling
 
-        author: discord.Member = msg.author
-        guild: discord.Guild = msg.guild
+        author = msg.author
+        guild = msg.guild
         userRoles = [role.id for role in author.roles]
 
         if msg.channel.id in config.noxpchannelIDs:

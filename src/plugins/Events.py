@@ -38,7 +38,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: typing.Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]):
-        guild: discord.Guild = channel.guild
+        guild = channel.guild
         if not guild.me.guild_permissions.manage_channels:
             return
 
@@ -73,7 +73,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role):
-        guild: discord.Guild = role.guild
+        guild = role.guild
 
         query = 'SELECT welcomer.joinrole, config.modroles, config.muterole, leveling.noxprole, leveling.roles ' \
                 'FROM automod.config LEFT JOIN config.leveling ON config.sid = leveling.sid ' \
@@ -106,7 +106,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        guild: discord.Guild = channel.guild
+        guild = channel.guild
 
         query = 'SELECT welcomer.joinchannel, welcomer.leavechannel, leveling.channel AS lvlchannel, ' \
                 'leveling.noxpchannels, config.logchannel FROM automod.config ' \
@@ -172,7 +172,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        guild: discord.Guild = member.guild
+        guild = member.guild
 
         data = await self.bot.db.fetchrow(
             'SELECT joinrole, joinmessage, joinrole, joinchannel, joindm, modules.welcomer, modules.globalbans FROM config.welcomer '
@@ -189,7 +189,7 @@ class Events(commands.Cog):
                 await guild.ban(member, reason=f"Globalban:\n{reason}")
                 logchannel = await self.bot.db.fetchval('SELECT logchannel FROM automod.config WHERE config.sid = $1', guild.id)
                 if logchannel:
-                    embed: discord.Embed = std.getBaseModEmbed(f'Globalban: {reason}', member)
+                    embed = std.getBaseModEmbed(f'Globalban: {reason}', member)
                     embed.title = f'Automoderation [GLOBALBAN]'
                     logchannel = member.guild.get_channel(logchannel)
                     if logchannel is not None:
@@ -197,7 +197,7 @@ class Events(commands.Cog):
                 return
 
         if data["joinmessage"] is not None and data["joinchannel"] is not None:
-            channel: discord.TextChannel = guild.get_channel(data["joinchannel"])
+            channel = guild.get_channel(data["joinchannel"])
             channels = re.findall(CHANNEL_REGEX, data["joinmessage"])
             msg = formatMessage(data["joinmessage"], member)
 
@@ -235,7 +235,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        guild: discord.Guild = member.guild
+        guild = member.guild
         data = await self.bot.db.fetchrow(
             'SELECT leavechannel, leavemessage, welcomer FROM config.welcomer INNER JOIN config.modules '
             'ON welcomer.sid = modules.sid WHERE welcomer.sid = $1',

@@ -32,10 +32,10 @@ class PlyooxSupport(commands.Cog):
             json.dump(data, file)
             file.truncate()
 
-        msg: discord.Message = await ctx.channel.fetch_message(ID)
+        msg = await ctx.channel.fetch_message(ID)
         if not msg.content:
             raise commands.BadArgument('Nachricht hat keinen Content')
-        acceptedChannel: discord.TextChannel = ctx.guild.get_channel(ACCEPTED_SUGGESTION_CHANNEL)
+        acceptedChannel = ctx.guild.get_channel(ACCEPTED_SUGGESTION_CHANNEL)
         embed = discord.Embed(color=discord.Color.green(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
         embed.set_footer(text=f'#{data["suggestion"]} | {msg.author}')
         if message:
@@ -58,10 +58,10 @@ class PlyooxSupport(commands.Cog):
             json.dump(data, file)
             file.truncate()
 
-        msg: discord.Message = await ctx.channel.fetch_message(ID)
+        msg = await ctx.channel.fetch_message(ID)
         if not msg.content:
             raise commands.BadArgument('Nachricht hat keinen Content')
-        deniedChannel: discord.TextChannel = ctx.guild.get_channel(DENIED_SUGGESTION_CHANNEL)
+        deniedChannel = ctx.guild.get_channel(DENIED_SUGGESTION_CHANNEL)
         embed = discord.Embed(color=discord.Color.red(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
         embed.description = msg.content
         embed.set_footer(text='#' + str(data['suggestion']))
@@ -84,10 +84,10 @@ class PlyooxSupport(commands.Cog):
             json.dump(data, file)
             file.truncate()
 
-        msg: discord.Message = await ctx.channel.fetch_message(ID)
+        msg = await ctx.channel.fetch_message(ID)
         if not msg.content:
             raise commands.BadArgument('Nachricht hat keinen Content')
-        waitingChannel: discord.TextChannel = ctx.guild.get_channel(WAITING_SUGGESTION_CHANNEL)
+        waitingChannel = ctx.guild.get_channel(WAITING_SUGGESTION_CHANNEL)
         embed = discord.Embed(color=discord.Color.gold(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
         embed.description = msg.content
         embed.set_footer(text=f'#{data["suggestion"]} | {msg.author}')
@@ -103,10 +103,10 @@ class PlyooxSupport(commands.Cog):
 
     @suggestion.command()
     async def publish(self, ctx: context.Context, ID: int):
-        msg: discord.Message = await ctx.channel.fetch_message(ID)
+        msg = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
         embed.color = discord.Color.blue()
-        implementedChannel: discord.TextChannel = ctx.guild.get_channel(IMPLEMENTED_SUGGESTION_CHANNEL)
+        implementedChannel = ctx.guild.get_channel(IMPLEMENTED_SUGGESTION_CHANNEL)
         if msg.attachments:
             attachment = await msg.attachments[0].to_file()
             await implementedChannel.send(embed=embed, file=attachment)
@@ -117,8 +117,8 @@ class PlyooxSupport(commands.Cog):
 
     @suggestion.command()
     async def publishall(self, ctx: context.Context):
-        channel: discord.TextChannel = ctx.guild.get_channel(DEVELOPED_SUGGESTION_CHANNEL)
-        implementedChannel: discord.TextChannel = ctx.guild.get_channel(IMPLEMENTED_SUGGESTION_CHANNEL)
+        channel = ctx.guild.get_channel(DEVELOPED_SUGGESTION_CHANNEL)
+        implementedChannel = ctx.guild.get_channel(IMPLEMENTED_SUGGESTION_CHANNEL)
         messages = await channel.history(limit=500).flatten()
     
         for msg in messages[::-1]:
@@ -136,10 +136,10 @@ class PlyooxSupport(commands.Cog):
         
     @suggestion.command()
     async def developed(self, ctx: context.Context, ID: int):
-        msg: discord.Message = await ctx.channel.fetch_message(ID)
+        msg = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
         embed.color = discord.Color.dark_teal()
-        developedChannel: discord.TextChannel = ctx.guild.get_channel(DEVELOPED_SUGGESTION_CHANNEL)
+        developedChannel = ctx.guild.get_channel(DEVELOPED_SUGGESTION_CHANNEL)
         if msg.attachments:
             attachment = await msg.attachments[0].to_file()
             await developedChannel.send(embed=embed, file=attachment)
@@ -150,7 +150,7 @@ class PlyooxSupport(commands.Cog):
 
     @suggestion.command()
     async def move(self, ctx: context.Context, ID: int, toChannel: discord.TextChannel):
-        msg: discord.Message = await ctx.channel.fetch_message(ID)
+        msg = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
 
         if toChannel.id == ACCEPTED_SUGGESTION_CHANNEL:
@@ -170,8 +170,8 @@ class PlyooxSupport(commands.Cog):
 
     @suggestion.command()
     async def append(self, ctx: context.Context, ID: int, suggestionID: int, channel: discord.TextChannel):
-        msg: discord.Message = await channel.fetch_message(ID)
-        suggestionMsg: discord.Message = await ctx.channel.fetch_message(suggestionID)
+        msg = await channel.fetch_message(ID)
+        suggestionMsg = await ctx.channel.fetch_message(suggestionID)
         embed = msg.embeds[0]
         embed.add_field(name=str(suggestionMsg.author), value=suggestionMsg.content)
         await msg.edit(embed=embed)
@@ -180,7 +180,7 @@ class PlyooxSupport(commands.Cog):
 
     @suggestion.command()
     async def dev(self, ctx: context.Context, ID: int, *, text):
-        msg: discord.Message = await ctx.channel.fetch_message(ID)
+        msg = await ctx.channel.fetch_message(ID)
         embed = msg.embeds[0]
         embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=text)
         await msg.edit(embed=embed)

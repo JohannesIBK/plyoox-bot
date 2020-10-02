@@ -13,14 +13,14 @@ class Logging(commands.Cog):
         self.bot = bot
 
     async def createWebhook(self, guildID):
-        guild: discord.Guild = self.bot.get_guild(guildID)
+        guild = self.bot.get_guild(guildID)
         channelID = await self.bot.db.fetchval('SELECT channelid FROM config.logging WHERE sid = $1', guild.id)
-        channel: discord.TextChannel = guild.get_channel(channelID)
+        channel = guild.get_channel(channelID)
         if channel is None:
             return
         if guild.me.permissions_in(channel).manage_webhooks:
             avatar = await self.bot.user.avatar_url_as(format='webp').read()
-            webhook: discord.Webhook = await channel.create_webhook(name=self.bot.user.name, avatar=avatar)
+            webhook = await channel.create_webhook(name=self.bot.user.name, avatar=avatar)
             await self.bot.db.execute('UPDATE config.logging SET token = $1, id = $2 WHERE sid = $3', webhook.token, webhook.id, guild.id)
 
 

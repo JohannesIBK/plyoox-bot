@@ -54,7 +54,7 @@ class Utilities(commands.Cog):
     @cmd()
     @commands.is_owner()
     async def infos(self, ctx: context.Context):
-        embed: discord.Embed = discord.Embed(title='**__Links__**', color=std.normal_color)
+        embed = discord.Embed(title='**__Links__**', color=std.normal_color)
         embed.description = \
             f'**[Seite](https://plyoox.net)** `plyoox.net`\n' \
             f'**[Discord](https://go.plyoox.net/discord)** `go.plyoox.net/discord`\n' \
