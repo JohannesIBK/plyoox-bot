@@ -29,6 +29,8 @@ class Errors(commands.Cog):
                 return await ctx.error('Das Mitglied wurde nicht gefunden.')
             if isinstance(error, commands.UserNotFound):
                 return await ctx.error('Der User wurde nicht gefunden (nicht im Cache).')
+            if isinstance(error, commands.ChannelNotFound):
+                return await ctx.error('Der Channel wurde nicht gefunden.')
             else:
                 embed = await self._help(ctx, f'Ein Argument wurde falsch angegeben.')
                 await ctx.send(embed=embed)
