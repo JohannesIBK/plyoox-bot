@@ -192,6 +192,8 @@ class Leveling(commands.Cog):
     @checks.isMod()
     @checks.isActive('leveling')
     async def resetlevel(self, ctx: context.Context, user: discord.Member):
+        if user.bot:
+            return await ctx.error('Dieser User ist ein Bot.')
         await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
         await ctx.embed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.')
 
