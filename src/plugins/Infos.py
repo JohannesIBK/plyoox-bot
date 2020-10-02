@@ -188,8 +188,8 @@ class Infos(commands.Cog):
 
     @cmd()
     async def todayJoined(self, ctx: context.Context):
-        joined = len([user.id for user in ctx.guild.members if (datetime.datetime.now() - user.joined_at).days == 0])
-        await ctx.embed(f'Heute {"ist" if joined == 1 else "sind"} {joined} User auf den Server gejoint.')
+        joined = len([user.id for user in ctx.guild.members if (datetime.datetime.now() - user.joined_at).seconds <= 86400])
+        await ctx.embed(f'In den letzten 24 Stunden {"ist" if joined == 1 else "sind"} {joined} User auf den Server gejoint.')
 
     @cmd()
     async def joined(self, ctx: context.Context, user: Union[discord.Member, int] = None):
