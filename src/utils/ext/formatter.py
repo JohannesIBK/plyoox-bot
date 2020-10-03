@@ -30,7 +30,7 @@ class __Guild:
 
 
 class __Level:
-    def __init__(self, lvl, role: discord.Role):
+    def __init__(self, lvl, role: discord.Role = None):
         self.role = role
         self.lvl = str(lvl)
 
