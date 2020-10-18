@@ -4,12 +4,14 @@ import json
 import random
 import time
 
+import asyncpg
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 import main
-from utils.ext import standards as std, checks, converters, context
+from utils.ext import standards as std, checks, converters, context, logs
 from utils.ext.cmds import grp
+from utils.ext.reminder import Timer
 
 
 # BAN       0
@@ -21,115 +23,110 @@ from utils.ext.cmds import grp
 class Timers(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
-        self.checkTimers.start()
+        self._current_timer: Timer = None
+        self._have_data = asyncio.Event(loop=bot.loop)
+        self._task = bot.loop.create_task(self.dispatch_timers())
 
-    @tasks.loop(minutes=10)
-    async def checkTimers(self):
-        entrys = await self.bot.db.fetch('SELECT * FROM extra.timers WHERE time - extract(EPOCH FROM now()) <= 600;')
+    async def get_active_timer(self, *, connection=None, days=7):
+        con = connection or self.bot.db
 
-        for entry in entrys:
-            timerType = entry['type']
-            endTime = entry['time']
-            guildID = entry['sid']
-            timerID = entry['id']
-            if timerType in [0, 1]:
-                self.bot.loop.create_task(self.punishTimer(endTime, entry['objid'], guildID, timerType))
+        record = await con.fetchrow("SELECT * FROM extra.timers WHERE time < $1 ORDER BY time LIMIT 1", time.time() + days + 86400)
+        return Timer.load_timer(record=record) if record else None
 
-            elif timerType == 2:
-                self.bot.loop.create_task(self.giveawayTimer(endTime, entry['objid'], guildID, entry['data'], timerID))
+    async def wait_for_active_timers(self, *, days=7):
+        async with self.bot.db.acquire(timeout=300) as con:
+            timer = await self.get_active_timer(connection=con, days=days)
+            if timer is not None:
+                self._have_data.set()
+                return timer
 
-            if timerType == 3:
-                self.bot.loop.create_task(self.reminderTimer(endTime, entry['objid'], guildID, entry['data'], timerID))
+            self._have_data.clear()
+            self._current_timer = None
+            await self._have_data.wait()
+            return await self.get_active_timer(connection=con, days=days)
 
-
-    @checkTimers.before_loop
-    async def before_printer(self):
-        await self.bot.wait_until_ready()
-
-    async def punishTimer(self, unbanTime: int, memberID: int, guildID: int, punishmentType: int):
-        untilUnban = unbanTime - time.time()
-        if unbanTime < 0:
-            untilUnban = 0
-
-        await asyncio.sleep(untilUnban)
-
-        guild = self.bot.get_guild(guildID)
-        await self.bot.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 and type = $3", guild.id, memberID, punishmentType)
-        self.bot.dispatch('punishment_runout', guild, memberID, punishmentType)
-
-    async def giveawayTimer(self, endTime: int, messageID: int, guildID: int, data, ID):
-        untilEnd = endTime - time.time()
-        if endTime < 0:
-            untilEnd = 0
-
-        await asyncio.sleep(untilEnd)
-
-        deleted = await self.bot.db.execute('DELETE FROM extra.timers WHERE id = $1', ID)
-        if deleted == 0:
-            return
-
-        data = json.loads(data)
-        guild = self.bot.get_guild(guildID)
-        if guild is None:
-            return
-        channel = guild.get_channel(data['channel'])
-        if channel is None:
-            return
-        message = await channel.fetch_message(messageID)
-        self.bot.dispatch('giveaway_runout', message, data)
-
-    async def reminderTimer(self, endTime: int, memberID: int, guildID: int, data, ID: int):
-        untilEnd = endTime - time.time()
-        if endTime < 0:
-            untilEnd = 0
-
-        await asyncio.sleep(untilEnd)
-
-        await self.bot.db.execute('DELETE FROM extra.timers WHERE id = $1', ID)
-
-        data = json.loads(data)
-        guild = self.bot.get_guild(guildID)
-        if guild is None:
-            return
-        member = guild.get_member(memberID)
-        if member is None:
-            return
-        channel = guild.get_channel(int(data['channelid']))
+    async def dispatch_timers(self):
         try:
-            await channel.send(f'Hier ist deine Erinnerung {member.mention}!', embed=std.getEmbed(data['message']))
-        except discord.Forbidden:
-            pass
+            while not self.bot.is_closed():
+                timer = self._current_timer = await self.wait_for_active_timers(days=40)
+                now = datetime.datetime.utcnow().timestamp()
+
+                if timer.time >= now:
+                    to_sleep = timer.time - now
+                    await asyncio.sleep(to_sleep)
+
+                await self.call_timer(timer)
+        except (OSError, discord.ConnectionClosed, asyncpg.PostgresConnectionError):
+            self._task.cancel()
+            self._task = self.bot.loop.create_task(self.dispatch_timers())
+
+    async def call_timer(self, timer):
+        await self.bot.db.execute("DELETE FROM extra.timers WHERE id = $1", timer.id)
+        self.bot.dispatch(f'{timer.type}_end', timer)
+
+    async def short_timer(self, timer, delta):
+        await asyncio.sleep(delta)
+        self.bot.dispatch(f'{timer.type}_end', timer)
+
+    async def create_timer(self, ctx: context.Context, *, date: datetime.datetime, objectID: int, type: str, data: dict = None):
+        seconds = date.timestamp()
+        delta = (date - datetime.datetime.utcnow()).total_seconds()
+        timer = await Timer.create_timer(ctx.guild.id, time=seconds, object_id=objectID, type=type, data=data)
+
+        if delta <= 60:
+            self.bot.loop.create_task(self.short_timer(timer, delta))
+            return timer
+
+        timer_id = await ctx.db.execute(
+            "INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+            ctx.guild.id, objectID, seconds, type, data
+        )
+
+        timer.id = timer_id
+
+        if delta <= (86400 * 40):
+            self._have_data.set()
+
+        if self._current_timer and seconds < self._current_timer.time:
+            self._task.cancel()
+            self._task = self.bot.loop.create_task(self.dispatch_timers())
+
+        return timer
 
     @commands.Cog.listener()
-    async def on_punishment_runout(self, guild: discord.Guild, memberID: int, punishType: int):
+    async def on_tempban_end(self, timer: Timer):
+        user = discord.Object(timer.object_id)
+        lang = await self.bot.lang("moderation", utils=True)
+        guild = self.bot.get_guild(timer.sid)
         if guild is None:
             return
 
-        if punishType == 0:
-            user = discord.Object(id=memberID)
-            if user is None:
-                return
+        fake_context = context.FakeContext(self.bot, guild)
+        ban = await guild.fetch_ban(user)
+        await guild.unban(user=user, reason=lang["tempbanExpiredReason"])
+        mod_embed = std.cmdEmbed("unmute", lang["unbanReason"], lang, user=ban.user, mod=fake_context.me)
+        await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
 
-            try:
-                await guild.unban(user, reason='Tempban has expired')
-            except:
-                pass
-
-        if punishType == 1:
-            muteroleID: int = await self.bot.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
-            muterole = guild.get_role(muteroleID)
-            member = guild.get_member(memberID)
-
-            if muterole is None or member is None:
-                return
-
-            try:
-                await member.remove_roles(muterole)
-            except discord.Forbidden:
-                pass
 
     @commands.Cog.listener()
-    async def on_giveaway_runout(self, message: discord.Message, data):
+    async def on_tempmute_end(self, timer):
+        guild = self.bot.get_guild(timer.sid)
+        config = await self.bot.cache.get(timer.sid)
+        if guild is None or config is None:
+            return
+
+        lang = await self.bot.lang("moderation", utils=True)
+        user = guild.get_member(timer.object_id)
+        if user is None:
+            return
+
+        fake_context = context.FakeContext(self.bot, guild)
+        mod_embed = std.cmdEmbed("unmute", lang["unmuteReason"], lang, user=user, mod=fake_context.me)
+        await user.remove_roles(config.automod.config.muterole)
+        await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
+
+    @commands.Cog.listener()
+    async def on_giveaway_end(self, message: discord.Message, data):
         channel = message.channel
         reactions = message.reactions
         winners = []
