@@ -1,6 +1,5 @@
 import asyncio
-from typing import Dict
-
+#
 from . import leveling, modules, automod
 
 
@@ -50,7 +49,7 @@ class BotCache:
     __slots__ = 'bot'
 
 
-    cache: Dict[int, GuildConfig] = {}
+    cache: dict[int, GuildConfig] = {}
 
     def __init__(self, bot):
         self.bot = bot

@@ -1,5 +1,3 @@
-from typing import List
-
 import discord
 
 
@@ -9,12 +7,12 @@ class Base:
     sid: int
     state: int
     points: int
-    _whitelist: List[int]
+    whitelist: list[int]
 
 class Invites(Base):
     __slots__ = 'partner'
 
-    partner: List[int]
+    partner: list[int]
 
     def __init__(self, bot, record, sid):
         self.sid = sid
@@ -51,7 +49,7 @@ class Invites(Base):
 class Blacklist(Base):
     __slots__ = 'words'
 
-    words: List[str]
+    words: list[str]
 
     def __init__(self, bot, record, sid):
         self.sid = sid
@@ -115,7 +113,7 @@ class Caps(Base):
 class Links(Base):
     __slots__ = ('links', 'iswhitelist')
 
-    links: List[str]
+    links: list[str]
     iswhitelist: bool
 
     def __init__(self, bot, record, sid):
@@ -205,12 +203,12 @@ class Config:
     gmm: bool
     maxpoints: int
     action: int
-    modroles: List[int]
+    modroles: list[int]
     logging: bool
     mutetime: int
     bantime: int
-    ignoredroles: List[int]
-    helperroles: List[int]
+    ignoredroles: list[int]
+    helperroles: list[int]
     _muterole: int
 
     def __init__(self, bot, record, sid):
@@ -233,7 +231,7 @@ class Config:
             self.gmm = record.get('gmm')
             self.maxpoints = record.get('maxpoints')
             self.action = record.get('action')
-            self.logchannelID = record.get('logging')
+            self.logging = record.get('logging')
             self.bantime = record.get('bantime')
             self.mutetime = record.get('mutetime')
             self.ignoredroles = record.get('ignoredroles') or []
@@ -290,7 +288,7 @@ class Automod:
     blacklist: Blacklist
 
     def __init__(self, bot, sid, record):
-        self.config = Config(bot, record, sid),
+        self.config = Config(bot, record, sid)
         self.blacklist = Blacklist(bot, record, sid)
         self.links = Links(bot, record, sid)
         self.invites = Invites(bot, record, sid)

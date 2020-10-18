@@ -1,16 +1,13 @@
-from typing import List
-
-
 class Leveling:
     __slots__ = ('sid', 'channelID', 'message', 'noxpchannelIDs', 'noxproleID', 'remove', 'bot', 'roles')
 
     sid: int
     channelID: int
     message: str
-    noxpchannelIDs: List[int]
+    noxpchannelIDs: list[int]
     noxproleID: int
     remove: bool
-    roles: List[list]
+    roles: list[list]
 
     def __init__(self, bot, sid, record):
         self.sid = sid
