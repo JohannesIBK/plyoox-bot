@@ -5,7 +5,7 @@ import discord
 from asyncpg.pool import Pool
 from discord.ext import commands
 
-from utils.db.cache import GuildConfig, BotCache
+from utils.db.cache import BotCache
 from utils.ext import standards as std
 
 
@@ -36,16 +36,26 @@ class Context(commands.Context):
     def cache(self) -> BotCache:
         return self.bot.cache
 
+    async def lang(self, utils = False):
+        if utils:
+            return { **self.bot._lang[self.cog.qualified_name.lower()], **self.bot._lang["utils"]}
+        else:
+            return self.bot._lang[self.cog.qualified_name.lower()]
+
     async def release(self):
         if self._db is not None:
             await self.bot.pool.release(self._db)
             self._db = None
 
     async def error(self, message: str, **kwargs):
-        await self.send(embed=std.getErrorEmbed(message), **kwargs)
+        return await self.send(embed=std.getErrorEmbed(message), **kwargs)
 
-    async def embed(self, message: str, **kwargs):
-        await self.send(embed=std.getEmbed(message), **kwargs)
+    async def embed(self, message: str, signed=False, **kwargs):
+        embed = std.getEmbed(message)
+        if signed:
+            embed.set_footer(icon_url=self.author.avatar_url, text=f'Requested by {self.author}')
+
+        return await self.send(embed=embed, **kwargs)
 
     async def prompt(self, message, *, timeout=60.0, delete_after=True, reacquire=True, author_id=None):
         if not self.channel.permissions_for(self.me).add_reactions:
@@ -54,7 +64,7 @@ class Context(commands.Context):
         fmt = f'{message}\n\nReagiere mit {std.yes_emoji} um zu bestätigen oder {std.no_emoji} um abzubrechen.'
 
         author_id = author_id or self.author.id
-        msg = await self.send(embed=discord.Embed(color=std.normal_color, description=fmt))
+        msg = await self.send('Ping!', embed=discord.Embed(color=std.normal_color, description=fmt))
 
         confirm = None
 
@@ -91,3 +101,18 @@ class Context(commands.Context):
                 await msg.delete()
         finally:
             return confirm
+
+
+class FakeContext:
+    def __init__(self, bot, guild):
+        self.bot = bot
+        self.guild = guild
+
+    @property
+    def cache(self):
+        return self.bot.cache
+
+    @property
+    def me(self):
+        return self.guild.me
+
