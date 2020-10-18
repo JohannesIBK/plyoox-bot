@@ -34,7 +34,7 @@ class Fun(commands.Cog):
         color = discord.Colour.from_rgb(rgbs[0], rgbs[1], rgbs[2])
         colorHex = "#%02x%02x%02x" % (rgbs[0], rgbs[1], rgbs[2])
         await ctx.send(embed=discord.Embed(color=color,
-                                           description=f'Es wurde eine zufällige Farbe generiert:\nFarbcode in RGB {rgbs} und HEX-Code {colorHex}'))
+                                           description=f'Es wurde eine zufällige Farbe generiert:\nFarbcode in RGB `{rgbs}` und HEX `{colorHex}`'))
 
     @cmd()
     @checks.isActive('fun')
@@ -106,11 +106,13 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def ship(self, ctx: context.Context, user1: discord.Member, user2: discord.Member = None):
+        lang = await ctx.lang()
+
         if user2 is None:
             user2 = ctx.message.author
 
         if user1 == user2:
-            return await ctx.embed('Das funktioniert so nicht D:')
+            return await ctx.error(lang["errorSameUser"])
 
         score = random.randint(0, 100)
         filled_progbar = round(score / 100 * 10)
@@ -125,14 +127,16 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def thisorthat(self, ctx: context.Context, *, questions: str):
+        lang = await ctx.lang()
+
         if 'discord.gg' in questions.lower() or 'discord.com/invite' in questions.lower():
             return
         if questions.count('|') == 0:
-            return await ctx.error('Fargen müssen mit `|` getrennt werden')
+            return await ctx.error(lang["errorNoQuestion"])
 
         questionsList = questions.split('|')
-        choosen: str = random.choice(questionsList)
-        await ctx.send(f'Ich wähle: `{choosen.strip()}`', allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+        choosen = random.choice(questionsList)
+        await ctx.embed(lang["chooseMessage"].format(c=choosen.strip()), allowed_mentions=discord.AllowedMentions.none(), signed=True)
 
     @cmd()
     @checks.isActive('fun')
@@ -145,17 +149,18 @@ class Fun(commands.Cog):
     @checks.isActive('fun')
     @commands.cooldown(rate=3, per=1, type=commands.BucketType.member)
     async def slot(self, ctx: context.Context):
+        lang = await ctx.lang()
         emojis = ("🍎", '🍉', '🍇', '🍓', '🍒')
 
         selected = ''
         for _ in range(3):
             selected += random.choice(emojis)
-        rolled = len(set(selected))
 
-        if rolled == 1:
-            await ctx.send(f"{''.join(selected)} Du hast gewonnen! 🎉")
+        if len(set(selected)) == 1:
+            await ctx.embed(lang["slotWin"].format(s=''.join(selected)), signed=True)
         else:
-            await ctx.send(f"{''.join(selected)} Verloren 😢")
+            await ctx.embed(lang["slotLose"].format(s=''.join(selected)), signed=True)
+
 
     @cmd()
     @checks.isActive('fun')
@@ -164,9 +169,7 @@ class Fun(commands.Cog):
         if 'discord.gg' in reversedText.lower() or 'discord.com/invite' in reversedText.lower():
             return
 
-        embed = std.getEmbed(reversedText)
-        embed.set_footer(icon_url=ctx.author.avatar_url, text=ctx.author)
-        await ctx.send(embed=embed)
+        await ctx.embed(reversedText, signed=True)
 
     @cmd()
     @checks.isActive('fun')
@@ -188,9 +191,7 @@ class Fun(commands.Cog):
                     lastUpper = False
             newText.append(t)
 
-        embed = std.getEmbed(' '.join(newText))
-        embed.set_footer(icon_url=ctx.author.avatar_url, text=ctx.author)
-        await ctx.send(embed=embed)
+        await ctx.embed(f'```{" ".join(newText)}```', signed=True)
 
     @cmd(aliases=['ts'])
     @checks.isActive('fun')
@@ -249,95 +250,83 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def pat(self, ctx: context.Context, user: discord.Member):
+        lang = await ctx.lang()
+
         if user == ctx.author:
-            return await ctx.embed('Das funktioniert so nicht D:')
+            return await ctx.embed(lang["errorSameUser"])
 
         gifs = self.gifData['pat']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed(f'{ctx.author.mention} patted {user.mention}')
+        embed = std.getEmbed(lang["patMessage"].fomat(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
     async def hug(self, ctx: context.Context, user: discord.Member):
+        lang = await ctx.lang()
+
         if user == ctx.author:
-            return await ctx.embed('Das funktioniert so nicht D:')
+            return await ctx.embed(lang["errorSameUser"])
 
         gifs = self.gifData['hug']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed(f'{ctx.author.mention} hugged {user.mention}')
+        embed = std.getEmbed(lang["hugMessage"].fomat(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
     async def highfive(self, ctx: context.Context, user: discord.Member):
+        lang = await ctx.lang()
+
         if user == ctx.author:
-            return await ctx.embed('Das funktioniert so nicht D:')
+            return await ctx.embed(lang["errorSameUser"])
 
-        gifs: list = self.gifData['highfive']
-        gif: str = random.choice(gifs)
+        gifs: list[str] = self.gifData['highfive']
+        gif = random.choice(gifs)
 
-        embed = discord.Embed(color=std.normal_color, description=f'{ctx.author.mention} gives {user.mention} a highfive')
+        embed = discord.Embed(color=std.normal_color, description=lang["highfiveMessage"].format(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
     async def rage(self, ctx: context.Context):
-        gifs: list = self.gifData['rage']
-        gif: str = random.choice(gifs)
+        lang = await ctx.lang()
 
-        embed = std.getEmbed(f'{ctx.author.mention} rages')
+        gifs: list[str] = self.gifData['rage']
+        gif = random.choice(gifs)
+
+        embed = std.getEmbed(lang["rageMessage"].format(u=ctx.author.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
     async def cry(self, ctx: context.Context):
-        gifs: list = self.gifData['cry']
-        gif: str = random.choice(gifs)
+        lang = await ctx.lang()
 
-        embed = std.getEmbed(f'{ctx.author.mention} cries')
+        gifs: list[str] = self.gifData['cry']
+        gif = random.choice(gifs)
+
+        embed = std.getEmbed(lang["cryMessage"].format(u=ctx.author.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
     @cmd(name='8ball')
     @checks.isActive('fun')
     async def _8ball(self, ctx: context.Context, *, Frage: str):
-        answers = [
-            'Ja.',
-            'Kann sein.',
-            'Auf jeden Fall!',
-            'Niemals!',
-            'Nein.',
-            'Vermutlich.',
-            'So wie ich das sehe, ja.',
-            'Das kann ich jetzt noch nicht sagen.',
-            'Ich sage nein.',
-            'Meine Quellen sagen nein.',
-            'Das sage ich dir besser nicht.',
-            'Schaut schlecht aus',
-            'Ja, auf jeden Fall!',
-            'Ich kann mich nicht entscheiden.',
-            'Die Sterne schauen gut aus.',
-            'Lass mich kurz nachdenken... Nein.',
-            'Lass mich kurz nachdenken... Ja.',
-            'Ich denke, ich kann dir das nicht sagen.',
-            'Meine Antwort ist ja.',
-            'Meine Antwort ist nein.',
-            'Ich bin mir unsicher.'
-        ]
-        await ctx.send(f'> {Frage}\n{random.choice(answers)}', allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+        lang = await ctx.lang()
+        await ctx.embed(f'> {Frage}\n{random.choice(lang["8ball"]["answers"])}', allowed_mentions=discord.AllowedMentions.none(), signed=True)
 
     @cmd()
     @checks.isActive('fun')
     async def cat(self, ctx: context.Context):
-        gifs: list = self.gifData['cat']
-        gif: str = random.choice(gifs)
+        gifs: list[str] = self.gifData['cat']
+        gif = random.choice(gifs)
 
         embed = discord.Embed(color=std.normal_color)
         embed.set_image(url=gif)
@@ -346,10 +335,12 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def laugh(self, ctx: context.Context):
-        gifs: list = self.gifData['laugh']
-        gif: str = random.choice(gifs)
+        lang = await ctx.lang()
 
-        embed = std.getEmbed(f'{ctx.author.mention} laughs')
+        gifs: list[str] = self.gifData['laugh']
+        gif = random.choice(gifs)
+
+        embed = std.getEmbed(lang["laughMessage"].format(u=ctx.author.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
