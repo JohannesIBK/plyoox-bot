@@ -48,7 +48,6 @@ class GuildConfig:
 class BotCache:
     __slots__ = 'bot'
 
-
     cache: dict[int, GuildConfig] = {}
 
     def __init__(self, bot):
