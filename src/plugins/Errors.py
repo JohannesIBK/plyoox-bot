@@ -19,46 +19,44 @@ class Errors(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: context.Context, error):
+        lang = await ctx.lang()
+
         if hasattr(ctx.command, "on_error") or (ctx.command and hasattr(ctx.cog, f"_{ctx.command.cog_name}__error")):
             return
 
         if isinstance(error, commands.BadArgument) or isinstance(error, commands.BadUnionArgument):
             if isinstance(error, commands.RoleNotFound):
-                return await ctx.error('Die Rolle wurde nicht gefunden.')
+                return await ctx.error(lang["roleNotFound"])
             if isinstance(error, commands.MemberNotFound):
-                return await ctx.error('Das Mitglied wurde nicht gefunden.')
+                return await ctx.error(lang["memberNotFound"])
             if isinstance(error, commands.UserNotFound):
-                return await ctx.error('Der User wurde nicht gefunden (nicht im Cache).')
+                return await ctx.error(lang["userNotFound"])
             if isinstance(error, commands.ChannelNotFound):
-                return await ctx.error('Der Channel wurde nicht gefunden.')
+                return await ctx.error(lang["channelNotFound"])
             else:
-                embed = await self._help(ctx, f'Ein Argument wurde falsch angegeben.')
-                await ctx.send(embed=embed)
+                await ctx.error(lang["badArgument"].format(e=str(error)))
 
         elif isinstance(error, commands.MissingRequiredArgument):
-            embed = await self._help(ctx, f'Das Argument `{error.param.name}` wurde nicht angegeben.')
-            await ctx.send(embed=embed)
+            await ctx.error(lang["missingArgument"].format(p=str(error.param.name)))
 
         elif isinstance(error, commands.BotMissingPermissions):
-            await ctx.error(f'Dem Bot fehlt die Berechtigung(en) {" ".join(error.missing_perms)}')
+            await ctx.error(lang["botMissingPermissions"].format(p=" ".join(error.missing_perms)))
 
         elif isinstance(error, commands.MissingPermissions):
-            await ctx.error(f'Dir fehlen die Berechtigung(en) `{" ".join(error.missing_perms)}`.')
+            await ctx.error(lang["userMissingPermissions"].format(p=" ".join(error.missing_perms)))
 
         elif isinstance(error, commands.CommandNotFound):
             pass
 
         elif isinstance(error, commands.CommandOnCooldown):
             cooldown = error.cooldown
-            await ctx.error(f'Dieser Command hat einen Cooldown. '
-                           f'Du kannst ihn nur {cooldown.rate} pro {cooldown.per}s benutzen.\n'
-                           f'Versuche es in {round(error.retry_after)}s erneut.')
+            await ctx.error(lang["cooldownCommand"].format(p=str(cooldown.per), r=str(cooldown.rate), rt=str(round(error.retry_after))))
 
         elif isinstance(error, commands.NotOwner):
-            await ctx.error('Diesen Command kann nur der Owner des Bots ausführen.')
+            await ctx.error(lang["ownerOnly"])
 
         elif isinstance(error, commands.DisabledCommand):
-            await ctx.error('Dieser Command ist auf diesem Server deaktiviert.')
+            await ctx.error(lang["disabledCommand"])
 
         elif isinstance(error, commands.CheckFailure):
             pass
@@ -67,13 +65,13 @@ class Errors(commands.Cog):
             error = error.__cause__
             if isinstance(error, discord.Forbidden):
                 try:
-                    await ctx.error('Der Bot hat keine Berechtigung um den Command auszuführen.')
+                    await ctx.error(lang["discordForbidden"])
                 except:
                     pass
 
             else:
                 userEmbed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")
-                userEmbed.add_field(name="Original Error", value=f'{error}')
+                userEmbed.add_field(name="Original Error", value=f'```py{error}```')
                 try:
                     await ctx.send(embed=userEmbed)
                 except Exception as e:
@@ -84,7 +82,7 @@ class Errors(commands.Cog):
                                     value=ctx.command.name)
                     embed.add_field(name='Error',
                                     value=f'{type(error).__name__}: {error}')
-                    await channel.send(embed=embed)
+                    return await channel.send(embed=embed)
 
                 if self.bot.user.id == 505433541916622850:
                     if ctx.cog.qualified_name == 'Owner':
