@@ -1,5 +1,4 @@
 import datetime
-from typing import Union
 
 import discord
 
@@ -62,6 +61,8 @@ lock_emoji = '\U0001F512'
 date_emoji = '\U0001F4C5'
 inbox_emoji = '\U0001F4E5'
 outbox_emoji = '\U0001F4E4'
+tropy_emoji = '\U0001F3C6'
+arrow = '<:arrow:762598973886169099>'
 
 # Colors
 error_color = 0xff0000
@@ -74,15 +75,18 @@ avatar_url = 'https://cdn.discordapp.com/avatars/505433541916622850/ccc8ba894dd4
 
 
 # Embeds
-def getEmbed(description: str) -> discord.Embed:
+def getEmbed(description: str = None, signed: discord.Member = None) -> discord.Embed:
     """
     :param description: Message to send
+    :param signed: User who requested the command
     :return: discord.Embed
     """
 
-    embed = discord.Embed(
-        color=normal_color,
-        description=description)
+    embed = discord.Embed(color=normal_color)
+    if description is not None:
+        embed.description = description
+    if signed:
+        embed.set_footer(icon_url=signed.avatar_url, text=f'Requested by {signed}')
 
     return embed
 
@@ -101,46 +105,65 @@ def getErrorEmbed(errorMessage: str) -> discord.Embed:
     return embed
 
 
-def getBaseModEmbed(reason, user: Union[discord.Member, discord.User] = None, mod: discord.Member = None):
+def getBaseModEmbed(reason, user: discord.User = None, mod: discord.Member = None) -> discord.Embed:
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text='Plyoox Moderation', icon_url=avatar_url)
 
+    description = []
+
     if user is not None:
-        embed.description = f'{nametag_emoji} {user}\n' \
-                            f'{botdev_emoji} {user.id}\n' \
-                            f'{mention_emoji} {user.mention}' \
+        description.append(f'**User:** {user} [{user.id}]')
 
     if mod is not None:
-        embed.add_field(name=f'{supporter_emoji} **__Moderator__**',
-                        value=str(mod))
+        description.append(f'**Moderator:** {mod}')
 
-    embed.add_field(name=f'{richPresence_emoji} **__Grund__**',
-                    value=reason,
-                    inline=False)
+    if reason is not None:
+        description.append(f'**Grund:** {reason}')
+
+    embed.description = '\n'.join(description)
+
     return embed
 
 
-def getUserEmbed(reason, guildName: str, duration = 'permanent', punishType = 1):
+def getUserEmbed(lang, *, reason, guildName, punishType, duration = 'permanent'):
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
-    embed.set_footer(text='Plyoox Moderation', icon_url=avatar_url)
+    embed.set_footer(text=lang['plyooxFooter'], icon_url=avatar_url)
 
-    if duration == 'permanent':
-        messageStart = 'Du wurdest permanent '
+    if duration:
+        messageStart = lang['userEmbedDuration'].format(d=str(duration)) + " "
     else:
-        messageStart = f'Du wurdest bis {duration} '
+        messageStart = lang['userEmbedPerma'] + " "
 
-    if reason == 'No Reason':
-        reason = ''
-    else:
-        reason = f'für `{reason}` '
+    reason = reason or ''
+    if reason:
+        reason = lang['userEmbedReason'].format(r=reason) + " "
 
-    if punishType == 0:
-        embed.description = messageStart + f'vom Server `{guildName}` {reason}ausgeschlossen.'
-    elif punishType == 1:
-        embed.description = f'Du wurdest vom Server `{guildName}` {reason}gekickt.'
-    elif punishType == 2:
-        embed.description = messageStart + f'auf dem Server `{guildName}` {reason}gemutet.'
+    if punishType == 'ban':
+        embed.description = messageStart + lang["userEmbedPunish0"].format(n=guildName, r=reason)
+    elif punishType == 'kick':
+        embed.description = lang["userEmbedPunish1"].format(n=guildName, r=reason)
+    elif punishType == 'mute':
+        embed.description = messageStart + lang['userEmbedPunish2'].format(n=guildName, r=reason)
+
+    return embed
+
+def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member = None, user: discord.Member = None, amount = None, duration = None):
+    reason = reason or lang['noreason']
+    embed = discord.Embed(color=normal_color, title=lang[action].upper())
+    embed.set_footer(text="Plyoox", icon_url=avatar_url)
+
+    if user is not None:
+        embed.add_field(name=arrow + lang["user"].upper(), value=f"```{user} [{user.id}]```")
+        embed.set_author(name=str(user), icon_url=user.avatar_url)
+    if mod is not None:
+        embed.add_field(name=arrow + lang["moderator"].upper(), value=f"```{mod}```")
+    if reason is not None:
+        embed.add_field(name=arrow + lang["reason"].upper(), value=f"```{reason}```")
+    if duration is not None:
+        embed.add_field(name=arrow + lang["duration"].upper(), value=f"```{duration}```")
+    if amount is not None:
+        embed.add_field(name=arrow + lang["amount"].upper(), value=f"```{amount}```")
 
     return embed
