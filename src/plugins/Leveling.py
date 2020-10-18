@@ -135,12 +135,14 @@ class Leveling(commands.Cog):
         else:
             currentXP = userData['xp'] - self._get_xp_from_lvl(lvl - 1)
 
-        embed = discord.Embed(color=user.color, title=f"**{user.display_name}**",
+        embed = discord.Embed(color=user.color,
                               timestamp=datetime.utcnow())
+        embed.set_author(name=user.name, icon_url=user.avatar_url)
         embed.set_thumbnail(url=user.avatar_url)
-        embed.add_field(name=f"{std.level_emoji} Level", value=str(lvl))
-        embed.add_field(name=f"{std.booster4_emoji} XP", value=f"{currentXP}/{lvlXP}")
-        embed.set_footer(text=f'Rang #{userData["count"]}')
+        embed.add_field(name=f"{std.arrow} Level", value=f'```{lvl}```')
+        embed.add_field(name=f"{std.arrow} XP", value=f"```{currentXP}/{lvlXP}```")
+        embed.add_field(name=f'{std.arrow} Rang', value=f'```#{userData["count"]}```')
+        embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
     @cmd()
@@ -156,14 +158,20 @@ class Leveling(commands.Cog):
             lvlRoles.append([role, roleData[1]])
         lvlRoles.sort(key=lambda lvlRole: lvlRole[1])
 
-        await ctx.send(embed=discord.Embed(color=std.normal_color, title='Level-Rollen', description='\n'.join(f'{lvlRole[0].mention} | {lvlRole[1]}' for lvlRole in lvlRoles)))
+        embed = discord.Embed(
+            color=std.normal_color,
+            title='Level-Rollen',
+            description='\n'.join(f'{lvlRole[0].mention} | {lvlRole[1]}' for lvlRole in lvlRoles)
+        )
+        embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
+        await ctx.send(embed=embed)
 
     @cmd(aliases=["top10"])
     @checks.isActive('leveling')
     async def top(self, ctx: context.Context):
         users = await ctx.db.fetch('SELECT * FROM extra.levels WHERE sid = $1 ORDER BY xp DESC LIMIT 15', ctx.guild.id)
 
-        embed = discord.Embed(color=std.normal_color, title='TOP 10')
+        embed = discord.Embed(color=std.normal_color, title=f'**TOP 10** | {ctx.guild.name}')
         count = 0
 
         for userData in users:
@@ -185,7 +193,8 @@ class Leveling(commands.Cog):
             if count == 11:
                 break
 
-            embed.add_field(name=f"{count}. {member.display_name}", value=f'Level: {lvl}\nXP: {currentXP}/{lvlXP}')
+            embed.add_field(name=f"{count}. {member.display_name}", value=f'```Level: {lvl}\nXP: {currentXP}/{lvlXP}```')
+        embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
     @cmd(aliases=["rl"])
@@ -195,7 +204,7 @@ class Leveling(commands.Cog):
         if user.bot:
             return await ctx.error('Dieser User ist ein Bot.')
         await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
-        await ctx.message.delete()
+        await ctx.message.delete(delay=5)
         await ctx.embed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.', delete_after=5)
 
 
