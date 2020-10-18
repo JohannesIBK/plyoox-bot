@@ -1,0 +1,2 @@
+class ModeratorCommand(Exception):
+    pass
