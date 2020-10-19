@@ -28,6 +28,7 @@
     "word.duration": "Dauer",
     "word.unban": "Entbann",
     "word.unmute": "Entmute",
+    "word.massban": "Massenbann",
     "word.resetPoints": "Punkte zurückgesetzt",
     "mute.temp.reason.unmute": "Mute abgelaufen",
     "mute.temp.message": "Der User `{u}` wurde erfolgreich `{d}` für `{r}` gemutet.",
