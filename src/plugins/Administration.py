@@ -3,7 +3,7 @@ from discord.ext import commands
 
 import main
 from utils import rules
-from utils.ext import checks, standards as std, context
+from utils.ext import checks, context
 from utils.ext.cmds import grp, cmd
 
 
@@ -14,13 +14,14 @@ class Servermoderation(commands.Cog):
     @cmd(name="prefix")
     @checks.isAdmin()
     async def prefix(self, ctx: context.Context, prefix: str):
+        lang = await ctx.lang()
         if len(prefix) > 3:
-            return await ctx.error('Der Prefix darf maximal 3 Zeichen lang sein.')
+            return await ctx.error(lang["prefix.error.maxlength"])
 
         await ctx.db.execute("UPDATE config.guild SET prefix = $1 WHERE sid = $2", prefix, ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed(f'{std.yes_emoji} Der Prefix wurde erfolgreich zu `{prefix}` geändert.')
+        await ctx.embed(lang["prefix.message"].format(p=prefix))
 
     @grp(case_insensitive=True)
     @checks.isAdmin()
@@ -31,57 +32,64 @@ class Servermoderation(commands.Cog):
     @activate.command()
     @commands.bot_has_permissions(manage_roles=True)
     async def leveling(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET leveling = true WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Das Levelsystem wurde erfolgreich aktiviert.')
+        await ctx.embed(lang["activate.leveling.message"])
 
     @activate.command()
     async def fun(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET fun = true WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Das Games-Modul wurde erfolgreich aktiviert.')
+        await ctx.embed(lang["activate.fun.message"])
 
     @activate.command()
     @commands.bot_has_permissions(ban_members=True, kick_members=True, manage_roles=True, manage_messages=True)
     async def automod(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET automod = true WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Der AutoMod wurde erfolgreich aktiviert."')
+        await ctx.embed(lang["activate.automod.message"])
 
     @activate.command()
     @commands.bot_has_permissions()
     async def welcomer(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET welcomer = true WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Der Welcomer wurde erfolgreich aktiviert."')
+        await ctx.embed(lang["activate.welcomer.message"])
 
     @activate.command()
     @commands.bot_has_permissions(ban_members=True)
     async def globalbans(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET globalbans = true WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Globalbans wurden erfolgreich aktiviert.')
+        await ctx.embed(lang["activate.globalbans.message"])
 
     @activate.command()
     @commands.bot_has_permissions(ban_members=True)
     async def logging(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET logging = true WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Logging wurden erfolgreich aktiviert.')
+        await ctx.embed(lang["activate.logging.message"])
 
     @activate.command()
     @commands.bot_has_permissions(ban_members=True)
     async def timer(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET timers = true WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Timer wurden erfolgreich aktiviert.')
+        await ctx.embed(lang["activate.timer.message"])
 
     @grp(case_insensitive=True)
     @checks.isAdmin()
@@ -91,52 +99,59 @@ class Servermoderation(commands.Cog):
 
     @deactivate.command(name='leveling')
     async def _leveling(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET leveling = false WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Das Levelsystem wurde deaktiviert.')
+        await ctx.embed(lang["deactivate.leveling.message"])
 
     @deactivate.command(name='fun')
     async def _fun(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET fun = false WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Das Fun-Modul wurde deaktiviert')
+        await ctx.embed(lang["deactivate.fun.message"])
 
     @deactivate.command(name="automod")
     async def _automod(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET automod = false WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Der Automod wurde deaktiviert')
+        await ctx.embed(lang["deactivate.automod.message"])
 
     @deactivate.command(name='welcomer')
     async def _welcomer(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET welcomer = false WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Der Welcomer wurde erfolgreich deaktiviert.')
+        await ctx.embed(lang["deactivate.welcomer.message"])
 
     @deactivate.command(name='globalbans')
-    async def _globalban(self, ctx: context.Context):
+    async def _globalbans(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET globalbans = false WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Globalbans wurden erfolgreich deaktiviert."')
+        await ctx.embed(lang["deactivate.globalbans.message"])
 
     @deactivate.command(name='logging')
-    async def _globalban(self, ctx: context.Context):
+    async def _logging(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET logging = false WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Logging wurden erfolgreich deaktiviert.')
+        await ctx.embed(lang["deactivate.logging.message"])
 
     @deactivate.command(name='timer')
     async def _timer(self, ctx: context.Context):
+        lang = await ctx.lang()
         await ctx.db.execute("UPDATE config.modules SET logging = false WHERE sid = $1", ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
-        await ctx.embed('Timer wurden erfolgreich deaktiviert.')
+        await ctx.embed(lang["deactivate.timer.message"])
 
     @cmd()
     @checks.isAdmin()
@@ -182,12 +197,13 @@ class Servermoderation(commands.Cog):
     @commands.cooldown(1, 900, type=commands.BucketType.guild)
     @commands.bot_has_permissions(manage_channels=True)
     async def setupMute(self, ctx: context.Context):
+        lang = await ctx.lang()
         guild = ctx.guild
 
         muteRoleID: int = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
         muteRole = guild.get_role(muteRoleID)
         if muteRole is None:
-            return await ctx.error('Der Server hat keine Mute-Rolle!')
+            return await ctx.error(lang["setupmute.error.nomuterole"])
 
         await muteRole.edit(permissions=discord.Permissions.none())
 
@@ -216,35 +232,38 @@ class Servermoderation(commands.Cog):
                     allow=discord.Permissions(permissions=0))
                 await channel.set_permissions(muteRole, overwrite=overwrite)
 
-        await ctx.embed('Die Muterolle wurde eingestellt.')
+        await ctx.embed(lang["setupmute.message"])
 
     @cmd()
     @checks.isAdmin()
     async def copyblacklist(self, ctx: context.Context, guildID: int, overwrite: bool = False):
         guild = ctx.bot.get_guild(guildID)
+        lang = await ctx.lang()
+
         if guild is None:
-            return await ctx.error('Der Server konnte nicht gefunden werden.')
+            return await ctx.error(lang["copyblacklist.error.guildnotfound"])
+
         member = guild.get_member(ctx.author.id)
         if member is None or not member.guild_permissions.administrator:
-            return await ctx.error('Du bist nicht auf diesem Server oder hast keine Administrator-Rechte.')
+            return await ctx.error(lang["copyblacklist.error.nopermissions"])
 
         words = await ctx.db.fetchval(
-            'SELECT words FROM automod.blacklist WHERE sid = $1',
+            'SELECT blacklistwords FROM automod.automod WHERE sid = $1',
             guild.id)
 
         if words is None:
-            return await ctx.error('Der Server hat keine Wörter eingespeichert.')
+            return await ctx.error(lang["copyblacklist.error.nowords"])
 
         if overwrite:
             await ctx.db.execute(
-                'UPDATE automod.blacklist SET words = $1 WHERE sid = $2',
+                'UPDATE automod.automod SET blacklistwords = $1 WHERE sid = $2',
                 words, ctx.guild.id)
         else:
             await ctx.db.execute(
-                'UPDATE automod.blacklist SET words = array_cat(words, $1) WHERE sid = $2',
+                'UPDATE automod.automod SET blacklistwords = array_cat(blacklistwords, $1) WHERE sid = $2',
                 words, ctx.guild.id)
 
-        await ctx.embed('Die Blacklist wurde geupdated.')
+        await ctx.embed(lang["copyblacklist.message"])
 
 
     # @cmd()
