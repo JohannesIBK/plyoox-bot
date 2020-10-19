@@ -20,6 +20,12 @@ from utils.ext.time import FutureTime
 linkRegex = re.compile('((https?://(www\.)?|www\.)[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})', re.IGNORECASE)
 
 
+def can_execute_action(ctx, user, target):
+    return user.id == ctx.bot.owner_id or \
+           user == ctx.guild.owner or \
+           user.top_role > target.top_role
+
+
 class Arguments(argparse.ArgumentParser):
     def error(self, message):
         raise RuntimeError(message)
@@ -491,6 +497,163 @@ class Moderation(commands.Cog):
 
         args.search = max(0, min(2000, args.search))
         await self.do_removal(ctx, args.search, predicate, lang, before=args.before, after=args.after)
+
+    @cmd(aliases=['banmatch'])
+    @checks.isAdmin()
+    @commands.bot_has_permissions(ban_members=True)
+    async def massban(self, ctx: Context, *, args):
+        lang = await ctx.lang()
+
+        parser = Arguments(add_help=False, allow_abbrev=False)
+        parser.add_argument('--channel', '-c')
+        parser.add_argument('--reason', '-r')
+        parser.add_argument('--search', type=int, default=100)
+        parser.add_argument('--regex')
+        parser.add_argument('--no-avatar', action='store_true')
+        parser.add_argument('--no-roles', action='store_true')
+        parser.add_argument('--created', type=int)
+        parser.add_argument('--joined', type=int)
+        parser.add_argument('--joined-before', type=int)
+        parser.add_argument('--joined-after', type=int)
+        parser.add_argument('--contains')
+        parser.add_argument('--starts')
+        parser.add_argument('--ends')
+        parser.add_argument('--match')
+        parser.add_argument('--show', action='store_true')
+        parser.add_argument('--embeds', action='store_const', const=lambda m: len(m.embeds))
+        parser.add_argument('--files', action='store_const', const=lambda m: len(m.attachments))
+        parser.add_argument('--after', type=int)
+        parser.add_argument('--before', type=int)
+
+        try:
+            args = parser.parse_args(shlex.split(args))
+        except Exception as e:
+            return await ctx.send(str(e))
+
+        members = []
+
+        if args.channel:
+            channel = await commands.TextChannelConverter().convert(ctx, args.channel)
+            before = args.before and discord.Object(id=args.before)
+            after = args.after and discord.Object(id=args.after)
+            predicates = []
+            if args.contains:
+                predicates.append(lambda m: args.contains in m.content)
+            if args.starts:
+                predicates.append(lambda m: m.content.startswith(args.starts))
+            if args.ends:
+                predicates.append(lambda m: m.content.endswith(args.ends))
+            if args.match:
+                try:
+                    _match = re.compile(args.match)
+                except re.error as e:
+                    return await ctx.error(lang["massban.error.regex"].format(e=str(e)))
+                else:
+                    predicates.append(lambda m, x=_match: x.match(m.content))
+            if args.embeds:
+                predicates.append(args.embeds)
+            if args.files:
+                predicates.append(args.files)
+
+            async for message in channel.history(limit=min(max(1, args.search), 2000), before=before, after=after):
+                if all(p(message) for p in predicates):
+                    members.append(message.author)
+        else:
+            members = ctx.guild.members
+
+        # member filters
+        predicates = [
+            lambda m: m.id != ctx.author.id,
+            lambda m: can_execute_action(ctx, ctx.author, m),  # Only if applicable
+            lambda m: not m.bot,  # No bots
+            lambda m: m.discriminator != '0000',  # No deleted users
+        ]
+
+        async def _resolve_member(member_id):
+            r = ctx.guild.get_member(member_id)
+            if r is None:
+                try:
+                    return await ctx.guild.fetch_member(member_id)
+                except discord.HTTPException:
+                    raise commands.MemberNotFound from None
+            return r
+
+        if args.regex:
+            try:
+                _regex = re.compile(args.regex)
+            except re.error as e:
+                return await ctx.error(lang["massban.error.regex"].format(e=str(e)))
+            else:
+                predicates.append(lambda m, x=_regex: x.match(m.name))
+
+        if args.no_avatar:
+            predicates.append(lambda m: m.avatar is None)
+        if args.no_roles:
+            predicates.append(lambda m: len(getattr(m, 'roles', [])) <= 1)
+
+        now = datetime.datetime.utcnow()
+        if args.created:
+            def created(memb, *, offset=now - datetime.timedelta(minutes=args.created)):
+                return memb.created_at > offset
+
+            predicates.append(created)
+        if args.joined:
+            def joined(memb, *, offset=now - datetime.timedelta(minutes=args.joined)):
+                return memb.joined_at and memb.joined_at > offset
+
+            predicates.append(joined)
+        if args.joined_after:
+            _joined_after_member = await _resolve_member(args.joined_after)
+
+            def joined_after(memb, *, _other=_joined_after_member):
+                return memb.joined_at and _other.joined_at and memb.joined_at > _other.joined_at
+
+            predicates.append(joined_after)
+        if args.joined_before:
+            _joined_before_member = await _resolve_member(args.joined_before)
+
+            def joined_before(memb, *, _other=_joined_before_member):
+                return memb.joined_at and _other.joined_at and memb.joined_at < _other.joined_at
+
+            predicates.append(joined_before)
+
+        members = {m for m in members if all(p(m) for p in predicates)}
+        if len(members) == 0:
+            return await ctx.error(lang["massban.error.noonefound"])
+
+        if args.show:
+            members = sorted(members, key=lambda m: m.joined_at or now)
+            fmt = "\n".join(lang["massban.memberlist.message"]
+                            .format(id=m.id, j=m.joined_at, c=m.created_at, m=str(m)) for m in members)
+            content = f'{lang["massban.word.usercount"]}: {len(members)}\n{fmt}'
+            file = discord.File(io.BytesIO(content.encode('utf-8')), filename='members.txt')
+            return await ctx.send(file=file)
+
+        if args.reason is None:
+            return await ctx.error(lang["massban.error.noreason"])
+        else:
+            reason = await ActionReason().convert(ctx, args.reason)
+
+        confirm = await ctx.prompt(lang["massban.message.prompt"].format(m=str(len(members))))
+        if not confirm:
+            return await ctx.embed(lang["massban.message.abord"])
+
+        count = 0
+        for member in members:
+            try:
+                await ctx.guild.ban(member, reason=reason)
+            except discord.HTTPException:
+                pass
+            else:
+                count += 1
+
+        await ctx.embed(lang["massban.message.banned"].format(c=str(count), m=str(len(members))))
+
+        embed = std.cmdEmbed('massban', reason, lang, mod=ctx.author, amount=len(members))
+        embed.add_field(name=lang["massban.embed.users.name"],
+                        value=lang["massban.embed.users.value"].format(c=str(count), m=str(len(members))))
+
+        await logs.createCmdLog(ctx, embed)
 
 
 def setup(bot):

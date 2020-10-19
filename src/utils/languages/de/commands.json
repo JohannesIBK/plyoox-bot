@@ -47,7 +47,18 @@
     "check.ban.temp": "Dieser User ist bis `{d}` für `{r}` gebannt.",
     "check.mute.temp": "Dieser User ist bis `{d}` für `{r}` gemutet.",
     "check.punish": "Der User hat derzeit `{p}` Vergehen.",
-    "check.nopunish": "Der User hat keine offenen Bestrafungen oder Einträge."
+    "check.nopunish": "Der User hat keine offenen Bestrafungen oder Einträge.",
+    "massban.error.regex": "Das Regex ist fehlerhaft: ```{e}```",
+    "massban.error.noonefound": "Es wurde kein User gefunden, auf den diese Kriterien zutreffen.",
+    "massban.error.noreason": "Das Argument `--reason` wird benötigt.",
+    "massban.memberlist.message": "{id}\tBeigetreten: {j}\tErstellt: {c}\t{m}",
+    "massban.word.usercount": "Useranzahl",
+    "massban.message.prompt": "Das wird **{m} User bannen**. Sicher?",
+    "massban.message.abord": "Abgebrochen",
+    "massban.message.banned": "Es wurden {c}/{m} User gebannt.",
+    "massban.embed.users.name": "User",
+    "massban.embed.users.value": "Gebannt {c}/{m}"
+
   },
   "errors": {
     "error.rolenotfound": "Die Rolle wurde nicht gefunden.",
