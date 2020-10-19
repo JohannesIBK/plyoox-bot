@@ -26,37 +26,37 @@ class Errors(commands.Cog):
 
         if isinstance(error, commands.BadArgument) or isinstance(error, commands.BadUnionArgument):
             if isinstance(error, commands.RoleNotFound):
-                return await ctx.error(lang["roleNotFound"])
+                return await ctx.error(lang["error.rolenotfound"])
             if isinstance(error, commands.MemberNotFound):
-                return await ctx.error(lang["memberNotFound"])
+                return await ctx.error(lang["error.membernotfound"])
             if isinstance(error, commands.UserNotFound):
-                return await ctx.error(lang["userNotFound"])
+                return await ctx.error(lang["error.usernotfound"])
             if isinstance(error, commands.ChannelNotFound):
-                return await ctx.error(lang["channelNotFound"])
+                return await ctx.error(lang["error.channelnotfound"])
             else:
-                await ctx.error(lang["badArgument"].format(e=str(error)))
+                await ctx.error(lang["error.badargument"].format(e=str(error)))
 
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.error(lang["missingArgument"].format(p=str(error.param.name)))
+            await ctx.error(lang["error.missingargument"].format(p=str(error.param.name)))
 
         elif isinstance(error, commands.BotMissingPermissions):
-            await ctx.error(lang["botMissingPermissions"].format(p=" ".join(error.missing_perms)))
+            await ctx.error(lang["error.permissions.bot"].format(p=" ".join(error.missing_perms)))
 
         elif isinstance(error, commands.MissingPermissions):
-            await ctx.error(lang["userMissingPermissions"].format(p=" ".join(error.missing_perms)))
+            await ctx.error(lang["error.permissions.user"].format(p=" ".join(error.missing_perms)))
 
         elif isinstance(error, commands.CommandNotFound):
             pass
 
         elif isinstance(error, commands.CommandOnCooldown):
             cooldown = error.cooldown
-            await ctx.error(lang["cooldownCommand"].format(p=str(cooldown.per), r=str(cooldown.rate), rt=str(round(error.retry_after))))
+            await ctx.error(lang["error.command.cooldown"].format(p=str(cooldown.per), r=str(cooldown.rate), rt=str(round(error.retry_after))))
 
         elif isinstance(error, commands.NotOwner):
-            await ctx.error(lang["ownerOnly"])
+            await ctx.error(lang["error.command.owneronly"])
 
         elif isinstance(error, commands.DisabledCommand):
-            await ctx.error(lang["disabledCommand"])
+            await ctx.error(lang["error.command.disabled"])
 
         elif isinstance(error, commands.CheckFailure):
             pass
@@ -65,7 +65,7 @@ class Errors(commands.Cog):
             error = error.__cause__
             if isinstance(error, discord.Forbidden):
                 try:
-                    await ctx.error(lang["discordForbidden"])
+                    await ctx.error(lang["error.discord.forbidden"])
                 except:
                     pass
 

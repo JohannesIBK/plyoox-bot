@@ -129,38 +129,38 @@ def getBaseModEmbed(reason, user: discord.User = None, mod: discord.Member = Non
 def getUserEmbed(lang, *, reason, guildName, punishType, duration = 'permanent'):
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
-    embed.set_footer(text=lang['plyooxFooter'], icon_url=avatar_url)
+    embed.set_footer(text=lang['log.embed.footer'], icon_url=avatar_url)
 
     if duration:
-        messageStart = lang['userEmbedDuration'].format(d=str(duration)) + " "
+        messageStart = lang['log.embed.duration'].format(d=str(duration)) + " "
     else:
-        messageStart = lang['userEmbedPerma'] + " "
+        messageStart = lang['log.embed.perma'] + " "
 
     reason = reason or ''
     if reason:
-        reason = lang['userEmbedReason'].format(r=reason) + " "
+        reason = lang['log.embed.reason'].format(r=reason) + " "
 
     if punishType == 'ban':
-        embed.description = messageStart + lang["userEmbedPunish0"].format(n=guildName, r=reason)
+        embed.description = messageStart + lang["log.embed.ban"].format(n=guildName, r=reason)
     elif punishType == 'kick':
-        embed.description = lang["userEmbedPunish1"].format(n=guildName, r=reason)
+        embed.description = lang["log.embed.kick"].format(n=guildName, r=reason)
     elif punishType == 'mute':
-        embed.description = messageStart + lang['userEmbedPunish2'].format(n=guildName, r=reason)
+        embed.description = messageStart + lang['log.embed.mute'].format(n=guildName, r=reason)
 
     return embed
 
 def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member = None, user: discord.Member = None, amount = None, duration = None):
-    reason = reason or lang['noreason']
-    embed = discord.Embed(color=normal_color, title=lang[action].upper())
+    reason = reason or lang['log.noreason']
+    embed = discord.Embed(color=normal_color, title=lang["word." + action].upper())
     embed.set_footer(text="Plyoox", icon_url=avatar_url)
 
     if user is not None:
         embed.add_field(name=arrow + lang["user"].upper(), value=f"```{user} [{user.id}]```")
         embed.set_author(name=str(user), icon_url=user.avatar_url)
     if mod is not None:
-        embed.add_field(name=arrow + lang["moderator"].upper(), value=f"```{mod}```")
+        embed.add_field(name=arrow + lang["word.moderator"].upper(), value=f"```{mod}```")
     if reason is not None:
-        embed.add_field(name=arrow + lang["reason"].upper(), value=f"```{reason}```")
+        embed.add_field(name=arrow + lang["word.reason"].upper(), value=f"```{reason}```")
     if duration is not None:
         embed.add_field(name=arrow + lang["duration"].upper(), value=f"```{duration}```")
     if amount is not None:

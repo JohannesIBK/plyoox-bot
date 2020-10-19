@@ -112,7 +112,7 @@ class Fun(commands.Cog):
             user2 = ctx.message.author
 
         if user1 == user2:
-            return await ctx.error(lang["errorSameUser"])
+            return await ctx.error(lang["multi.error.sameuser"])
 
         score = random.randint(0, 100)
         filled_progbar = round(score / 100 * 10)
@@ -132,11 +132,11 @@ class Fun(commands.Cog):
         if 'discord.gg' in questions.lower() or 'discord.com/invite' in questions.lower():
             return
         if questions.count('|') == 0:
-            return await ctx.error(lang["errorNoQuestion"])
+            return await ctx.error(lang["thisorthat.error.needmultiple"])
 
         questionsList = questions.split('|')
         choosen = random.choice(questionsList)
-        await ctx.embed(lang["chooseMessage"].format(c=choosen.strip()), allowed_mentions=discord.AllowedMentions.none(), signed=True)
+        await ctx.embed(lang["thisorthat.message"].format(c=choosen.strip()), allowed_mentions=discord.AllowedMentions.none(), signed=True)
 
     @cmd()
     @checks.isActive('fun')
@@ -157,9 +157,9 @@ class Fun(commands.Cog):
             selected += random.choice(emojis)
 
         if len(set(selected)) == 1:
-            await ctx.embed(lang["slotWin"].format(s=''.join(selected)), signed=True)
+            await ctx.embed(lang["slot.message.win"].format(s=''.join(selected)), signed=True)
         else:
-            await ctx.embed(lang["slotLose"].format(s=''.join(selected)), signed=True)
+            await ctx.embed(lang["slot.message.lose"].format(s=''.join(selected)), signed=True)
 
 
     @cmd()
@@ -253,12 +253,12 @@ class Fun(commands.Cog):
         lang = await ctx.lang()
 
         if user == ctx.author:
-            return await ctx.embed(lang["errorSameUser"])
+            return await ctx.embed(lang["multi.error.sameuser"])
 
         gifs = self.gifData['pat']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed(lang["patMessage"].fomat(u1=ctx.author.mention, u2=user.mention))
+        embed = std.getEmbed(lang["pat.message"].fomat(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -268,12 +268,12 @@ class Fun(commands.Cog):
         lang = await ctx.lang()
 
         if user == ctx.author:
-            return await ctx.embed(lang["errorSameUser"])
+            return await ctx.embed(lang["multi.error.sameuser"])
 
         gifs = self.gifData['hug']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed(lang["hugMessage"].fomat(u1=ctx.author.mention, u2=user.mention))
+        embed = std.getEmbed(lang["hug.message"].fomat(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -283,12 +283,12 @@ class Fun(commands.Cog):
         lang = await ctx.lang()
 
         if user == ctx.author:
-            return await ctx.embed(lang["errorSameUser"])
+            return await ctx.embed(lang["multi.error.sameuser"])
 
         gifs: list[str] = self.gifData['highfive']
         gif = random.choice(gifs)
 
-        embed = discord.Embed(color=std.normal_color, description=lang["highfiveMessage"].format(u1=ctx.author.mention, u2=user.mention))
+        embed = discord.Embed(color=std.normal_color, description=lang["highfive.message"].format(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -300,7 +300,7 @@ class Fun(commands.Cog):
         gifs: list[str] = self.gifData['rage']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed(lang["rageMessage"].format(u=ctx.author.mention))
+        embed = std.getEmbed(lang["rage.message"].format(u=ctx.author.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -312,7 +312,7 @@ class Fun(commands.Cog):
         gifs: list[str] = self.gifData['cry']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed(lang["cryMessage"].format(u=ctx.author.mention))
+        embed = std.getEmbed(lang["cry.message"].format(u=ctx.author.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -320,7 +320,7 @@ class Fun(commands.Cog):
     @checks.isActive('fun')
     async def _8ball(self, ctx: context.Context, *, Frage: str):
         lang = await ctx.lang()
-        await ctx.embed(f'> {Frage}\n{random.choice(lang["8ball"]["answers"])}', allowed_mentions=discord.AllowedMentions.none(), signed=True)
+        await ctx.embed(f'> {Frage}\n{random.choice(lang["8ball.answers"])}', allowed_mentions=discord.AllowedMentions.none(), signed=True)
 
     @cmd()
     @checks.isActive('fun')
@@ -340,7 +340,7 @@ class Fun(commands.Cog):
         gifs: list[str] = self.gifData['laugh']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed(lang["laughMessage"].format(u=ctx.author.mention))
+        embed = std.getEmbed(lang["laugh.message"].format(u=ctx.author.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 

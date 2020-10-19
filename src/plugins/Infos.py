@@ -101,28 +101,28 @@ class Infos(commands.Cog):
 
         roles = self._getRoles(guild.roles)
         emojis = self._getEmojis(guild.emojis)
-        created = guild.created_at.strftime(lang["smallDateFormat"])
+        created = guild.created_at.strftime(lang["date.format.small"])
         days = datetime.datetime.utcnow() - guild.created_at
 
         embed = discord.Embed(color=std.normal_color, title=lang["infoTitle"].format(n=guild.name))
         embed.set_thumbnail(url=guild.icon_url)
-        embed.description = lang["guildDescription"].format(g=guild)
-        embed.add_field(name=std.arrow + lang["guildMembersTitle"],
+        embed.description = lang["guild.embed.description"].format(g=guild)
+        embed.add_field(name=std.arrow + lang["guild.embed.members.name"],
                         value=f'```{guild.member_count}```',
                         inline=False)
-        embed.add_field(name=std.arrow + lang["guildDataTile"],
-                        value=lang["guildDataField"].format(c=created, d=str(days)),
+        embed.add_field(name=std.arrow + lang["guild.embed.data.name"],
+                        value=lang["guild.embed.data.value"].format(c=created, d=str(days)),
                         inline=False)
-        embed.add_field(name=std.arrow + lang["infoRolesTitle"].format(r=str(len(guild.roles))),
+        embed.add_field(name=std.arrow + lang["info.embed.roles.name"].format(r=str(len(guild.roles))),
                         value=roles,
                         inline=False)
-        embed.add_field(name=std.arrow + lang["guildChannelTitle"],
-                        value=lang["guildChannelField"].format(a=str(len(guild.channels)),
+        embed.add_field(name=std.arrow + lang["guild.embed.channels.name"],
+                        value=lang["guild.embed.channels.value"].format(a=str(len(guild.channels)),
                                                                t=str(len(guild.text_channels)),
                                                                v=str(len(guild.voice_channels)),
                                                                c=str(len(guild.categories))))
 
-        embed.add_field(name=std.arrow + lang["guildEmojisTitle"].format(e=str(len(guild.emojis))),
+        embed.add_field(name=std.arrow + lang["guild.embed.emojis.name"].format(e=str(len(guild.emojis))),
                         value=emojis,
                         inline=False)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
@@ -137,9 +137,9 @@ class Infos(commands.Cog):
 
         if user is None:
             user = ctx.message.author
-        joined_dc = user.created_at.strftime(lang["smallDateFormat"])
+        joined_dc = user.created_at.strftime(lang["date.format.small"])
         days_dc = (datetime.datetime.now() - user.created_at).days
-        joined_guild = user.joined_at.strftime(lang["smallDateFormat"])
+        joined_guild = user.joined_at.strftime(lang["date.format.small"])
         since_joined_guild = (datetime.datetime.now() - user.joined_at).days
         roles = self._getRoles(user.roles)
         members = ctx.guild.members
@@ -147,19 +147,19 @@ class Infos(commands.Cog):
         members.sort(key=sort)
         join_pos = members.index(user) + 1
 
-        embed = discord.Embed(title=lang["infoTitle"].format(n=user.display_name), color=user.color)
+        embed = discord.Embed(title=lang["info.embed.title"].format(n=user.display_name), color=user.color)
         embed.set_thumbnail(url=user.avatar_url)
-        embed.description = lang["infoDescription"].format(u=user)
-        embed.add_field(name=std.arrow + lang["infoAccountTitle"],
-                        value=lang["infoAccountValue"].format(jd=joined_dc, dd=str(days_dc)),
+        embed.description = lang["info.embed.description"].format(u=user)
+        embed.add_field(name=std.arrow + lang["info.embed.account.name"],
+                        value=lang["info.embed.account.value"].format(jd=joined_dc, dd=str(days_dc)),
                         inline=False)
-        embed.add_field(name=std.arrow + lang["infoServerTitle"],
-                        value=lang["infoServerValue"].format(jg=joined_guild, sjg=str(since_joined_guild), jp=str(join_pos)),
+        embed.add_field(name=std.arrow + lang["info.embed.server.name"],
+                        value=lang["info.embed.server.value"].format(jg=joined_guild, sjg=str(since_joined_guild), jp=str(join_pos)),
                         inline=False)
-        embed.add_field(name=std.arrow + lang["infoRolesTitle"].format(r=str(len(user.roles) - 1)),
+        embed.add_field(name=std.arrow + lang["info.embed.roles.name"].format(r=str(len(user.roles) - 1)),
                         value=f'{roles}',
                         inline=False)
-        embed.add_field(name=std.arrow + lang["infoFlagsTitle"].format(f=str(len(flags))), value=' '.join(flags) if flags else '-----')
+        embed.add_field(name=std.arrow + lang["info.embed.falgs.name"].format(f=str(len(flags))), value=' '.join(flags) if flags else '-----')
 
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
@@ -169,11 +169,11 @@ class Infos(commands.Cog):
         lang = await ctx.lang()
 
         joined = len([user.id for user in ctx.guild.members if (datetime.datetime.now() - user.joined_at).seconds <= 86400])
-        await ctx.embed(lang["todayMessage"].format(j=str(joined)), signed=True)
+        await ctx.embed(lang["todayjoined.message"].format(j=str(joined)), signed=True)
 
     @cmd()
     async def joined(self, ctx: context.Context, user: Union[discord.Member, int] = None):
-        lang = await ctx.lang()
+        lang = await ctx.lang(utils=True)
 
         def sort(list_user):
             return list_user.joined_at
@@ -197,15 +197,13 @@ class Infos(commands.Cog):
                 user = members[join_pos]
                 days = (datetime.datetime.now() - user.joined_at).days
             except IndexError:
-                return await ctx.error(lang["joinedError"])
+                return await ctx.error(lang["joined.error.invalidposition"])
 
-        joined = user.joined_at.strftime(lang["smallDateFormat"])
+        joined = user.joined_at.strftime(lang["date.format.small"])
 
-        embed = discord.Embed(title=lang["joinedTitle"], color=std.normal_color)
-        embed.add_field(name=std.arrow + lang["joinedFieldName"],
-                        value=lang["joinedFieldValue"].format(p=str(join_pos + 1), d=str(days)))
-        embed.add_field(name=std.arrow + lang["joinedFieldName"],
-                        value=lang["infoServerValue"].format(jg=joined, sjg=str(days), jp=str(join_pos)))
+        embed = discord.Embed(title=lang["joined.embed.title"], color=std.normal_color)
+        embed.set_author(name=str(user), icon_url=user.avatar_url)
+        embed.description = lang["info.embed.server.value"].format(jg=joined, sjg=str(days), jp=str(join_pos + 1))
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
@@ -218,17 +216,17 @@ class Infos(commands.Cog):
 
         embed = std.getEmbed()
         embed.title = f'{ctx.me}'
-        embed.add_field(name=std.arrow + lang["botOwner"], value="```JohannesIBK#9220```")
-        embed.add_field(name=std.arrow + lang["botGuilds"], value=f'```{len(self.bot.guilds)}```')
-        embed.add_field(name=std.arrow + lang["botUser"], value=f'```{len(list(self.bot.get_all_members()))}```')
-        embed.add_field(name=std.arrow + lang["botVersions"],
+        embed.add_field(name=std.arrow + lang["bot.embed.owner.name"], value="```JohannesIBK#9220```")
+        embed.add_field(name=std.arrow + lang["bot.embed.guilds.name"], value=f'```{len(self.bot.guilds)}```')
+        embed.add_field(name=std.arrow + lang["bot.embed.users.name"], value=f'```{len(list(self.bot.get_all_members()))}```')
+        embed.add_field(name=std.arrow + lang["bot.embed.versions.name"],
                         value=f'```Python: {python_version}\nDiscord.py: {discord.__version__}```')
         embed.add_field(name=f"{std.arrow}**Uptime**", value=f'```{uptime}```')
         embed.add_field(name="⠀",
                         value=f'[Vote](https://discordbots.org/bot/505433541916622850) | '
-                              f'[{lang["botDashboard"]}](https://plyoox.net) | '
-                              f'[{lang["botInvite"]}](https://discordapp.com/oauth2/authorize?client_id={ctx.me.id}&scope=bot&permissions=285600894) | '
-                              f'[{lang["botSource"]}](https://github.com/JohannesIBK/plyoox-bot)', inline=False)
+                              f'[{lang["bot.word.dashboard"]}](https://plyoox.net) | '
+                              f'[{lang["bot.word.invite"]}](https://discordapp.com/oauth2/authorize?client_id={ctx.me.id}&scope=bot&permissions=285600894) | '
+                              f'[{lang["bot.word.source"]}](https://github.com/JohannesIBK/plyoox-bot)', inline=False)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
@@ -236,7 +234,7 @@ class Infos(commands.Cog):
     @checks.hasPerms(manage_guild=True)
     async def roleMembers(self, ctx: context.Context, role: discord.Role):
         lang = await ctx.lang()
-        await ctx.embed(lang["roleMessage"].format(m=role.mention, l=len(role.members)), signed=True)
+        await ctx.embed(lang["role.message"].format(m=role.mention, l=len(role.members)), signed=True)
 
     @cmd()
     async def avatar(self, ctx: context.Context, user: discord.Member = None):
@@ -251,7 +249,7 @@ class Infos(commands.Cog):
     @cmd()
     async def members(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.embed(lang["membersMessage"].format(m=str(ctx.guild.member_count)), signed=True)
+        await ctx.embed(lang["members.message"].format(m=str(ctx.guild.member_count)), signed=True)
 
     @cmd()
     async def dashboard(self, ctx: context.Context):
@@ -260,7 +258,7 @@ class Infos(commands.Cog):
     @cmd()
     async def vote(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.embed(lang["voteMessage"].format(l="https://top.gg/bot/505433541916622850/vote"), signed=True)
+        await ctx.embed(lang["vote.message"].format(l="https://top.gg/bot/505433541916622850/vote"), signed=True)
 
 
 def setup(bot):
