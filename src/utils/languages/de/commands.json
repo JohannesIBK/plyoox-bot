@@ -131,6 +131,19 @@
     "guild.embed.channels.value": "```Insgesamt: {a}\nTextchannel: {t}\nVoicechannel: {v)}\nKategorien: {c}```",
     "guild.embed.emojis.name": "Emojis ({e})"
   },
+  "leveling": {
+    "level.error.bot": "Bots können kein XP bekommen.",
+    "level.error.noentry": "Dieser User hat noch nie etwas geschrieben.",
+    "level.embed.level.name": "Level",
+    "level.embed.xp.name": "XP",
+    "level.embed.rank.name": "Rang",
+    "levelroles.error.noroles": "Der Server hat keine Levelrollen festgelegt.",
+    "levelroles.embed.title": "Level-Rollen",
+    "top.embed.title": "TOP 10 | {g}",
+    "top.embed.user.value": "```Level: {l}\nXP: {c}/{x}```",
+    "resetlevel.error.bot": "Dieser User ist ein Bot.",
+    "resetlevel.message": "Das Level des Users `{u}` wurde erfolgreich zurückgesetzt."
+  },
   "utils": {
     "date.format.small": "%d. %m. %Y",
     "date.format.large": "%d. %m. %Y um %H:%M:%S",

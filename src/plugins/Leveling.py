@@ -115,18 +115,20 @@ class Leveling(commands.Cog):
     @cmd(aliases=['rank'])
     @checks.isActive('leveling')
     async def level(self, ctx: context.Context, user: discord.Member = None):
+        lang = await ctx.lang()
+
         if user is None:
             user = ctx.author
 
         if user.bot:
-            return await ctx.embed('Bots können keine XP erhalten!')
+            return await ctx.error(lang["level.error.bot"])
 
         userData = await ctx.db.fetchrow(
             "WITH users AS (SELECT xp, uid, row_number() OVER (ORDER BY xp DESC) AS count FROM extra.levels "
             "WHERE sid = $1) SELECT * FROM users WHERE uid = $2",
             ctx.guild.id, user.id)
         if not userData:
-            return await ctx.embed('Dieser User hat noch nie etwas geschrieben.')
+            return await ctx.error(lang["level.error.noentry"])
 
         lvl = self._get_level_from_xp(userData['xp'])
         lvlXP = self._get_level_xp(lvl)
@@ -139,18 +141,20 @@ class Leveling(commands.Cog):
                               timestamp=datetime.utcnow())
         embed.set_author(name=user.name, icon_url=user.avatar_url)
         embed.set_thumbnail(url=user.avatar_url)
-        embed.add_field(name=f"{std.arrow} Level", value=f'```{lvl}```')
-        embed.add_field(name=f"{std.arrow} XP", value=f"```{currentXP}/{lvlXP}```")
-        embed.add_field(name=f'{std.arrow} Rang', value=f'```#{userData["count"]}```')
+        embed.add_field(name=std.arrow + lang["level.embed.level.name"], value=f'```{lvl}```')
+        embed.add_field(name=std.arrow + lang["level.embed.xp.name"], value=f"```{currentXP}/{lvlXP}```")
+        embed.add_field(name=std.arrow + lang["level.embed.xp.name"], value=f'```#{userData["count"]}```')
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
     @cmd()
     @checks.isActive('leveling')
     async def levelRoles(self, ctx: context.Context):
+        lang = await ctx.lang()
+
         data = await self.bot.db.fetchval("SELECT roles FROM config.leveling WHERE sid = $1", ctx.guild.id)
         if data is None:
-            return await ctx.error('Der Server hat keine Levelrollen festgelegt.')
+            return await ctx.error(lang["levelroles.error.noroles"])
 
         lvlRoles = []
         for roleData in data:
@@ -160,7 +164,7 @@ class Leveling(commands.Cog):
 
         embed = discord.Embed(
             color=std.normal_color,
-            title='Level-Rollen',
+            title=lang["levelroles.embed.title"],
             description='\n'.join(f'{lvlRole[0].mention} | {lvlRole[1]}' for lvlRole in lvlRoles)
         )
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
@@ -169,9 +173,10 @@ class Leveling(commands.Cog):
     @cmd(aliases=["top10"])
     @checks.isActive('leveling')
     async def top(self, ctx: context.Context):
-        users = await ctx.db.fetch('SELECT * FROM extra.levels WHERE sid = $1 ORDER BY xp DESC LIMIT 15', ctx.guild.id)
+        lang = await ctx.lang()
 
-        embed = discord.Embed(color=std.normal_color, title=f'**TOP 10** | {ctx.guild.name}')
+        users = await ctx.db.fetch('SELECT * FROM extra.levels WHERE sid = $1 ORDER BY xp DESC LIMIT 15', ctx.guild.id)
+        embed = discord.Embed(color=std.normal_color, title=lang["top.embed.title"].format(g=ctx.guild.name))
         count = 0
 
         for userData in users:
@@ -193,19 +198,21 @@ class Leveling(commands.Cog):
             if count == 11:
                 break
 
-            embed.add_field(name=f"{count}. {member.display_name}", value=f'```Level: {lvl}\nXP: {currentXP}/{lvlXP}```')
+            embed.add_field(name=f"{count}. {member.display_name}", value=lang["top.embed.user.value"].fomat(l=lvl, c=currentXP, x=lvlXP))
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
     @cmd(aliases=["rl"])
     @checks.isMod()
     @checks.isActive('leveling')
-    async def resetlevel(self, ctx: context.Context, user: discord.Member):
+    async def resetLevel(self, ctx: context.Context, user: discord.Member):
+        lang = await ctx.lang()
+
         if user.bot:
-            return await ctx.error('Dieser User ist ein Bot.')
+            return await ctx.error(lang["resetlevel.error.bot"])
         await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
         await ctx.message.delete(delay=5)
-        await ctx.embed(f'{std.law_emoji} Das Level des Users {user} wurde erfolgreich zurückgesetzt.', delete_after=5)
+        await ctx.embed(lang["resetlevel.message"].format(u=str(user)), delete_after=5)
 
 
 def setup(bot):
