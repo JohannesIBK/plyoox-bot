@@ -103,8 +103,8 @@ class Timers(commands.Cog):
 
         fake_context = context.FakeContext(self.bot, guild)
         ban = await guild.fetch_ban(user)
-        await guild.unban(user=user, reason=lang["tempbanExpiredReason"])
-        mod_embed = std.cmdEmbed("unmute", lang["unbanReason"], lang, user=ban.user, mod=fake_context.me)
+        await guild.unban(user=user, reason=lang["ban.temp.reason.expired"])
+        mod_embed = std.cmdEmbed("unban", lang["ban.temp.reason.expired"], lang, user=ban.user, mod=fake_context.me)
         await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
 
 
@@ -121,7 +121,7 @@ class Timers(commands.Cog):
             return
 
         fake_context = context.FakeContext(self.bot, guild)
-        mod_embed = std.cmdEmbed("unmute", lang["unmuteReason"], lang, user=user, mod=fake_context.me)
+        mod_embed = std.cmdEmbed("unmute", lang["mute.temp.reason.unmute"], lang, user=user, mod=fake_context.me)
         await user.remove_roles(config.automod.config.muterole)
         await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
 
