@@ -144,6 +144,20 @@
     "resetlevel.error.bot": "Dieser User ist ein Bot.",
     "resetlevel.message": "Das Level des Users `{u}` wurde erfolgreich zurückgesetzt."
   },
+  "help": {
+    "help.embed.title": "Command Hilfe",
+    "help.embed.deactivated.title": "Deaktivierte Module",
+    "help.error.nohelp": "Für diesen Command ist keine Hilfe verfügbar.",
+    "help.error.notacommand": "Dieser Command exsitiert nicht.",
+    "help.embed.modul.title": "Modul-Hilfe",
+    "help.embed.command.title": "**__Command Hilfe für `{c}`__**",
+    "help.word.alias": "Alias",
+    "help.word.module": "Modul",
+    "help.word.dashboard": "Dashboard",
+    "help.word.support": "Support Server",
+    "help.word.invite": "Einladung",
+    "word.lang.prefix": "Prefix"
+  },
   "utils": {
     "date.format.small": "%d. %m. %Y",
     "date.format.large": "%d. %m. %Y um %H:%M:%S",

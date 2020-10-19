@@ -16,6 +16,7 @@ class Help(commands.Cog):
 
     @cmd()
     async def help(self, ctx: context.Context, command = None):
+        lang = await ctx.lang()
         arg = ''
         if command is not None:
             arg: str = command.lower()
@@ -33,8 +34,8 @@ class Help(commands.Cog):
             if data['prefix'] is not None:
                 prefix = data['prefix']
 
-            embed = discord.Embed(title=f'{standards.question_emoji} Command Hilfe',
-                                                 description=f'[Dashboard](https://plyoox.net/) | [Support Discord](https://discordapp.com/invite/5qPPvQe) | [Invite](https://go.plyoox.net/invite) \nPrefix: `{prefix}`',
+            embed = discord.Embed(title=lang["help.embed.title"],
+                                                 description=f'[{lang["help.word.dashboard"]}](https://plyoox.net/) | [{lang["help.word.support"]}](https://discordapp.com/invite/5qPPvQe) | [{lang["help.word.invite"]}](https://go.plyoox.net/invite) \n{lang["word.lang.prefix"]}: `{prefix}`',
                                                  color=standards.help_color)
             embed.set_footer(icon_url=ctx.me.avatar_url)
             disabledModules = []
@@ -52,11 +53,11 @@ class Help(commands.Cog):
                 cmds = [module_cmd for module_cmd in cog[1].get_commands() if module_cmd.showHelp]
 
                 embed.add_field(name=cog[0], value=f'> {", ".join(f"`{module_cmd}`" for module_cmd in cmds)}', inline=False)
-                embed.set_footer(text=f"{ctx.prefix}help <Modul>",
+                embed.set_footer(text=f"{ctx.prefix}help <{lang['help.word.module']}>",
                                  icon_url=ctx.me.avatar_url)
 
             if disabledModules:
-                embed.add_field(name='Deaktivierte Module',
+                embed.add_field(name=lang["help.embed.deactivated.title"],
                                 value=' '.join(f'`{module}`' for module in disabledModules))
 
             await ctx.send(embed=embed)
@@ -65,19 +66,19 @@ class Help(commands.Cog):
             try:
                 cmdObj: commands.Command = self.bot.get_all_commands[arg]
             except KeyError:
-                return await ctx.error('Für diesen Command ist keine Hilfe verfügbar.')
+                return await ctx.error(lang["help.error.nohelp"])
             cmdHelpRaw: list = self.helpText[cmdObj.name.lower()].copy()
             if cmdObj.aliases:
-                cmdHelpRaw.insert(1, f'\n**__Alias:__** {", ".join(f"`{alias}`" for alias in cmdObj.aliases)}')
+                cmdHelpRaw.insert(1, f'\n**__{lang["help.word.alias"]}:__** {", ".join(f"`{alias}`" for alias in cmdObj.aliases)}')
             cmdHelp: str = '\n'.join(cmdHelpRaw)
             await ctx.send(embed=discord.Embed(color=standards.help_color,
-                                               title=f'**__Command Hilfe für {cmdObj.name}__**',
+                                               title=lang["help.embed.command.title"].format(c=cmdObj.name),
                                                description=cmdHelp.format(p=ctx.prefix)))
 
         elif arg.lower() in modules:
             cogHelp: commands.Cog = modules[arg.lower()][1]
             command: commands.Command
-            embed = discord.Embed(color=standards.help_color, title=f'{standards.question_emoji} Modul-Hilfe')
+            embed = discord.Embed(color=standards.help_color, title=lang["help.embed.modul.title"])
 
             for command in cogHelp.get_commands():
                 cmdHelpRaw: list = self.helpText[command.name.lower()].copy()
@@ -87,7 +88,7 @@ class Help(commands.Cog):
             await ctx.send(embed=embed)
 
         else:
-            await ctx.error('Dieser Command exsitiert nicht.')
+            await ctx.error(lang["help.error.notacommand"])
 
 
 def setup(bot):
