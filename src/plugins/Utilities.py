@@ -16,20 +16,23 @@ class Utilities(commands.Cog):
 
     @cmd()
     async def someone(self, ctx: context.Context):
+        lang = await ctx.lang()
         user = random.choice(ctx.guild.members)
-        embed = std.getEmbed(f'{std.nametag_emoji} {user} ( {user.mention} )\n {std.botdev_emoji} {user.id}')
+        embed = std.getEmbed(signed=ctx.author)
 
-        embed.title = 'Zufälliger User :eyes:'
-        embed.add_field(name=f'**Informationen**',
-                        value=f'{std.date_emoji} **Gejoint vor:** {(datetime.datetime.now() - user.joined_at).days} Tagen')
+        embed.title = lang["someone.embed.title"]
+        embed.add_field(name=f'{std.arrow}**Infos**',
+                        value=lang["someone.embed.description"].format(d=str((datetime.datetime.now() - user.joined_at).days)))
         embed.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=embed)
 
     @cmd()
     async def invite(self, ctx: context.Context):
-        embed = discord.Embed(title=f"Hol mich {std.ola_emoji}",
+        lang = await ctx.lang()
+        embed = discord.Embed(title=lang["invite.embed.title"].format(e=std.ola_emoji),
                               url=f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=822471806",
                               color=std.normal_color)
+        embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
     @cmd()
@@ -38,18 +41,20 @@ class Utilities(commands.Cog):
         start = time.perf_counter()
         message = await ctx.embed('Pong!')
         end = time.perf_counter()
-        duration = (end - start) * 1000
-        await message.edit(embed=std.getEmbed('Bot: {:.2f}ms\nWebsocket: {:.2f}ms'.format(duration, ping)))
+        embed = std.getEmbed(f'```Bot: {round((end - start) * 1000, 2)}ms\nWebsocket: {round(ping, 2)}ms```', signed=ctx.author)
+        await message.edit(embed=embed)
 
     @cmd()
     async def bin(self, ctx: context.Context, number: int):
+        lang = await ctx.lang()
         if number > 10000**10:
-            return await ctx.error('Die Zahl ist zu groß!')
-        await ctx.embed(f'{number} in binär ist `{str(bin(number))[2:]}`')
+            return await ctx.error(lang["bin.error.tolarge"])
+        await ctx.embed(lang["bin.message"].format(n=number, b=str(bin(number))[2:]), signed=True)
 
     @cmd()
     async def hex(self, ctx: context.Context, number: int):
-        await ctx.embed(f'{number} in hexadezimal ist `{str(hex(number))[2:]}`')
+        lang = await ctx.lang()
+        await ctx.embed(lang["hex.message"].format(n=number, h=str(hex(number))[2:]), signed=True)
 
     @cmd()
     @commands.is_owner()
@@ -74,7 +79,7 @@ class Utilities(commands.Cog):
         embed.add_field(name='#einrichen',
                         value='[*(click)*](https://canary.discordapp.com/channels/694790265382109224/739108334069612594/) '
                               'Wenn du einen Vorschlag hast oder dir beim Bot noch etwas fehlt, kannst du die Funktion hier vorschlagen. '
-                              'Schau aber vorher nach ob es noch nciht vorgeschlagen wurde.')
+                              'Schau aber vorher nach ob es noch nicht vorgeschlagen wurde.')
 
         await ctx.send(embed=embed)
 

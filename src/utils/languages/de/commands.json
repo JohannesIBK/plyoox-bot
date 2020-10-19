@@ -158,6 +158,14 @@
     "help.word.invite": "Einladung",
     "word.lang.prefix": "Prefix"
   },
+  "utilities": {
+    "someone.embed.title": "Zufälliger User",
+    "someone.embed.description": "```{user} [{user.id}]\nvor {d} Tagen beigetreten```",
+    "invite.embed.title": "Hol mich {e}",
+    "bin.error.tolarge": "Die Zahl ist zu groß!",
+    "bin.message": "`{n}` in binär ist `{b}`",
+    "hex.message": "`{n}` in hexadezimal ist `{h}`"
+  },
   "utils": {
     "date.format.small": "%d. %m. %Y",
     "date.format.large": "%d. %m. %Y um %H:%M:%S",
