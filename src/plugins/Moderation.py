@@ -245,7 +245,7 @@ class Moderation(commands.Cog):
             except discord.HTTPException:
                 pass
 
-        await ctx.send(lang["massban.embed.users.value"].format(c=str(count), m=str(len(user))))
+        await ctx.send(lang["massban.embed.users.value"].format(c=str(count), m=str(len(users))))
 
     @cmd()
     @checks.isMod(helper=True)
