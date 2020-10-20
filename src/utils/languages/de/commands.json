@@ -58,8 +58,9 @@
     "massban.message.abord": "Abgebrochen",
     "massban.message.banned": "Es wurden {c}/{m} User gebannt.",
     "massban.embed.users.name": "User",
-    "massban.embed.users.value": "Gebannt {c}/{m}"
-
+    "massban.embed.users.value": "Gebannt {c}/{m}",
+    "multiban.prompt": "Das wird {c} User bannen. Fortfahren?",
+    "multiban.prompt.abord": "Abbruch"
   },
   "errors": {
     "error.rolenotfound": "Die Rolle wurde nicht gefunden.",

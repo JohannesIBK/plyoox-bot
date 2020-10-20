@@ -15,6 +15,7 @@ from utils.ext import checks, logs, standards as std
 from utils.ext.cmds import cmd, grp
 from utils.ext.context import Context
 from utils.ext.converters import ActionReason, BannedMember, AdvancedMember
+from utils.ext.errors import FakeArgument
 from utils.ext.time import FutureTime
 
 linkRegex = re.compile('((https?://(www\.)?|www\.)[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})', re.IGNORECASE)
@@ -222,6 +223,29 @@ class Moderation(commands.Cog):
 
         mod_embed = std.cmdEmbed("unban", reason, lang, mod=ctx.author, user=user.user)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed)
+
+    @commands.command()
+    @checks.isMod()
+    @commands.bot_has_permissions(ban_members=True)
+    async def multiban(self, ctx: Context, users: commands.Greedy[AdvancedMember], *, reason: ActionReason = None):
+        lang = await ctx.lang()
+        total_members = len(users)
+        if total_members == 0:
+            raise commands.MissingRequiredArgument(FakeArgument('users'))
+
+        confirm = await ctx.prompt(lang["multiban.prompt"].format(c=total_members), reacquire=False)
+        if not confirm:
+            return await ctx.embed(lang["multiban.prompt.abord"])
+
+        count = 0
+        for user in users:
+            try:
+                await ctx.guild.ban(user, reason=reason)
+                count += 1
+            except discord.HTTPException:
+                pass
+
+        await ctx.send(lang["massban.embed.users.value"].format(c=str(count), m=str(len(user))))
 
     @cmd()
     @checks.isMod(helper=True)
