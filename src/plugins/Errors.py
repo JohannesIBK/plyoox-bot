@@ -19,7 +19,7 @@ class Errors(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: context.Context, error):
-        lang = await ctx.lang()
+        lang = await ctx.lang(module=self.qualified_name)
 
         if hasattr(ctx.command, "on_error") or (ctx.command and hasattr(ctx.cog, f"_{ctx.command.cog_name}__error")):
             return

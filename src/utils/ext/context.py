@@ -36,11 +36,13 @@ class Context(commands.Context):
     def cache(self) -> BotCache:
         return self.bot.cache
 
-    async def lang(self, utils = False):
+    async def lang(self, utils = False, module = None):
+        if module is None:
+            module = self.cog.qualified_name
         if utils:
-            return { **self.bot._lang[self.cog.qualified_name.lower()], **self.bot._lang["utils"]}
+            return { **self.bot._lang[module.lower()], **self.bot._lang["utils"]}
         else:
-            return self.bot._lang[self.cog.qualified_name.lower()]
+            return self.bot._lang[module.lower()]
 
     async def release(self):
         if self._db is not None:
