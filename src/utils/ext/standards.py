@@ -155,7 +155,7 @@ def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member = None, u
     embed.set_footer(text="Plyoox", icon_url=avatar_url)
 
     if user is not None:
-        embed.add_field(name=arrow + lang["user"].upper(), value=f"```{user} [{user.id}]```")
+        embed.add_field(name=arrow + lang["word.user"].upper(), value=f"```{user} [{user.id}]```")
         embed.set_author(name=str(user), icon_url=user.avatar_url)
     if mod is not None:
         embed.add_field(name=arrow + lang["word.moderator"].upper(), value=f"```{mod}```")
