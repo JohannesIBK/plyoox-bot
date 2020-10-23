@@ -55,12 +55,12 @@
     "massban.memberlist.message": "{id}\tBeigetreten: {j}\tErstellt: {c}\t{m}",
     "massban.word.usercount": "Useranzahl",
     "massban.message.prompt": "Das wird **{m} User bannen**. Sicher?",
-    "massban.message.abord": "Abgebrochen",
+    "massban.message.abort": "Abgebrochen",
     "massban.message.banned": "Es wurden {c}/{m} User gebannt.",
     "massban.embed.users.name": "User",
     "massban.embed.users.value": "Gebannt {c}/{m}",
     "multiban.prompt": "Das wird {c} User bannen. Fortfahren?",
-    "multiban.prompt.abord": "Abbruch"
+    "multiban.prompt.abort": "Abbruch"
   },
   "errors": {
     "error.rolenotfound": "Die Rolle wurde nicht gefunden.",
@@ -225,6 +225,28 @@
     "update.embed.role.title": "MEMBER [ROLEN ÄNDERUNG]",
     "update.embed.role.nameadd": "Rolle hinzugefügt",
     "update.embed.role.nameremove": "Rolle entfernt"
+  },
+  "timers": {
+    "giveaway.event.nowinners": "Das Giveaway `{w}` Niemand hat teilgenommen. Es gibt keine Gewinner :(",
+    "giveaway.event.nowinners.edited": "**Giveaway beendet**\nKeine Gewinner",
+    "giveaway.event.edit.single": "**Giveaway beendet**\n{m} hat gewonnen \uD83C\uDF89",
+    "giveaway.event.edit.multiple": "**Giveaway beendet**\n{m} haben gewonnen \uD83C\uDF89",
+    "giveaway.event.message.single": "Gewinner von {w} ist {m}",
+    "giveaway.event.message.multiple": "Gewinner von {w} sind {m}",
+    "giveaway.embed.title": "\uD83C\uDF89 Giveaway \uD83C\uDF89",
+    "giveaway.embed.description": "Reagiere mit \uD83C\uDF89 um dem Giveaway beizutreten.",
+    "giveaway.message.started": "Das Giveaway wurde gestartet.",
+    "giveaway.error.wrongid": "Kein Giveaway mit dieser ID gefunden.",
+    "giveaway.message.stopped": "Das Giveaway wurde gestoppt.",
+    "giveaway.message.abort": "Das Giveaway wurde abgebrochen.",
+    "giveaway.embed.footer": "{g} Gewinner | {id} | Endet",
+    "giveaway.embed.startdescription": "Giveaway startet...",
+    "reminder.error.forbidden": "Du darfst keine Reminder verwenden.",
+    "reminder.error.maxtimers": "Du hast bereits 25 Timer.",
+    "reminder.message.created": "Dein Timer wurde erstellt.",
+    "reminder.error.notimers": "Du hast keine Timer auf diesem Server.",
+    "reminder.message.deleted": "Der Timer wurde gelöscht.",
+    "reminder.error.delete": "Der Timer konnte nicht gelöscht werden. Du bist nicht der Ersteller des Timers oder er existiert nicht."
   },
   "utils": {
     "date.format.small": "%d. %m. %Y",
