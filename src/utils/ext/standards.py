@@ -108,7 +108,7 @@ def getErrorEmbed(errorMessage: str) -> discord.Embed:
     return embed
 
 
-def dmEmbed(lang, *, reason, guildName, punishType, duration: datetime.datetime) -> discord.Embed:
+def dmEmbed(lang, *, reason, guildName, punishType, duration: datetime.datetime=None)  -> discord.Embed:
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text=lang['log.embed.footer'], icon_url=avatar_url)
