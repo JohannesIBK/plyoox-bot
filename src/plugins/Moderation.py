@@ -68,7 +68,7 @@ class Moderation(commands.Cog):
         await ctx.message.delete(delay=5)
 
         mod_embed = std.cmdEmbed("ban", reason, lang, mod=ctx.author, user=user)
-        user_embed = std.getUserEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='ban')
+        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='ban')
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
@@ -84,7 +84,7 @@ class Moderation(commands.Cog):
         await ctx.message.delete(delay=5)
 
         mod_embed = std.cmdEmbed("kick", reason, lang, mod=ctx.author, user=user)
-        user_embed = std.getUserEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='kick')
+        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='kick')
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
@@ -102,7 +102,7 @@ class Moderation(commands.Cog):
         await ctx.message.delete(delay=5)
 
         mod_embed = std.cmdEmbed("kick", reason, lang, mod=ctx.author, user=user)
-        user_embed = std.getUserEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='kick')
+        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='kick')
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
@@ -141,7 +141,7 @@ class Moderation(commands.Cog):
         await ctx.message.delete(delay=5)
 
         mod_embed = std.cmdEmbed("mute", reason, lang, mod=ctx.author, user=user)
-        user_embed = std.getUserEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='mute')
+        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='mute')
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
@@ -165,7 +165,7 @@ class Moderation(commands.Cog):
         await ctx.message.delete(delay=5)
 
         mod_embed = std.cmdEmbed("tempmute", reason, lang, mod=ctx.author, user=user, duration=time.dt)
-        user_embed = std.getUserEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='mute', duration=time.dt)
+        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='mute', duration=time.dt)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
@@ -208,7 +208,7 @@ class Moderation(commands.Cog):
         await ctx.message.delete(delay=5)
 
         mod_embed = std.cmdEmbed("tempban", reason, lang, mod=ctx.author, user=user, duration=time.dt)
-        user_embed = std.getUserEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='ban', duration=time.dt)
+        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='ban', duration=time.dt)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
