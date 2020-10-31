@@ -1,6 +1,6 @@
 import asyncio
+import json
 import logging
-import sys
 import time
 import traceback
 from logging.handlers import RotatingFileHandler
@@ -24,15 +24,18 @@ logger.setLevel(logging.ERROR)
 logger.addHandler(handler)
 # ---------------------------------------------------------------
 
+with open("./utils/languages/de/commands.json", 'r') as f:
+    lang = dict(json.load(f))
+
 cogs = [
     "plugins.Owner",
     "plugins.Moderation",
-    "plugins.Servermoderation",
+    "plugins.Administration",
     "plugins.Help",
     "plugins.Leveling",
     "plugins.Utilities",
     "plugins.Commands",
-    "plugins.Errors",
+    # "plugins.Errors",
     "plugins.Fun",
     "plugins.Events",
     "plugins.Infos",
@@ -47,6 +50,7 @@ intents.bans = True
 intents.presences = True
 intents.reactions = True
 intents.guilds = True
+intents.members = True
 
 intents.invites = False
 intents.typing = False
@@ -86,6 +90,7 @@ class Plyoox(commands.Bot):
         self.remove_command("help")
         self.commandsCount = {}
         self.cache: BotCache = BotCache(self)
+        self._lang = lang
 
     async def on_ready(self):
         self.gamesLoop = asyncio.create_task(setGame(self))
@@ -133,8 +138,14 @@ class Plyoox(commands.Bot):
         else:
             self.commandsCount[commandName] += 1
 
+    async def lang(self, guild_id, modul, utils=False):
+        if utils:
+            return {**self._lang[modul.lower()], **self._lang["utils"]}
+        else:
+            return self._lang[modul.lower()]
+
     async def create_db_pool(self, port):
         self.db: Pool = await asyncpg.create_pool(database='discord', user='plyoox', password='1', port=port)
 
-    async def on_error(self, event_method, *args, **kwargs):
-         logger.error(traceback.format_exc())
+    # async def on_error(self, event_method, *args, **kwargs):
+    #      logger.error(traceback.format_exc())
