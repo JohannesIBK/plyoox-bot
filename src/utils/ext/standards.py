@@ -73,6 +73,9 @@ plyoox_color = 0x24c689
 
 avatar_url = 'https://cdn.discordapp.com/avatars/505433541916622850/ccc8ba894dd4188ecf37de0a53430f22.webp?size=1024'
 
+def quote(string: str):
+    return "```" + str(string) + "```"
+
 
 # Embeds
 def getEmbed(description: str = None, signed: discord.Member = None) -> discord.Embed:
@@ -105,34 +108,13 @@ def getErrorEmbed(errorMessage: str) -> discord.Embed:
     return embed
 
 
-def getBaseModEmbed(reason, user: discord.User = None, mod: discord.Member = None) -> discord.Embed:
-    embed = discord.Embed(color=normal_color)
-    embed.timestamp = datetime.datetime.utcnow()
-    embed.set_footer(text='Plyoox Moderation', icon_url=avatar_url)
-
-    description = []
-
-    if user is not None:
-        description.append(f'**User:** {user} [{user.id}]')
-
-    if mod is not None:
-        description.append(f'**Moderator:** {mod}')
-
-    if reason is not None:
-        description.append(f'**Grund:** {reason}')
-
-    embed.description = '\n'.join(description)
-
-    return embed
-
-
-def getUserEmbed(lang, *, reason, guildName, punishType, duration = 'permanent'):
+def dmEmbed(lang, *, reason, guildName, punishType, duration: datetime.datetime) -> discord.Embed:
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text=lang['log.embed.footer'], icon_url=avatar_url)
 
     if duration:
-        messageStart = lang['log.embed.duration'].format(d=str(duration)) + " "
+        messageStart = lang['log.embed.duration'].format(d=str(duration.strftime(lang["date.format.large"]))) + " "
     else:
         messageStart = lang['log.embed.perma'] + " "
 
@@ -140,30 +122,82 @@ def getUserEmbed(lang, *, reason, guildName, punishType, duration = 'permanent')
     if reason:
         reason = lang['log.embed.reason'].format(r=reason) + " "
 
-    if punishType == 'ban':
+    if punishType in ["ban", "tempban"]:
         embed.description = messageStart + lang["log.embed.ban"].format(n=guildName, r=reason)
     elif punishType == 'kick':
         embed.description = lang["log.embed.kick"].format(n=guildName, r=reason)
-    elif punishType == 'mute':
+    elif punishType in ["tempban", "mute"]:
         embed.description = messageStart + lang['log.embed.mute'].format(n=guildName, r=reason)
 
     return embed
 
-def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member = None, user: discord.Member = None, amount = None, duration = None):
+
+def automodUserEmbed(lang, reason, guildName, type, points=None, duration=None):
+    embed = discord.Embed(color=normal_color)
+    embed.timestamp = datetime.datetime.utcnow()
+    embed.set_footer(text=lang['log.embed.footer'], icon_url=avatar_url)
+
+    msg = lang["logs.user.start"].format(r=reason) + " "
+
+    if duration is not None:
+        msg += lang["log.duration"].format(d=duration.strftime(lang["date.format.large"])) + " "
+
+    msg += lang["log.guildname"].format(n=guildName) + " "
+
+    if type == "tempmute":
+        msg += lang["log.word.mute"] + "."
+    elif type in ["ban", "tempban"]:
+        msg += lang["log.word.ban"] + "."
+    else:
+        msg += lang["log.word.warn"] + ". "
+        if points is not None:
+            msg += lang["log.points"].format(p=points) + "."
+
+    embed.description = msg
+    return embed
+
+
+def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member=None, user: discord.Member=None, amount=None, duration=None) -> discord.Embed:
     reason = reason or lang['log.noreason']
-    embed = discord.Embed(color=normal_color, title=lang["word." + action].upper())
+    embed = discord.Embed(color=discord.Color.orange(), title=lang["word." + action].upper())
     embed.set_footer(text="Plyoox", icon_url=avatar_url)
+    embed.set_author(name=str(user), icon_url=user.avatar_url)
 
     if user is not None:
-        embed.add_field(name=arrow + lang["word.user"].upper(), value=f"```{user} [{user.id}]```")
+        embed.add_field(name=arrow + lang["word.user"], value=f"```{user} [{user.id}]```")
         embed.set_author(name=str(user), icon_url=user.avatar_url)
     if mod is not None:
-        embed.add_field(name=arrow + lang["word.moderator"].upper(), value=f"```{mod}```")
+        embed.add_field(name=arrow + lang["word.moderator"], value=quote(mod))
     if reason is not None:
-        embed.add_field(name=arrow + lang["word.reason"].upper(), value=f"```{reason}```")
+        embed.add_field(name=arrow + lang["word.reason"], value=quote(reason))
     if duration is not None:
-        embed.add_field(name=arrow + lang["duration"].upper(), value=f"```{duration}```")
+        embed.add_field(name=arrow + lang["duration"], value=quote(duration.strftime(lang['date.format.large'])))
     if amount is not None:
-        embed.add_field(name=arrow + lang["amount"].upper(), value=f"```{amount}```")
+        embed.add_field(name=arrow + lang["amount"], value=quote(amount))
 
     return embed
+
+
+def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime, reason, points = None, extra_user: discord.Member = None):
+    user = ctx.author or extra_user
+    embed = discord.Embed(color=plyoox_color, title=lang["word.automod"] + f'[{lang["word." + action]}]')
+
+    embed.add_field(name=arrow + lang["word.user"].upper(), value=f"```{user} [{user.id}]```")
+    embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
+    embed.add_field(name=arrow + lang["word.channel"], value=str(ctx.channel))
+    embed.timestamp = datetime.datetime.utcnow()
+
+    message = ctx.message if len(ctx.message.content) <= 1018 else ctx.message.content[:1015] + "..."
+
+    if extra_user:
+        embed.add_field(name=arrow + lang["word.moderator"], value=ctx.author.mention)
+
+    if duration is not None:
+        embed.add_field(name=arrow + lang["word.punishuntil"], value=quote(duration.strftime(lang["date.format.large"])))
+
+    if points is not None:
+        embed.add_field(name=arrow + lang["word.points"], value=quote(points))
+
+    embed.add_field(name=arrow + lang["word.reason"], value=quote(reason))
+
+    embed.add_field(name=arrow + lang["word.message"], value=quote(message))
