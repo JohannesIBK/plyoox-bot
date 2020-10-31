@@ -5,8 +5,8 @@ import time
 
 import discord
 
-from main import Plyoox
-from utils.ext import standards as std, checks, context, logs
+from utils.ext import standards as std, checks, logs
+from utils.ext.context import Context
 
 DISCORD_INVITE = '(discord(app\.com\/invite|\.com(\/invite)?|\.gg)\/?[a-zA-Z0-9-]{2,32})'
 EXTERNAL_LINK = '((https?:\/\/(www\.)?|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})'
@@ -20,60 +20,55 @@ def findWord(word):
     return re.compile(r'\b({0})\b'.format(word), flags=re.IGNORECASE).search
 
 
-async def managePunishment(ctx, punishment, reason):
+async def managePunishment(ctx: Context, punishment, reason):
     await ctx.message.delete()
+    lang = await ctx.lang(module="automod", utils=True)
     config = await ctx.bot.cache.get(ctx.guild.id)
     if not config.automod:
         return
     config = config.automod.config
 
-    user: discord.Member = ctx.author
-    msg = ctx.message.content if len(ctx.message.content) < 1015 else f'{ctx.message.content[:1015]}...'
-    reason = f'Automoderation: {reason}'
+    user = ctx.author
+    reason = lang["word.automod"] + ": " + reason
 
-    embed: discord.Embed = std.getBaseModEmbed(reason, ctx.author, ctx.me)
-    userEmbed: discord.Embed = std.getBaseModEmbed(reason)
-    userEmbed.add_field(name=f'{std.folder_emoji} **Server**', value=ctx.guild.name, inline=False)
-    userEmbed.add_field(name=f'{std.list_emoji} **__Message__**', value=msg, inline=False)
-    embed.add_field(name=f'{std.channel_emoji} **__Channel__**', value=ctx.channel.mention, inline=False)
-    embed.add_field(name=f'{std.list_emoji} **__Message__**', value=msg, inline=False)
+    punishment_str = ''
+    date = None
 
     if punishment == 1:
         if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
-            embed.title = 'AUTOMODERATION [KICK]'
-            userEmbed.title = 'AUTOMODERATION [KICK]'
+            punishment_str = "kick"
             await ctx.guild.kick(user, reason=reason)
     elif punishment == 2:
         if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
-            embed.title = 'AUTOMODERATION [BAN]'
-            userEmbed.title = 'AUTOMODERATION [BAN]'
+            punishment_str = "ban"
             await ctx.guild.ban(user, reason=reason)
     elif punishment == 3:
         if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
-            embed.title = 'AUTOMODERATION [TEMPBAN]'
-            userEmbed.title = 'AUTOMODERATION [TEMPBAN]'
+            punishment_str = "tempban"
             unixTime = time.time() + config.bantime
-            embed.add_field(name=f'{std.date_emoji} **__Entbann__**', value=datetime.datetime.fromtimestamp(unixTime).strftime('%d. %m. %Y um %H:%M:%S'))
+            date = datetime.datetime.utcfromtimestamp(unixTime)
             await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
-                                 ctx.guild.id, user.id, 0, unixTime, json.dumps({'reason': reason}))
+                                 ctx.guild.id, user.id, "tempban", unixTime, json.dumps({'reason': reason}))
             await ctx.guild.ban(user, reason=reason)
     elif punishment == 4:
         if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
             if config.muterole is None:
                 return
 
-            embed.title = 'AUTOMODERATION [TEMPMUTE]'
-            userEmbed.title = 'AUTOMODERATION [TEMPMUTE]'
+            punishment_str = "tempmute"
             unixTime = time.time() + config.mutetime
-            embed.add_field(name=f'{std.date_emoji} **__Entmute__**', value=datetime.datetime.fromtimestamp(unixTime).strftime('%d. %m. %Y um %H:%M:%S'))
+            date = datetime.datetime.utcfromtimestamp(unixTime)
             await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
-                                 ctx.guild.id, user.id, 1, unixTime, json.dumps({'reason': reason}))
+                                 ctx.guild.id, user.id, "tempmute", unixTime, json.dumps({'reason': reason}))
             await user.add_roles(config.muterole, reason=reason)
 
-    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=user, ignoreMMSG=True, ignoreNoLogging=True)
+    mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason)
+    user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType=punishment_str, duration=date)
+    await logs.createLog(ctx, mEmbed=mod_embed, uEmbed=user_embed, automod=True)
 
 
-async def add_points(ctx: context, addPoints, modType, user: discord.Member = None):
+async def add_points(ctx: Context, addPoints, reason, user: discord.Member = None):
+    lang = await ctx.lang(module="automod", utils=True)
     await ctx.message.delete()
     config = await ctx.bot.cache.get(ctx.guild.id)
     if not config.automod:
@@ -81,69 +76,55 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
     config = config.automod.config
 
     if user is not None:
-        punishedUser: discord.Member = user
+        punishedUser = user
     else:
-        punishedUser: discord.Message = ctx.author
+        punishedUser = ctx.author
 
     await ctx.bot.db.execute(
         'INSERT INTO automod.users (uid, sid, points, time, reason) VALUES ($1, $2, $3, $4, $5)',
-        punishedUser.id, ctx.guild.id, addPoints, time.time(), f'Automoderation: {modType}')
+        punishedUser.id, ctx.guild.id, addPoints, time.time(), reason)
 
-    points  = await ctx.bot.db.fetchval('SELECT sum(points) FROM automod.users WHERE uid = $1 AND sid = $2 AND $3 - time < 2592000', punishedUser.id, ctx.guild.id, time.time())
-    msg: discord.Message = ctx.message
+    points = await ctx.bot.db.fetchval(
+        'SELECT sum(points) FROM automod.users WHERE uid = $1 AND sid = $2 AND $3 - time < 2592000',
+        punishedUser.id, ctx.guild.id, time.time())
 
     action = config.action
     maxPoints = config.maxpoints
     unixTimeMute = unixTimeBan = time.time() + 86400
 
     if config.mutetime:
-        unixTimeMute: float = time.time() + config.mutetime
+        unixTimeMute = time.time() + config.mutetime
     if config.bantime:
-        unixTimeBan: float = time.time() + config.bantime
+        unixTimeBan = time.time() + config.bantime
 
-    message = msg.content if len(msg.content) < 1015 else f'{ctx.message.content[:1015]}...'
+    date = None
+    punishment_str = 'log'
 
-    embed: discord.Embed = std.getBaseModEmbed(f'{modType} [+{addPoints}]', punishedUser)
-    userEmbed: discord.Embed = std.getBaseModEmbed(f'{modType} [+{addPoints}]')
-    userEmbed.add_field(name=f'{std.folder_emoji} **Server**', value=ctx.guild.name)
-    embed.title = f'AUTOMODERATION [LOG]'
-    userEmbed.title = f'AUTOMODERATION [LOG]'
-    if user is not None:
-        embed.add_field(name=f'{std.supporter_emoji} **__Moderator__**', value=ctx.author.mention, inline=False)
-    embed.add_field(name=f'{std.channel_emoji} **__Channel__**', value=ctx.channel.mention, inline=False)
-    embed.add_field(name=f'{std.invite_emoji} **__Punkte__**', value=f'{points}/{maxPoints}', inline=False)
-    userEmbed.add_field(name=f'{std.invite_emoji} **__Punkte__**', value=f'{points}/{maxPoints}', inline=False)
-    if user is None:
-        userEmbed.add_field(name=f'{std.list_emoji} **__Message__**', value=message, inline=False)
-        embed.add_field(name=f'{std.list_emoji} **__Message__**', value=message, inline=False)
-
-    if points >= maxPoints:
-        if action is None:
-            embed.title = 'AUTOMODERATION [LOG]'
-
+    if points >= maxPoints and action is not None:
         if action == 1:
             if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
-                embed.title = 'AUTOMODERATION [KICK]'
-                await punishedUser.kick(reason="Automoderation")
-                await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
+                punishment_str = 'kick'
+                await ctx.guild.kick(punishedUser, reason=lang["word.automod"] + ": " + reason)
+                await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, ctx.guild.id)
             else:
                 return
 
         if action == 2:
             if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
-                embed.title = 'AUTOMODERATION [BAN]'
-                await punishedUser.ban(reason="Automoderation")
-                await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
+                punishment_str = "ban"
+                await ctx.guild.ban(punishedUser, reason=lang["word.automod"] + ": " + reason)
+                await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, ctx.guild.id)
             else:
                 return
 
         if action == 3:
             if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
-                embed.add_field(name=f'{std.date_emoji} **__Entbann__**', value=datetime.datetime.fromtimestamp(unixTimeBan).strftime('%d. %m. %Y um %H:%M:%S'))
-                embed.title = 'AUTOMODERATION [TEMPBAN]'
-                await punishedUser.ban(reason="Automoderation: Punktesystem")
-                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
-                                     ctx.guild.id, punishedUser.id, 0, unixTimeBan, json.dumps({'reason': 'Automoderation: Punktesystem'}))
+                date = datetime.datetime.utcfromtimestamp(unixTimeBan)
+                punishment_str = "tempban"
+                await ctx.guild.ban(punishedUser, reason=lang["word.automod"] + ": " + reason)
+                await ctx.db.execute(
+                    'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
+                    ctx.guild.id, punishedUser.id, 0, unixTimeBan, json.dumps({'reason': lang["word.automod"] + ": " + lang["word.tempban"]}))
             else:
                 return
         if action == 4:
@@ -151,25 +132,35 @@ async def add_points(ctx: context, addPoints, modType, user: discord.Member = No
                 if config.muterole is None:
                     return
 
-                embed.add_field(name=f'{std.date_emoji} **__Entmute__**', value=datetime.datetime.fromtimestamp(unixTimeMute).strftime('%d. %m. %Y um %H:%M:%S'))
-                embed.title = 'AUTOMODERATION [TEMPMUTE]'
-                await punishedUser.add_roles(config.muterole, reason='Automoderation')
-                await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, msg.guild.id)
-                await ctx.db.execute('INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
-                                     ctx.guild.id, punishedUser.id, 1, unixTimeMute, json.dumps({'reason': 'Automoderation: Punktesystem'}))
+                date = datetime.datetime.fromtimestamp(unixTimeMute)
+                punishment_str = "tempmute"
+                await punishedUser.add_roles(config.muterole, reason=lang["word.automod"] + ": " + reason)
+                await ctx.bot.db.execute("DELETE FROM automod.users WHERE uid = $1 AND sid = $2", punishedUser.id, ctx.guild.id)
+                await ctx.db.execute(
+                    'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES ($1, $2, $3, $4, $5)',
+                    ctx.guild.id, punishedUser.id, 1, unixTimeMute, json.dumps({'reason': lang["word.automod"] + ": " + reason}))
             else:
                 return
-    await logs.createEmbedLog(ctx=ctx, modEmbed=embed, userEmbed=userEmbed, member=punishedUser, ignoreNoLogging=True, ignoreMMSG=True)
+
+    if user is not None:
+        mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason, f"{points}/{maxPoints}", punishedUser)
+    else:
+        mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason, f"{points}/{maxPoints}")
+
+    user_embed = std.automodUserEmbed(lang, reason, ctx.guild.name, punishment_str, f"{points}/{maxPoints}", date)
+
+    await logs.createLog(ctx=ctx, mEmbed=mod_embed, uEmbed=user_embed, user=punishedUser, automod=True)
 
 
 async def automod(ctx):
-    bot: Plyoox = ctx.bot
-    guild: discord.Guild = ctx.guild
-    msg: discord.Message = ctx.message
-    channel: discord.TextChannel = ctx.channel
+    bot = ctx.bot
+    guild = ctx.guild
+    msg = ctx.message
+    channel = ctx.channel
     config = await bot.cache.get(ctx.guild.id)
     modules =  config.modules
     automod = config.automod
+    lang = await ctx.lang(module="automod", utils=True)
 
     if not modules.automod or not config.automod:
         return
@@ -179,14 +170,13 @@ async def automod(ctx):
         for word in blacklist.words:
             if findWord(word)(msg.content.lower()):
                 if not await checks.ignoresAutomod(ctx):
-
                     if channel.id in blacklist.whitelist:
                         return
 
                     if blacklist.state == 5:
-                        return await add_points(ctx, blacklist.points, 'Blacklisted Word')
+                        return await add_points(ctx, blacklist.points, lang["reason.blacklistedword"])
                     else:
-                        return await managePunishment(ctx, blacklist.state, 'Blacklisted Word')
+                        return await managePunishment(ctx, blacklist.state, lang["reason.blacklistedword"])
 
     if discordRegex.findall(msg.content):
         invites = automod.invites
@@ -211,9 +201,9 @@ async def automod(ctx):
 
             except discord.Forbidden:
                 if invites.state == 5:
-                    return await add_points(ctx, invites.points, 'Invite')
+                    return await add_points(ctx, invites.points, lang["reason.invite"])
                 else:
-                    return await managePunishment(ctx, invites.state, 'Invite')
+                    return await managePunishment(ctx, invites.state, lang["reason.invite"])
 
             if invite.guild.id not in whitelistedServers:
                 hasInvite = True
@@ -221,9 +211,9 @@ async def automod(ctx):
 
         if hasInvite:
             if invites.state == 5:
-                return await add_points(ctx, invites.points, 'Invite')
+                return await add_points(ctx, invites.points, lang["reason.invite"])
             else:
-                return await managePunishment(ctx, invites.state, 'Invite')
+                return await managePunishment(ctx, invites.state, lang["reason.invite"])
 
 
     elif linkRegex.findall(msg.content):
@@ -246,15 +236,15 @@ async def automod(ctx):
             if links.iswhitelist:
                 if link not in linksList:
                     if links.state == 5:
-                        return await add_points(ctx, links.points, 'Link')
+                        return await add_points(ctx, links.points, lang["reason.link"])
                     else:
-                        return await managePunishment(ctx, links.state, 'Link')
+                        return await managePunishment(ctx, links.state, lang["reason.link"])
             else:
                 if link in links:
                     if links.state == 5:
-                        return await add_points(ctx, links.points, 'Link')
+                        return await add_points(ctx, links.points, lang["reason.link"])
                     else:
-                        return await managePunishment(ctx, links.state, 'Link')
+                        return await managePunishment(ctx, links.state, lang["reason.link"])
 
 
     if not msg.clean_content.islower() and len(msg.content) > 15:
@@ -272,9 +262,9 @@ async def automod(ctx):
                 return
 
             if caps.state == 5:
-                return await add_points(ctx, caps.points, 'Caps')
+                return await add_points(ctx, caps.points, lang["reason.caps"])
             else:
-                return await managePunishment(ctx, caps.state, 'Caps')
+                return await managePunishment(ctx, caps.state, lang["reason.caps"])
 
     if len(msg.raw_mentions) + len(msg.raw_role_mentions) + len(everyoneRegex.findall(msg.content)) >= 3:
         mentions = automod.mentions
@@ -294,6 +284,6 @@ async def automod(ctx):
 
         if lenMentions >= mentions.count:
             if mentions.state == 5:
-                return await add_points(ctx, mentions.points, 'Mentions')
+                return await add_points(ctx, mentions.points, lang["reason.mentions"])
             else:
-                return await managePunishment(ctx, mentions.state, 'Caps')
+                return await managePunishment(ctx, mentions.state, lang["reason.mentions"])

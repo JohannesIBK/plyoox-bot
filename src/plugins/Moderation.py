@@ -224,6 +224,7 @@ class Moderation(commands.Cog):
         mod_embed = std.cmdEmbed("unban", reason, lang, mod=ctx.author, user=user.user)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed)
 
+    # TODO logs
     @commands.command()
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
