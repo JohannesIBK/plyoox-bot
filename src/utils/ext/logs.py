@@ -3,7 +3,7 @@ import discord
 from utils.ext.context import Context
 
 
-async def createCmdLog(ctx, embed, file = None):
+async def createCmdLog(ctx, embed, file=None):
     data = await ctx.cache.get(ctx.guild.id)
     config = data.automod.config
 
@@ -14,7 +14,7 @@ async def createCmdLog(ctx, embed, file = None):
             else:
                 await config.logchannel.send(embed=embed)
 
-async def createLog(ctx: Context, *, user: discord.Member = None, mEmbed = None, uEmbed = None, automod = False):
+async def createLog(ctx: Context, *, user: discord.Member=None, mEmbed=None, uEmbed=None, automod=False):
     data = await ctx.cache.get(ctx.guild.id)
     config = data.automod.config
 
