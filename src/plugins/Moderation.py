@@ -117,11 +117,11 @@ class Moderation(commands.Cog):
         messages = await ctx.channel.history(limit=amount + 1).flatten()
         content = '\n'.join(f'{msg.author} ({msg.author.id}): {msg.content}' for msg in messages)
         file = discord.File(io.BytesIO(content.encode()), 'messages.txt')
-        await logs.createCmdLog(ctx, std.cmdEmbed("clear", reason, lang, mod=ctx.author, amount=amount), file)
 
         deleted_messages = await ctx.channel.purge(limit=amount + 1)
         await ctx.embed(lang['clear.message.deleted'].format(a=len(deleted_messages) - 1), delete_after=5)
         await ctx.message.delete(delay=5)
+        await logs.createCmdLog(ctx, std.cmdEmbed("clear", reason, lang, mod=ctx.author, amount=amount), file)
 
     @cmd()
     @checks.isMod()
@@ -183,13 +183,16 @@ class Moderation(commands.Cog):
             return ctx.error(lang["unmute.error.notmuted"])
 
         if config.automod.config.muterole in user.roles:
-            await user.remove_roles(config.automod.config.muterole, reason="Unmute")
+            await user.remove_roles(config.automod.config.muterole, reason=lang["word.unmute"])
 
         if mute is not None:
             await ctx.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 'tempmute'", ctx.guild.id, user.id)
 
         await ctx.embed(lang["unmute.message"].format(u=str(user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
+
+        mod_embed = std.cmdEmbed("unmute", reason, lang, mod=ctx.author, user=user)
+        await logs.createLog(ctx, user=user, mEmbed=mod_embed)
 
     @cmd()
     @checks.isMod()
@@ -246,7 +249,13 @@ class Moderation(commands.Cog):
             except discord.HTTPException:
                 pass
 
-        await ctx.send(lang["massban.embed.users.value"].format(c=str(count), m=str(len(users))))
+        fmt = "\n".join(lang["massban.memberlist.message"]
+                        .format(id=m.id, j=m.joined_at, c=m.created_at, m=str(m)) for m in users)
+        content = f'{lang["massban.word.usercount"]}: {len(users)}\n{fmt}'
+        file = discord.File(io.BytesIO(content.encode('utf-8')), filename='members.txt')
+
+        embed = std.cmdEmbed("massban", reason, lang, mod=ctx.author, amount=len(users))
+        await logs.createCmdLog(ctx, embed=embed, file=file)
 
     @cmd()
     @checks.isMod(helper=True)
