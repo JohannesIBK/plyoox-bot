@@ -128,7 +128,7 @@ class Logging(commands.Cog):
         embed.timestamp = datetime.datetime.utcnow()
         embed.description = lang["ban.embed.description"].format(u=user, d=str(since_joined_guild))
         roles = [role.mention for role in user.roles if role.name != '@everyone']
-        embed.add_field(name=lang["words.roles"],
+        embed.add_field(name=std.arrow + lang["words.roles"],
                         value=' '.join(roles) if len(roles) != 0 else '-----')
         embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
 
@@ -160,7 +160,7 @@ class Logging(commands.Cog):
             return
 
         if msg.content:
-            embed.add_field(name=lang["delete.embed.message.title"], value=std.quote(msg.content, True), inline=False)
+            embed.add_field(name=std.arrow + lang["delete.embed.message.title"], value=std.quote(msg.content, True), inline=False)
 
         if data['id'] and data['token']:
             try:
@@ -202,7 +202,7 @@ class Logging(commands.Cog):
 
         if msg is None:
             if msgData['content']:
-                embed.add_field(name=lang["edit.embed.new.title"],
+                embed.add_field(name=std.arrow + lang["edit.embed.new.title"],
                                 value=std.quote(msgData['content'], True))
             else:
                 return
@@ -210,9 +210,9 @@ class Logging(commands.Cog):
             if msgData['content'] and msg.content is not None:
                 if msgData['content'] == msg.content:
                     return
-                embed.add_field(name=lang["edit.embed.old.title"],
+                embed.add_field(name=std.arrow + lang["edit.embed.old.title"],
                                 value=std.quote(msg.content, True), inline=False)
-                embed.add_field(name=lang["edit.embed.new.title"],
+                embed.add_field(name=std.arrow + lang["edit.embed.new.title"],
                                 value=std.quote(msgData['content'], True), inline=False)
             else:
                 return
@@ -240,10 +240,10 @@ class Logging(commands.Cog):
             embed.set_thumbnail(url=after.avatar_url)
             embed.timestamp = datetime.datetime.utcnow()
             embed.description = lang["ban.embed.description"].format(u=after, d=str(since_joined_guild))
-            embed.add_field(name=lang["update.embed.name.old.title"],
+            embed.add_field(name=std.arrow + lang["update.embed.name.old.title"],
                             value=f"`{before.display_name}`",
                             inline=False)
-            embed.add_field(name=lang["update.embed.name.new.title"],
+            embed.add_field(name=std.arrow + lang["update.embed.name.new.title"],
                             value=f"`{after.display_name}`",
                             inline=False)
             embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
@@ -271,7 +271,7 @@ class Logging(commands.Cog):
 
             remove = len(before.roles) > len(after.roles)
             try:
-                embed.add_field(name=lang["update.embed.role.name" + ("remove" if remove else "add")],
+                embed.add_field(name=std.arrow + lang["update.embed.role.name" + ("remove" if remove else "add")],
                                 value=role[0].mention)
             except:
                 raise IndexError(role)
