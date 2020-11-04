@@ -222,7 +222,7 @@
     "update.embed.name.title": "MEMBER [NAMENS UPDATE]",
     "update.embed.name.new.title": "Neuer Name",
     "update.embed.name.old.title": "Alter Name",
-    "update.embed.role.title": "MEMBER [ROLEN ÄNDERUNG]",
+    "update.embed.role.title": "MEMBER [ROLLEN ÄNDERUNG]",
     "update.embed.role.nameadd": "Rolle hinzugefügt",
     "update.embed.role.nameremove": "Rolle entfernt"
   },
