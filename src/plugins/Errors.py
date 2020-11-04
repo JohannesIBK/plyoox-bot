@@ -26,13 +26,13 @@ class Errors(commands.Cog):
 
         if isinstance(error, commands.BadArgument) or isinstance(error, commands.BadUnionArgument):
             if isinstance(error, commands.RoleNotFound):
-                return await ctx.error(lang["error.rolenotfound"])
+                return await ctx.error(lang["error.rolenotfound"].format(a=error.argument))
             if isinstance(error, commands.MemberNotFound):
-                return await ctx.error(lang["error.membernotfound"])
+                return await ctx.error(lang["error.membernotfound"].format(a=error.argument))
             if isinstance(error, commands.UserNotFound):
-                return await ctx.error(lang["error.usernotfound"])
+                return await ctx.error(lang["error.usernotfound"].format(a=error.argument))
             if isinstance(error, commands.ChannelNotFound):
-                return await ctx.error(lang["error.channelnotfound"])
+                return await ctx.error(lang["error.channelnotfound"].format(a=error.argument))
             else:
                 await ctx.error(lang["error.badargument"].format(e=str(error)))
 

@@ -63,10 +63,10 @@
     "multiban.prompt.abort": "Abbruch"
   },
   "errors": {
-    "error.rolenotfound": "Die Rolle wurde nicht gefunden.",
-    "error.membernotfound": "Das Mitglied wurde nicht gefunden.",
-    "error.usernotfound": "Der User wurde nicht gefunden.",
-    "error.channelnotfound": "Der Channel wurde nicht gefunden.",
+    "error.rolenotfound": "Die Rolle `{a}` wurde nicht gefunden.",
+    "error.membernotfound": "Das Mitglied `{a}` wurde nicht gefunden.",
+    "error.usernotfound": "Der User `{a}` wurde nicht gefunden.",
+    "error.channelnotfound": "Der Channel `{a}` wurde nicht gefunden.",
     "error.missingargument": "Das Argument `{p}` wurde nicht angegeben.",
     "error.badargument": "Ein Argument wurde falsch angegeben.\n```{e}```",
     "error.permissions.bot": "Der Bot benötigt die Berechtigung `{p}`",
