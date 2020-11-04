@@ -211,7 +211,7 @@ class Logging(commands.Cog):
                 if msgData['content'] == msg.content:
                     return
                 embed.add_field(name=lang["edit.embed.old.title"],
-                                value=msg.content, inline=False)
+                                value=std.quote(msg.content, True), inline=False)
                 embed.add_field(name=lang["edit.embed.new.title"],
                                 value=std.quote(msgData['content'], True), inline=False)
             else:
