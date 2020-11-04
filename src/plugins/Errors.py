@@ -71,7 +71,7 @@ class Errors(commands.Cog):
 
             else:
                 userEmbed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")
-                userEmbed.add_field(name="Original Error", value=f'```py {error}```')
+                userEmbed.add_field(name="Original Error", value=f'```py\n{error}```')
                 try:
                     await ctx.send(embed=userEmbed)
                 except Exception as e:
