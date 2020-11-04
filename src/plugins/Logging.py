@@ -160,7 +160,7 @@ class Logging(commands.Cog):
             return
 
         if msg.content:
-            embed.add_field(name=lang["delete.embed.message.title"], value=msg.content, inline=False)
+            embed.add_field(name=lang["delete.embed.message.title"], value=std.quote(msg.content, True), inline=False)
 
         if data['id'] and data['token']:
             try:
@@ -203,7 +203,7 @@ class Logging(commands.Cog):
         if msg is None:
             if msgData['content']:
                 embed.add_field(name=lang["edit.embed.new.title"],
-                                value=msgData['content'])
+                                value=std.quote(msgData['content'], True))
             else:
                 return
         else:
@@ -213,7 +213,7 @@ class Logging(commands.Cog):
                 embed.add_field(name=lang["edit.embed.old.title"],
                                 value=msg.content, inline=False)
                 embed.add_field(name=lang["edit.embed.new.title"],
-                                value=msgData['content'], inline=False)
+                                value=std.quote(msgData['content'], True), inline=False)
             else:
                 return
 
