@@ -158,7 +158,7 @@ class Infos(commands.Cog):
                         value=lang["info.embed.server.value"].format(jg=joined_guild, sjg=str(since_joined_guild), jp=str(join_pos)),
                         inline=False)
         embed.add_field(name=std.arrow + lang["info.embed.roles.name"].format(r=str(len(user.roles) - 1)),
-                        value=f'{roles}',
+                        value=str(roles),
                         inline=False)
         embed.add_field(name=std.arrow + lang["info.embed.falgs.name"].format(f=str(len(flags))), value=' '.join(flags) if flags else '-----')
 
