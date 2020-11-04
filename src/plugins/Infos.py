@@ -17,6 +17,7 @@ class Infos(commands.Cog):
 
     @staticmethod
     def _getRoles(roles):
+        roles.reverse()
         roles = [f'{role.mention}' for role in roles if not role.is_default()]
         string = ''
 
