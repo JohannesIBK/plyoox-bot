@@ -105,7 +105,7 @@ class Infos(commands.Cog):
         created = guild.created_at.strftime(lang["date.format.small"])
         days = datetime.datetime.utcnow() - guild.created_at
 
-        embed = discord.Embed(color=std.normal_color, title=lang["infoTitle"].format(n=guild.name))
+        embed = discord.Embed(color=std.normal_color, title=lang["info.embed.title"].format(n=guild.name))
         embed.set_thumbnail(url=guild.icon_url)
         embed.description = lang["guild.embed.description"].format(g=guild)
         embed.add_field(name=std.arrow + lang["guild.embed.members.name"],
