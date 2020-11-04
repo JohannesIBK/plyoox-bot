@@ -22,8 +22,9 @@ class Utilities(commands.Cog):
 
         embed.title = lang["someone.embed.title"]
         embed.add_field(name=f'{std.arrow}**Infos**',
-                        value=lang["someone.embed.description"].format(d=str((datetime.datetime.now() - user.joined_at).days)))
+                        value=lang["someone.embed.description"].format(d=str((datetime.datetime.now() - user.joined_at).days), u=user))
         embed.set_thumbnail(url=user.avatar_url)
+        embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
     @cmd()
