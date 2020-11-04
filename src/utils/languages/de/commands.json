@@ -173,7 +173,7 @@
   },
   "utilities": {
     "someone.embed.title": "Zufälliger User",
-    "someone.embed.description": "```{user} [{user.id}]\nvor {d} Tagen beigetreten```",
+    "someone.embed.description": "```{u} [{u.id}]\nvor {d} Tagen beigetreten```",
     "invite.embed.title": "Hol mich {e}",
     "bin.error.tolarge": "Die Zahl ist zu groß!",
     "bin.message": "`{n}` in binär ist `{b}`",
