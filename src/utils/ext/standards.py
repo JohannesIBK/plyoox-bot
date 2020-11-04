@@ -73,7 +73,9 @@ plyoox_color = 0x24c689
 
 avatar_url = 'https://cdn.discordapp.com/avatars/505433541916622850/ccc8ba894dd4188ecf37de0a53430f22.webp?size=1024'
 
-def quote(string: str):
+def quote(string: str, shorten=False):
+    if shorten and len(string) > 1018:
+        string = string[:1015] + "..."
     return "```" + str(string) + "```"
 
 
