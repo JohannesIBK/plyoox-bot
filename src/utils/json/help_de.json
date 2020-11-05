@@ -194,7 +194,7 @@
     " » {p}points 505433541916622850"
   ],
   "coinflip": [
-    "Schmeißt einen Coin.",
+    "Schmeißt eine Münze.",
     "\n**__Command:__** {p}coinflip"
   ],
   "thisorthat": [
