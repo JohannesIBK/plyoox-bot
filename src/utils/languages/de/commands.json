@@ -248,7 +248,8 @@
     "reminder.message.created": "Dein Timer wurde erstellt.",
     "reminder.error.notimers": "Du hast keine Timer auf diesem Server.",
     "reminder.message.deleted": "Der Timer wurde gelöscht.",
-    "reminder.error.delete": "Der Timer konnte nicht gelöscht werden. Du bist nicht der Ersteller des Timers oder er existiert nicht."
+    "reminder.error.delete": "Der Timer konnte nicht gelöscht werden. Du bist nicht der Ersteller des Timers oder er existiert nicht.",
+    "reminder.event.timermessage": "Hey {u}, hier ist dein Timer:\n{m}"
   },
   "automod": {
     "word.automod": "Automod",

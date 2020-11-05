@@ -55,7 +55,9 @@ class Timers(commands.Cog):
 
                 if timer.time >= now:
                     to_sleep = timer.time - now
+                    print(to_sleep)
                     await asyncio.sleep(to_sleep)
+                print('instant')
 
                 await self.call_timer(timer)
         except (OSError, discord.ConnectionClosed, asyncpg.PostgresConnectionError):
@@ -126,6 +128,19 @@ class Timers(commands.Cog):
         mod_embed = std.cmdEmbed("unmute", lang["mute.temp.reason.unmute"], lang, user=user, mod=fake_context.me)
         await user.remove_roles(config.automod.config.muterole)
         await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
+
+    @commands.Cog.listener()
+    async def on_timer_end(self, timer: Timer):
+        guild = self.bot.get_guild(timer.sid)
+        lang = await self.bot.lang(timer.sid, "timers")
+        channel = guild.get_channel(timer.data["channel_id"])
+        member = await guild.fetch_member(timer.object_id)
+        if channel is None or member is None:
+            return
+
+        message = lang["reminder.event.timermessage"].format(u=str(member), m=std.quote(timer.data["message"]))
+
+        await channel.send(message, allowed_mentions=discord.AllowedMentions(everyone=False, users=True, roles=False))
 
     @commands.Cog.listener()
     async def on_giveaway_end(self, timer: Timer):
@@ -272,7 +287,7 @@ class Timers(commands.Cog):
 
         await ctx.db.execute(
             'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5)',
-            ctx.guild.id, ctx.author.id, duration.dt.timestamp(), 3, json.dumps({'message': reason, 'channelid': ctx.channel.id}))
+            ctx.guild.id, ctx.author.id, duration.dt.timestamp(),'timer', json.dumps({'message': reason, 'channel_id': ctx.channel.id}))
 
         await ctx.embed(lang["reminder.message.created"], delete_after=10)
         await ctx.message.delete(delay=10)
