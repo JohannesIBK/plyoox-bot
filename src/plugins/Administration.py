@@ -12,7 +12,7 @@ class Servermoderation(commands.Cog):
         self.bot = bot
 
     @cmd()
-    async def prefix(self, ctx: context.Context, prefix: str):
+    async def prefix(self, ctx: context.Context, prefix: str=None):
         lang = await ctx.lang()
         cache = await self.bot.cache.get(ctx.guild.id)
         if len(prefix) > 3:
