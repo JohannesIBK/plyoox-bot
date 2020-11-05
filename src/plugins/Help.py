@@ -65,9 +65,9 @@ class Help(commands.Cog):
         elif arg in self.bot.get_all_commands:
             try:
                 cmdObj: commands.Command = self.bot.get_all_commands[arg]
+                cmdHelpRaw = self.helpText[cmdObj.name.lower()].copy()
             except KeyError:
                 return await ctx.error(lang["help.error.nohelp"])
-            cmdHelpRaw = self.helpText[cmdObj.name.lower()].copy()
             if cmdObj.aliases:
                 cmdHelpRaw.insert(1, f'\n**__{lang["help.word.alias"]}:__** {", ".join(f"`{alias}`" for alias in cmdObj.aliases)}')
             cmdHelp = '\n'.join(cmdHelpRaw)
