@@ -7,7 +7,7 @@ from utils.ext import checks, context
 from utils.ext.cmds import grp, cmd
 
 
-class Servermoderation(commands.Cog):
+class Administration(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
 
@@ -15,14 +15,15 @@ class Servermoderation(commands.Cog):
     async def prefix(self, ctx: context.Context, prefix: str=None):
         lang = await ctx.lang()
         cache = await self.bot.cache.get(ctx.guild.id)
-        if len(prefix) > 3:
-            return await ctx.error(lang["prefix.error.maxlength"])
 
         if prefix is not None and not ctx.author.guild_permissions.administrator:
             raise commands.MissingPermissions(["administrator"])
 
         if not ctx.author.guild_permissions.administrator:
-            return await ctx.embed(lang["prefix.message.currentprefix"].format(p=cache.prefix))
+            return await ctx.embed(lang["prefix.message.currentprefix"].format(p=cache.prefix[-1]))
+
+        if len(prefix) > 3:
+            return await ctx.error(lang["prefix.error.maxlength"])
 
         await ctx.db.execute("UPDATE config.guild SET prefix = $1 WHERE sid = $2", prefix, ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
@@ -332,4 +333,4 @@ class Servermoderation(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Servermoderation(bot))
+    bot.add_cog(Administration(bot))
