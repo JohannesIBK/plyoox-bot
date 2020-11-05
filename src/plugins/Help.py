@@ -19,7 +19,7 @@ class Help(commands.Cog):
         lang = await ctx.lang()
         arg = ''
         if command is not None:
-            arg: str = command.lower()
+            arg = command.lower()
 
         modules = dict((key.lower(), [key, value]) for key, value in self.bot.cogs.items()
                        if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging', 'plyooxsupport', 'botlists'])
@@ -67,10 +67,10 @@ class Help(commands.Cog):
                 cmdObj: commands.Command = self.bot.get_all_commands[arg]
             except KeyError:
                 return await ctx.error(lang["help.error.nohelp"])
-            cmdHelpRaw: list = self.helpText[cmdObj.name.lower()].copy()
+            cmdHelpRaw = self.helpText[cmdObj.name.lower()].copy()
             if cmdObj.aliases:
                 cmdHelpRaw.insert(1, f'\n**__{lang["help.word.alias"]}:__** {", ".join(f"`{alias}`" for alias in cmdObj.aliases)}')
-            cmdHelp: str = '\n'.join(cmdHelpRaw)
+            cmdHelp = '\n'.join(cmdHelpRaw)
             await ctx.send(embed=discord.Embed(color=standards.help_color,
                                                title=lang["help.embed.command.title"].format(c=cmdObj.name),
                                                description=cmdHelp.format(p=ctx.prefix)))
@@ -81,8 +81,8 @@ class Help(commands.Cog):
             embed = discord.Embed(color=standards.help_color, title=lang["help.embed.modul.title"])
 
             for command in cogHelp.get_commands():
-                cmdHelpRaw: list = self.helpText[command.name.lower()].copy()
-                cmdHelp: str = cmdHelpRaw[0]
+                cmdHelpRaw = self.helpText[command.name.lower()].copy()
+                cmdHelp = cmdHelpRaw[0]
                 embed.add_field(name=f'**{command.name}** {command.signature}', value=cmdHelp.format(p=ctx.prefix), inline=False)
 
             await ctx.send(embed=embed)
