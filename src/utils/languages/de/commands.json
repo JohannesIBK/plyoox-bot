@@ -45,7 +45,7 @@
     "pointsreset.message": "Die Punkte des Users `{u}` wurden für `{r}` zurückgesetzt.",
     "slowmode.error.maxseconds": "Die Sekundenanzahl muss zwischen 0 und 21600 Sekunden (6h) liegen.",
     "slowmode.message": "Der Slowmode wurde erfolgreich auf `{s}` Sekunden gesetzt.",
-    "check.ban.perma": "Dieser User ist derzeit für {r} gebannt.",
+    "check.ban.perma": "Dieser User ist derzeit für `{r}` gebannt.",
     "check.ban.temp": "Dieser User ist bis `{d}` für `{r}` gebannt.",
     "check.mute.temp": "Dieser User ist bis `{d}` für `{r}` gemutet.",
     "check.punish": "Der User hat derzeit `{p}` Vergehen.",
