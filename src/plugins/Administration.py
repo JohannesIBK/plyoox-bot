@@ -18,6 +18,9 @@ class Servermoderation(commands.Cog):
         if len(prefix) > 3:
             return await ctx.error(lang["prefix.error.maxlength"])
 
+        if prefix is not None and not ctx.author.guild_permissions.administrator:
+            raise commands.MissingPermissions(["administrator"])
+
         if not ctx.author.guild_permissions.administrator:
             return await ctx.embed(lang["prefix.message.currentprefix"].format(p=cache.prefix))
 
