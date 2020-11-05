@@ -105,7 +105,7 @@ class Moderation(commands.Cog):
         user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='kick')
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
-    @cmd()
+    @cmd(aliases=["purge"])
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_messages=True)
     async def clear(self, ctx: Context, amount: int, *, reason: ActionReason=None):
