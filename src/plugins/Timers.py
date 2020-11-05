@@ -272,7 +272,7 @@ class Timers(commands.Cog):
 
         await ctx.db.execute(
             'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5)',
-            ctx.guild.id, ctx.author.id, duration, 3, json.dumps({'message': reason, 'channelid': ctx.channel.id}))
+            ctx.guild.id, ctx.author.id, duration.dt.timestamp(), 3, json.dumps({'message': reason, 'channelid': ctx.channel.id}))
 
         await ctx.embed(lang["reminder.message.created"], delete_after=10)
 
