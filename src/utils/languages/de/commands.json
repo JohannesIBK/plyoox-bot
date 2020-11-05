@@ -61,7 +61,8 @@
     "massban.embed.users.value": "Gebannt {c}/{m}",
     "multiban.prompt": "Das wird {c} User bannen. Fortfahren?",
     "multiban.prompt.abort": "Abbruch",
-    "converters.notbanned": "Dieser User ist nicht gebannt."
+    "converters.error.notbanned": "Dieser User ist nicht gebannt.",
+    "converters.error.reasontolong": "Der Grund ist zu lang (`{a}/{m}`)"
   },
   "errors": {
     "error.rolenotfound": "Die Rolle `{a}` wurde nicht gefunden.",
