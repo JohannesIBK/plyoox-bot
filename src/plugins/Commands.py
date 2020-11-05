@@ -100,7 +100,7 @@ class Commands(commands.Cog):
         if msg.content.startswith(tuple(config.prefix)):
             await self.command_list(ctx)
 
-    @grp(name="command")
+    @grp(name="command", aliases=["cmd", "cmds"])
     @checks.isAdmin()
     async def command_cmd(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
