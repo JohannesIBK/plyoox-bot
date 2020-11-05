@@ -143,7 +143,7 @@ class Moderation(commands.Cog):
         user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='mute')
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
-    @cmd()
+    @cmd(aliases=["tmute"])
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_roles=True)
     async def tempmute(self, ctx: Context, user: discord.Member, time: FutureTime, *, reason: ActionReason=None):
@@ -193,7 +193,7 @@ class Moderation(commands.Cog):
         mod_embed = std.cmdEmbed("unmute", reason, lang, mod=ctx.author, user=user)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed)
 
-    @cmd()
+    @cmd(aliases=["tban"])
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
     async def tempban(self, ctx: Context, user: AdvancedMember, time: FutureTime, *, reason: ActionReason=None):
