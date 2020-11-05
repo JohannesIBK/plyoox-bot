@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+from utils.ext.context import Context
+
 
 class ActionReason(commands.Converter):
     async def convert(self, ctx, argument):
@@ -11,19 +13,20 @@ class ActionReason(commands.Converter):
 
 
 class BannedMember(commands.Converter):
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: Context, argument):
+        lang = await ctx.lang()
         if argument.isdigit():
             memberID = int(argument, base=10)
             try:
                 return await ctx.guild.fetch_ban(discord.Object(id=memberID))
-            except discord.NotFound:
-                raise commands.BadArgument('Dieser User ist nicht gebannt.') from None
+            except discord.NotFound as e:
+                raise commands.BadArgument(lang["converters.notbanned"]) from e
 
         banList = await ctx.guild.bans()
         user = discord.utils.find(lambda u: str(u.user) == argument, banList)
 
         if user is None:
-            raise commands.BadArgument('Dieser User ist nicht gebannt.')
+            raise commands.BadArgument(lang["converters.notbanned"])
         return user
 
 class AdvancedMember(commands.Converter):

@@ -60,7 +60,8 @@
     "massban.embed.users.name": "User",
     "massban.embed.users.value": "Gebannt {c}/{m}",
     "multiban.prompt": "Das wird {c} User bannen. Fortfahren?",
-    "multiban.prompt.abort": "Abbruch"
+    "multiban.prompt.abort": "Abbruch",
+    "converters.notbanned": "Dieser User ist nicht gebannt."
   },
   "errors": {
     "error.rolenotfound": "Die Rolle `{a}` wurde nicht gefunden.",
