@@ -11,12 +11,15 @@ class Servermoderation(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
 
-    @cmd(name="prefix")
-    @checks.isAdmin()
+    @cmd()
     async def prefix(self, ctx: context.Context, prefix: str):
         lang = await ctx.lang()
+        cache = await self.bot.cache.get(ctx.guild.id)
         if len(prefix) > 3:
             return await ctx.error(lang["prefix.error.maxlength"])
+
+        if not ctx.author.guild_permissions.administrator:
+            return await ctx.embed(lang["prefix.message.currentprefix"].format(p=cache.prefix))
 
         await ctx.db.execute("UPDATE config.guild SET prefix = $1 WHERE sid = $2", prefix, ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)

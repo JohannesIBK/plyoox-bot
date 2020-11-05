@@ -185,6 +185,7 @@
   "administration": {
     "prefix.error.maxlength": "Der Prefix darf maximal 3 Zeichen lang sein.",
     "prefix.message": "Der Prefix wurde erfolgreich zu `{p}` geändert.",
+    "prefix.message.currentprefix": "Der Prefix für den Server ist `{p}`",
     "activate.leveling.message": "Das Levelsystem wurde aktiviert.",
     "activate.fun.message": "Das Fun-Plugin wurde aktiviert.",
     "activate.automod.message": "Der Automod wurde aktiviert.",
