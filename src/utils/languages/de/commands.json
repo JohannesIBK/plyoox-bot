@@ -222,6 +222,7 @@
     "edit.embed.description": "```{u} [{u.id}]```[Springe zur Nachricht]({l})",
     "edit.embed.new.title": "Neue Nachricht",
     "edit.embed.old.title": "Alte Nachricht",
+    "word.channel": "Channel",
     "update.embed.name.title": "MEMBER [NAMENS UPDATE]",
     "update.embed.name.new.title": "Neuer Name",
     "update.embed.name.old.title": "Alter Name",

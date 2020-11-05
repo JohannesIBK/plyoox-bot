@@ -155,6 +155,7 @@ class Logging(commands.Cog):
         embed.description = lang["delete.embed.description"].format(u=msg.author)
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
+        embed.add_field(name=std.arrow + lang["word.channel"], value=msg.channel.mention, inline=False)
 
         if not msg.content and not msg.attachments:
             return
@@ -199,6 +200,7 @@ class Logging(commands.Cog):
         msg = payload.cached_message
         jump_link = f'https://discord.com/channels/{msgData["guild_id"]}/{payload.channel_id}/{payload.message_id}'
         embed.description = lang["edit.embed.description"].format(u=user, l=jump_link)
+        embed.add_field(name=std.arrow + lang["word.channel"], value=guild.get_channel(int(payload.data["channel_id"])).mention, inline=False)
 
         if msg is None:
             if msgData['content']:
