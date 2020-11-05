@@ -14,7 +14,7 @@ class Help(commands.Cog):
         self.bot = bot
         self.helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
 
-    @cmd()
+    @cmd(aliases=["commands"])
     async def help(self, ctx: context.Context, command = None):
         lang = await ctx.lang(module="help")
         arg = ''
