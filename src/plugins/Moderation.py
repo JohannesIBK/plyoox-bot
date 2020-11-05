@@ -278,7 +278,7 @@ class Moderation(commands.Cog):
         if not config or not config.automod or config.automod.config.maxpoints is None:
             await ctx.error(lang["points.error.notset"])
 
-        if not self.can_punish_user(ctx, user):
+        if not await self.can_punish_user(ctx, user):
             return await ctx.error(lang["multi.error.notallowed"])
 
         points = await self.bot.db.fetchval('SELECT sum(points) FROM automod.users WHERE uid = $1 AND sid = $2', user.id, ctx.guild.id)
