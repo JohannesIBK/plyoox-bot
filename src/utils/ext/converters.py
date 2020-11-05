@@ -35,4 +35,4 @@ class AdvancedMember(commands.Converter):
                 user_id = int(argument, base=10)
                 return await ctx.bot.fetch_user(user_id)
             except (ValueError, discord.NotFound):
-                raise commands.UserNotFound
+                raise commands.UserNotFound(argument)
