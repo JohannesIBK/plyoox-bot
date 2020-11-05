@@ -275,6 +275,7 @@ class Timers(commands.Cog):
             ctx.guild.id, ctx.author.id, duration.dt.timestamp(), 3, json.dumps({'message': reason, 'channelid': ctx.channel.id}))
 
         await ctx.embed(lang["reminder.message.created"], delete_after=10)
+        await ctx.message.delete(delay=10)
 
     @reminder.command()
     async def list(self, ctx: context.Context):
