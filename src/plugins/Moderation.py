@@ -120,7 +120,6 @@ class Moderation(commands.Cog):
 
         deleted_messages = await ctx.channel.purge(limit=amount + 1)
         await ctx.embed(lang['clear.message.deleted'].format(a=len(deleted_messages) - 1), delete_after=5)
-        await ctx.message.delete(delay=5)
         await logs.createCmdLog(ctx, std.cmdEmbed("clear", reason, lang, mod=ctx.author, amount=amount), file)
 
     @cmd()
