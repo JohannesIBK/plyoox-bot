@@ -58,7 +58,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
-    async def ban(self, ctx: Context, user: AdvancedMember, *, reason: ActionReason = None):
+    async def ban(self, ctx: Context, user: AdvancedMember, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         if not await self.can_punish_user(ctx, user):
             return await ctx.error(lang['multi.error.notallowed'])
@@ -74,7 +74,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(kick_members=True)
-    async def kick(self, ctx: Context, user: discord.Member, *, reason: ActionReason = None):
+    async def kick(self, ctx: Context, user: discord.Member, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         if not await self.can_punish_user(ctx, user):
             return await ctx.error(lang['multi.error.notallowed'])
@@ -90,7 +90,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
-    async def softban(self, ctx: Context, user: discord.Member, *, reason: ActionReason = None):
+    async def softban(self, ctx: Context, user: discord.Member, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         if not await self.can_punish_user(ctx, user):
             return await ctx.error(lang['multi.error.notallowed'])
@@ -108,7 +108,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def clear(self, ctx: Context, amount: int, *, reason: ActionReason = None):
+    async def clear(self, ctx: Context, amount: int, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
 
         if amount > 2000 or amount < 0:
@@ -126,7 +126,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
-    async def mute(self, ctx: Context, user: discord.Member, reason: ActionReason = None):
+    async def mute(self, ctx: Context, user: discord.Member, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         config = await ctx.cache.get(ctx.guild.id)
 
@@ -147,7 +147,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def tempmute(self, ctx: Context, user: discord.Member, time: FutureTime, *, reason: ActionReason = None):
+    async def tempmute(self, ctx: Context, user: discord.Member, time: FutureTime, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         config = await ctx.cache.get(ctx.guild.id)
 
@@ -171,7 +171,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def unmute(self, ctx: Context, user: discord.Member, reason: ActionReason = None):
+    async def unmute(self, ctx: Context, user: discord.Member, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         config = await ctx.cache.get(ctx.guild.id)
 
@@ -197,7 +197,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
-    async def tempban(self, ctx: Context, user: AdvancedMember, time: FutureTime, *, reason: ActionReason = None):
+    async def tempban(self, ctx: Context, user: AdvancedMember, time: FutureTime, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
 
         if not self.can_punish_user(ctx, user):
@@ -217,7 +217,7 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
-    async def unban(self, ctx: Context, user: BannedMember, *, reason: ActionReason = None):
+    async def unban(self, ctx: Context, user: BannedMember, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         await ctx.guild.unban(user.user, reason=reason)
 
@@ -230,7 +230,7 @@ class Moderation(commands.Cog):
     @commands.command()
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
-    async def multiban(self, ctx: Context, users: commands.Greedy[AdvancedMember], *, reason: ActionReason = None):
+    async def multiban(self, ctx: Context, users: commands.Greedy[AdvancedMember], *, reason: ActionReason=None):
         lang = await ctx.lang()
         total_members = len(users)
         if total_members == 0:
@@ -258,7 +258,7 @@ class Moderation(commands.Cog):
 
     @cmd()
     @checks.isMod(helper=True)
-    async def warn(self, ctx: Context, user: discord.Member, points: int, *, reason: ActionReason = None):
+    async def warn(self, ctx: Context, user: discord.Member, points: int, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
 
         if not self.can_punish_user(ctx, user):
@@ -288,7 +288,7 @@ class Moderation(commands.Cog):
 
     @cmd()
     @checks.isMod()
-    async def resetPoints(self, ctx: Context, user: discord.Member, reason: ActionReason = None):
+    async def resetPoints(self, ctx: Context, user: discord.Member, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
 
         await ctx.bot.db.execute('DELETE FROM automod.users WHERE sid = $1 AND uid = $2', ctx.guild.id, user.id)
@@ -397,7 +397,7 @@ class Moderation(commands.Cog):
         await self.do_removal(ctx, amount, lambda m: string in m.content, lang)
 
     @remove.command(name='bot', aliases=['bots'])
-    async def _bot(self, ctx, amount, prefix = None):
+    async def _bot(self, ctx, amount, prefix=None):
         lang = await ctx.lang(utils=True)
         def predicate(m):
             return (m.webhook_id is None and m.author.bot) or (prefix and m.content.startswith(prefix))
