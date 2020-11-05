@@ -177,13 +177,13 @@ class Timers(commands.Cog):
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
                 await message.edit(embed=discord.Embed(color=std.normal_color, title=win,
-                                                       description=lang["giveaway.event.edit.single"].format(w=winnerMention)))
+                                                       description=lang["giveaway.event.edit.single"].format(m=winnerMention)))
             else:
                 await channel.send(lang["giveaway.event.message.multiple"].format(w=win, m=winnerMention),
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
                 await message.edit(embed=discord.Embed(color=std.normal_color, title=win,
-                                                       description=lang["giveaway.event.edit.multiple"].format(w=winnerMention)))
+                                                       description=lang["giveaway.event.edit.multiple"].format(m=winnerMention)))
             roleID = await self.bot.db.fetchval('SELECT winnerrole FROM config.timers WHERE sid = $1', message.guild.id)
             role = message.guild.get_role(roleID)
             if role is not None:
@@ -213,7 +213,7 @@ class Timers(commands.Cog):
         data = {
             'winner': winner,
             'winType': win,
-            'channel': channel.id
+            'channel_id': channel.id
         }
 
         embed = discord.Embed(color=std.normal_color, title=lang["giveaway.embed.title"],
@@ -226,9 +226,8 @@ class Timers(commands.Cog):
         embed.set_footer(text=lang["giveaway.embed.footer"].format(g=str(winner), id=str(msg.id)))
         embed.timestamp = duration.dt
         await msg.edit(embed=embed)
-        await ctx.db.execute(
-            "INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, 'giveaway', $4)",
-            ctx.guild.id, msg.id, duration, json.dumps(data))
+
+        await Timers.create_timer(self, ctx.guild.id, date=duration.dt, object_id=msg.id, type='giveaway', data=data)
 
     @giveaway.command()
     async def stop(self, ctx: context.Context, ID: int):
