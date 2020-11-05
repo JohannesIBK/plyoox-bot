@@ -55,9 +55,7 @@ class Timers(commands.Cog):
 
                 if timer.time >= now:
                     to_sleep = timer.time - now
-                    print(to_sleep)
                     await asyncio.sleep(to_sleep)
-                print('instant')
 
                 await self.call_timer(timer)
         except (OSError, discord.ConnectionClosed, asyncpg.PostgresConnectionError):
@@ -72,19 +70,18 @@ class Timers(commands.Cog):
         await asyncio.sleep(delta)
         self.bot.dispatch(f'{timer.type}_end', timer)
 
-    async def create_timer(self, ctx: context.Context, *, date: datetime.datetime, objectID: int, type: str, data: dict = None):
+    async def create_timer(self, guild_id: int, *, date: datetime.datetime, object_id: int, type: str, data: dict = None):
         seconds = date.timestamp()
         delta = (date - datetime.datetime.utcnow()).total_seconds()
-        timer = await Timer.create_timer(ctx.guild.id, time=seconds, object_id=objectID, type=type, data=data)
+        timer = await Timer.create_timer(guild_id, time=seconds, object_id=object_id, type=type, data=data)
 
         if delta <= 60:
             self.bot.loop.create_task(self.short_timer(timer, delta))
             return timer
 
-        timer_id = await ctx.db.execute(
+        timer_id = await self.bot.db.execute(
             "INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-            ctx.guild.id, objectID, seconds, type, data
-        )
+            guild_id, object_id, seconds, type, json.dumps(data))
 
         timer.id = timer_id
 
@@ -133,13 +130,12 @@ class Timers(commands.Cog):
     async def on_timer_end(self, timer: Timer):
         guild = self.bot.get_guild(timer.sid)
         lang = await self.bot.lang(timer.sid, "timers")
-        channel = guild.get_channel(timer.data["channel_id"])
+        channel = guild.get_channel(int(timer.data["channel_id"]))
         member = await guild.fetch_member(timer.object_id)
         if channel is None or member is None:
             return
 
-        message = lang["reminder.event.timermessage"].format(u=str(member), m=std.quote(timer.data["message"]))
-
+        message = lang["reminder.event.timermessage"].format(u=member.mention, m=std.quote(timer.data["message"]))
         await channel.send(message, allowed_mentions=discord.AllowedMentions(everyone=False, users=True, roles=False))
 
     @commands.Cog.listener()
@@ -285,9 +281,8 @@ class Timers(commands.Cog):
         if timerCount >= 25:
             await ctx.error(lang["reminder.error.maxtimer"])
 
-        await ctx.db.execute(
-            'INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5)',
-            ctx.guild.id, ctx.author.id, duration.dt.timestamp(),'timer', json.dumps({'message': reason, 'channel_id': ctx.channel.id}))
+        await Timers.create_timer(self, ctx.guild.id, date=duration.dt, object_id=ctx.author.id, type='timer',
+                                  data={'message': reason, 'channel_id': ctx.channel.id})
 
         await ctx.embed(lang["reminder.message.created"], delete_after=10)
         await ctx.message.delete(delay=10)

@@ -158,7 +158,7 @@ class Moderation(commands.Cog):
             return await ctx.error(lang["multi.error.nomuterole"])
 
         timers = self.bot.get_cog('Timers')
-        await timers.create_timer(ctx, date=time.dt, objectID=user.id, type='tempmute')
+        await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id, type='tempmute')
         await user.add_roles(config.automod.config.muterole)
 
         await ctx.embed(lang["mute.temp.message"].format(u=str(user), r=reason, d=time.delta), delete_after=5)
@@ -204,7 +204,7 @@ class Moderation(commands.Cog):
             return await ctx.error(lang["multi.error.notallowed"])
 
         timers = self.bot.get_cog('Timers')
-        await timers.create_timer(ctx, date=time.dt, objectID=user.id, type='tempban')
+        await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id, type='tempban')
         await ctx.guild.ban(user=user, reason=reason, delete_message_days=1)
 
         await ctx.embed(lang["ban.temp.message"].format(u=str(user), r=reason, d=time.delta), delete_after=5)

@@ -1,3 +1,6 @@
+import json
+
+
 class Timer:
     __slots__ = ("object_id", "sid", "data", "time", "type", "id")
 
@@ -19,7 +22,7 @@ class Timer:
         self.object_id = record["objid"]
         self.time = record["time"]
         self.type = record["type"]
-        self.data = record["data"]
+        self.data = json.loads(record["data"])
         self.sid = record["sid"]
 
         return self
