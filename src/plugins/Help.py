@@ -16,7 +16,7 @@ class Help(commands.Cog):
 
     @cmd()
     async def help(self, ctx: context.Context, command = None):
-        lang = await ctx.lang()
+        lang = await ctx.lang(module="help")
         arg = ''
         if command is not None:
             arg = command.lower()
