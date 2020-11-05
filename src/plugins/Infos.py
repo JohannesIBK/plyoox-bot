@@ -187,7 +187,6 @@ class Infos(commands.Cog):
 
         if isinstance(user, discord.Member):
             join_pos = members.index(user)
-            user = user
             days = (datetime.datetime.now() - user.joined_at).days
 
         else:
