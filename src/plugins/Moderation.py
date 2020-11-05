@@ -274,6 +274,9 @@ class Moderation(commands.Cog):
     @checks.isMod()
     async def points(self, ctx: Context, user: discord.Member):
         lang = await ctx.lang(utils=True)
+        config = await ctx.cache.get(ctx.guild.id)
+        if not config or not config.automod or config.automod.config.maxpoints is None:
+            await ctx.error(lang["points.error.notset"])
 
         if not self.can_punish_user(ctx, user):
             return await ctx.error(lang["multi.error.notallowed"])
@@ -282,7 +285,7 @@ class Moderation(commands.Cog):
         if points is None:
             return await ctx.error(lang["points.error.nopoints"])
 
-        await ctx.embed(lang["points.message"].format(u=str(user), p=str(points)), delete_after=5)
+        await ctx.embed(lang["points.message"].format(u=str(user), p=str(points), m=str(config.automod.config.maxpoints)), delete_after=5)
         await ctx.message.delete(delay=5)
 
     @cmd()
@@ -338,7 +341,7 @@ class Moderation(commands.Cog):
                 return await ctx.embed(lang["check.nopunish"])
             await ctx.send(embed=embed)
 
-    @grp(aliases=['purge'])
+    @grp()
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_messages=True)
     async def remove(self, ctx):
