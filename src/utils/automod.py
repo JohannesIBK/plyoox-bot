@@ -21,7 +21,11 @@ def findWord(word):
 
 
 async def managePunishment(ctx: Context, punishment, reason):
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.NotFound:
+        return
+
     lang = await ctx.lang(module="automod", utils=True)
     config = await ctx.bot.cache.get(ctx.guild.id)
     if not config.automod:
@@ -68,8 +72,12 @@ async def managePunishment(ctx: Context, punishment, reason):
 
 
 async def add_points(ctx: Context, addPoints, reason, user: discord.Member = None):
+    try:
+        await ctx.message.delete()
+    except discord.NotFound:
+        pass
+
     lang = await ctx.lang(module="automod", utils=True)
-    await ctx.message.delete()
     config = await ctx.bot.cache.get(ctx.guild.id)
     if not config.automod:
         return
