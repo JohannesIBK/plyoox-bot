@@ -123,10 +123,12 @@ class Infos(commands.Cog):
                         value=std.quote(lang["guild.embed.channels.value"].format(a=str(len(guild.channels)),
                                                                t=str(len(guild.text_channels)),
                                                                v=str(len(guild.voice_channels)),
-                                                               c=str(len(guild.categories)))))
+                                                               c=str(len(guild.categories)))),
+                        inline=False)
         embed.add_field(name=std.arrow + lang["guild.embed.boosts.name"].format(l=str(guild.premium_tier)),
                         value=std.quote(lang["guild.embed.boosts.value"]
-                                        .format(b=str(guild.premium_subscription_count), m=str(boosts[min(guild.premium_tier + 1, 3)]))))
+                                        .format(b=str(guild.premium_subscription_count), m=str(boosts[min(guild.premium_tier + 1, 3)]))),
+                        inline=False)
 
         embed.add_field(name=std.arrow + lang["guild.embed.emojis.name"].format(e=str(len(guild.emojis))),
                         value=emojis,
@@ -165,7 +167,7 @@ class Infos(commands.Cog):
         embed.add_field(name=std.arrow + lang["info.embed.roles.name"].format(r=str(len(user.roles) - 1)),
                         value=str(roles),
                         inline=False)
-        embed.add_field(name=std.arrow + lang["info.embed.falgs.name"].format(f=str(len(flags))), value=' '.join(flags) if flags else '-----')
+        embed.add_field(name=std.arrow + lang["info.embed.falgs.name"].format(f=str(len(flags))), value=' '.join(flags) if flags else '-----', inline=False)
 
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
