@@ -35,7 +35,7 @@ cogs = [
     "plugins.Leveling",
     "plugins.Utilities",
     "plugins.Commands",
-    # "plugins.Errors",
+    "plugins.Errors",
     "plugins.Fun",
     "plugins.Events",
     "plugins.Infos",

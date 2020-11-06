@@ -55,7 +55,7 @@ class Logging(commands.Cog):
 
         embed = discord.Embed(color=std.normal_color, title=lang["ban.embed.title"])
         embed.timestamp = datetime.datetime.utcnow()
-        embed.description = lang["ban.embed.description"].format(u=user, d=str(since_joined_guild))
+        embed.description = std.quote(lang["ban.embed.description"].format(u=user, d=str(since_joined_guild)))
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
 
@@ -80,7 +80,7 @@ class Logging(commands.Cog):
 
         embed = discord.Embed(color=std.normal_color, title=lang["unban.embed.title"])
         embed.timestamp = datetime.datetime.utcnow()
-        embed.description = lang["ban.embed.description"].format(u=user, d=str(account_age))
+        embed.description = std.quote(lang["ban.embed.description"].format(u=user, d=str(account_age)))
         embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
 
         if data['id'] and data['token']:
@@ -102,7 +102,7 @@ class Logging(commands.Cog):
         account_age = (datetime.datetime.now() - user.created_at).days
         embed = discord.Embed(color=std.normal_color, title=lang["join.embed.description"])
         embed.set_thumbnail(url=user.avatar_url)
-        embed.description = lang["unban.embed.description"].format(u=user, d=str(account_age))
+        embed.description = std.quote(lang["unban.embed.description"].format(u=user, d=str(account_age)))
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
 
@@ -126,7 +126,7 @@ class Logging(commands.Cog):
         embed = discord.Embed(color=std.normal_color, title=lang["remove.embed.title"])
         embed.set_thumbnail(url=user.avatar_url)
         embed.timestamp = datetime.datetime.utcnow()
-        embed.description = lang["ban.embed.description"].format(u=user, d=str(since_joined_guild))
+        embed.description = std.quote(lang["ban.embed.description"].format(u=user, d=str(since_joined_guild)))
         roles = [role.mention for role in user.roles if role.name != '@everyone']
         embed.add_field(name=std.arrow + lang["words.roles"],
                         value=' '.join(roles) if len(roles) != 0 else '-----')
@@ -152,7 +152,7 @@ class Logging(commands.Cog):
             return
 
         embed = discord.Embed(color=std.normal_color, title=lang["delete.embed.title"])
-        embed.description = lang["delete.embed.description"].format(u=msg.author)
+        embed.description = std.quote(lang["delete.embed.description"].format(u=msg.author))
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
         embed.add_field(name=std.arrow + lang["word.channel"], value=msg.channel.mention, inline=False)
@@ -241,7 +241,7 @@ class Logging(commands.Cog):
             embed = discord.Embed(color=std.normal_color, title=lang["update.embed.name.title"])
             embed.set_thumbnail(url=after.avatar_url)
             embed.timestamp = datetime.datetime.utcnow()
-            embed.description = lang["ban.embed.description"].format(u=after, d=str(since_joined_guild))
+            embed.description = std.quote(lang["ban.embed.description"].format(u=after, d=str(since_joined_guild)))
             embed.add_field(name=std.arrow + lang["update.embed.name.old.title"],
                             value=f"`{before.display_name}`",
                             inline=False)
@@ -267,7 +267,7 @@ class Logging(commands.Cog):
             embed = discord.Embed(color=std.normal_color, title=lang["update.embed.role.title"])
             embed.set_thumbnail(url=after.avatar_url)
             embed.timestamp = datetime.datetime.utcnow()
-            embed.description = lang["ban.embed.description"].format(u=after, d=str(since_joined_guild))
+            embed.description = std.quote(lang["ban.embed.description"].format(u=after, d=str(since_joined_guild)))
 
             role = list(set(before.roles) - set(after.roles)) or list(set(after.roles) - set(before.roles))
 

@@ -109,7 +109,7 @@ class Infos(commands.Cog):
 
         embed = discord.Embed(color=std.normal_color, title=lang["info.embed.title"].format(n=guild.name))
         embed.set_thumbnail(url=guild.icon_url)
-        embed.description = lang["guild.embed.description"].format(g=guild)
+        embed.description = std.quote(lang["guild.embed.description"].format(g=guild))
         embed.add_field(name=std.arrow + lang["guild.embed.members.name"],
                         value=f'```{guild.member_count}```',
                         inline=False)
@@ -120,10 +120,10 @@ class Infos(commands.Cog):
                         value=roles,
                         inline=False)
         embed.add_field(name=std.arrow + lang["guild.embed.channels.name"],
-                        value=lang["guild.embed.channels.value"].format(a=str(len(guild.channels)),
+                        value=std.quote(lang["guild.embed.channels.value"].format(a=str(len(guild.channels)),
                                                                t=str(len(guild.text_channels)),
                                                                v=str(len(guild.voice_channels)),
-                                                               c=str(len(guild.categories))))
+                                                               c=str(len(guild.categories)))))
         embed.add_field(name=std.arrow + lang["guild.embed.boosts.name"].format(l=str(guild.premium_tier)),
                         value=std.quote(lang["guild.embed.boosts.value"]
                                         .format(b=str(guild.premium_subscription_count), m=str(boosts[min(guild.premium_tier + 1, 3)]))))
@@ -155,12 +155,12 @@ class Infos(commands.Cog):
 
         embed = discord.Embed(title=lang["info.embed.title"].format(n=user.display_name), color=user.color)
         embed.set_thumbnail(url=user.avatar_url)
-        embed.description = lang["info.embed.description"].format(u=user)
+        embed.description = std.quote(lang["info.embed.description"].format(u=user))
         embed.add_field(name=std.arrow + lang["info.embed.account.name"],
-                        value=lang["info.embed.account.value"].format(jd=joined_dc, dd=str(days_dc)),
+                        value=std.quote(lang["info.embed.account.value"].format(jd=joined_dc, dd=str(days_dc))),
                         inline=False)
         embed.add_field(name=std.arrow + lang["info.embed.server.name"],
-                        value=lang["info.embed.server.value"].format(jg=joined_guild, sjg=str(since_joined_guild), jp=str(join_pos)),
+                        value=std.quote(lang["info.embed.server.value"].format(jg=joined_guild, sjg=str(since_joined_guild), jp=str(join_pos))),
                         inline=False)
         embed.add_field(name=std.arrow + lang["info.embed.roles.name"].format(r=str(len(user.roles) - 1)),
                         value=str(roles),
@@ -208,7 +208,7 @@ class Infos(commands.Cog):
 
         embed = discord.Embed(title=lang["joined.embed.title"], color=std.normal_color)
         embed.set_author(name=str(user), icon_url=user.avatar_url)
-        embed.description = lang["info.embed.server.value"].format(jg=joined, sjg=str(days), jp=str(join_pos + 1))
+        embed.description = std.quote(lang["info.embed.server.value"].format(jg=joined, sjg=str(days), jp=str(join_pos + 1)))
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)

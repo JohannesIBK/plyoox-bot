@@ -21,7 +21,7 @@ class Utilities(commands.Cog):
         embed = std.getEmbed(signed=ctx.author)
 
         embed.title = lang["someone.embed.title"]
-        embed.description = lang["someone.embed.description"].format(d=str((datetime.datetime.now() - user.joined_at).days), u=user)
+        embed.description = std.quote(lang["someone.embed.description"].format(d=str((datetime.datetime.now() - user.joined_at).days), u=user))
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
