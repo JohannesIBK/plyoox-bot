@@ -100,10 +100,12 @@ class Infos(commands.Cog):
                 except TypeError:
                     pass
 
+        boosts = {1: 2, 2: 15, 3: 30}
         roles = self._getRoles(guild.roles)
         emojis = self._getEmojis(guild.emojis)
         created = guild.created_at.strftime(lang["date.format.small"])
         days = datetime.datetime.utcnow() - guild.created_at
+
 
         embed = discord.Embed(color=std.normal_color, title=lang["info.embed.title"].format(n=guild.name))
         embed.set_thumbnail(url=guild.icon_url)
@@ -122,6 +124,9 @@ class Infos(commands.Cog):
                                                                t=str(len(guild.text_channels)),
                                                                v=str(len(guild.voice_channels)),
                                                                c=str(len(guild.categories))))
+        embed.add_field(name=std.arrow + lang["guild.embed.boosts.name"].format(l=str(guild.premium_tier)),
+                        value=std.quote(lang["guild.embed.boosts.value"]
+                                        .format(b=str(guild.premium_subscription_count), m=str(boosts[min(guild.premium_tier + 1, 3)]))))
 
         embed.add_field(name=std.arrow + lang["guild.embed.emojis.name"].format(e=str(len(guild.emojis))),
                         value=emojis,

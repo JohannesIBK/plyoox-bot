@@ -145,7 +145,9 @@
     "guild.embed.data.value": "Erstellt: {c}\nvor {d} Tagen",
     "guild.embed.channels.name": "Channel",
     "guild.embed.channels.value": "```Insgesamt: {a}\nTextchannel: {t}\nVoicechannel: {v}\nKategorien: {c}```",
-    "guild.embed.emojis.name": "Emojis ({e})"
+    "guild.embed.emojis.name": "Emojis ({e})",
+    "guild.embed.boosts.name": "Boosts ({l})",
+    "guild.embed.boosts.value": "{b} von {m}"
   },
   "leveling": {
     "level.error.bot": "Bots können kein XP bekommen.",
