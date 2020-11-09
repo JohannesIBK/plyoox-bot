@@ -349,7 +349,7 @@ class Moderation(commands.Cog):
             return await ctx.invoke(self.bot.get_command('help'), "remove")
 
     @staticmethod
-    async def do_removal(ctx, limit, predicate, lang, *, before=None, after=None):
+    async def do_removal(ctx: Context, limit: int, predicate, lang, *, before=None, after=None):
         if limit > 2000 or limit < 1:
             return await ctx.error(lang['clear.error.amount'])
 
@@ -364,7 +364,7 @@ class Moderation(commands.Cog):
         deleted = await ctx.channel.purge(limit=limit, before=before, after=after, check=predicate)
         deleted = len(deleted)
 
-        await ctx.embed(lang['clear.message.deleted'].format(a=deleted - 1), delete_after=5)
+        await ctx.embed(lang['clear.message.deleted'].format(a=deleted), delete_after=5)
 
     @remove.command()
     async def embeds(self, ctx, amount):
@@ -396,6 +396,7 @@ class Moderation(commands.Cog):
         lang = await ctx.lang(utils=True)
         if len(string) < 3:
             return await ctx.send(lang["remove.error.minlength"])
+
         await self.do_removal(ctx, amount, lambda m: string in m.content, lang)
 
     @remove.command(name='bot', aliases=['bots'])
@@ -414,18 +415,26 @@ class Moderation(commands.Cog):
         await self.do_removal(ctx, amount, lambda m: custom_emoji.search(m.content), lang)
 
     @remove.command(name='reactions')
-    async def _reactions(self, ctx, search=100):
+    async def _reactions(self, ctx, amount=100):
         lang = await ctx.lang(utils=True)
-        if search > 2000:
+        if amount > 2000:
             return await ctx.error(lang['clear.error.amount'])
 
         total_reactions = 0
-        async for message in ctx.history(limit=search, before=ctx.message):
+        async for message in ctx.history(limit=amount, before=ctx.message):
             if len(message.reactions):
                 total_reactions += sum(r.count for r in message.reactions)
                 await message.clear_reactions()
 
         await ctx.embed(lang['remove.message.reactions'].format(a=total_reactions), delete_after=5)
+
+    @remove.command(name="links")
+    async def _links(self, ctx: Context, amount: int=100):
+        lang = await ctx.lang(utils=True)
+        if amount > 2000:
+            return await ctx.error(lang['clear.error.amount'])
+
+        await self.do_removal(ctx, amount, lambda m: linkRegex.search(m.content), lang)
 
     @remove.command()
     async def custom(self, ctx, *, args: str):
