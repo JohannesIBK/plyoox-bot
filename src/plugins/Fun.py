@@ -28,13 +28,15 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def color(self, ctx: context.Context):
+        lang = await ctx.lang()
+
         rgbs = []
         for _ in range(0, 3, 1):
             rgbs.append(random.choice(range(256)))
         color = discord.Colour.from_rgb(rgbs[0], rgbs[1], rgbs[2])
         colorHex = "#%02x%02x%02x" % (rgbs[0], rgbs[1], rgbs[2])
         await ctx.send(embed=discord.Embed(color=color,
-                                           description=f'Es wurde eine zufällige Farbe generiert:\nFarbcode in RGB `{rgbs}` und HEX `{colorHex}`'))
+                                           description=lang["color.message"].format(r=rgbs, h=colorHex)))
 
     @cmd()
     @checks.isActive('fun')
