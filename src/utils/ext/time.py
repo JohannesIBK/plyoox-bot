@@ -39,7 +39,7 @@ class ShortTime:
                              (?:(?P<weeks>[0-9]{1,4})(?:weeks?|w))?
                              (?:(?P<days>[0-9]{1,5})(?:days?|d))
                              (?:(?P<hours>[0-9]{1,5})(?:hours?|h))?
-                             (?:(?P<minutes>[0-9]{1,5})(?:minutes?|m))?
+                             (?:(?P<minutes>[0-9]{1,5})(?:minutes?|min))?
                              (?:(?P<seconds>[0-9]{1,5})(?:seconds?|s))?
                           """, re.VERBOSE)
 
