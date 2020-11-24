@@ -23,7 +23,7 @@
   ],
   "tempmute": [
     "Mutet einen User temporär auf dem Server.",
-    "**__Zeiten:__** [ `h`, `d`, `mon`, `y` ]",
+    "**__Zeiten:__** [ `s`, `min`, `d`, `y` ]",
     "\n**__Command:__** {p}tempmute < **`User`** > < **`Zeit`** > [ `Grund` ]",
     "\n**__Beispiele:__**",
     " » {p}tempmute @Plyoxx#0000 7d Chatverhalten",
@@ -138,12 +138,6 @@
     "Schickt Regeln in den aktuellen Channel.",
     "\n**__Command:__** {p}rules1"
   ],
-  "namehistory": [
-    "Gibt die Minecraft-Namehistory eines Spielers aus.",
-    "\n**__Command:__** {p}namehistory < **`Name`** >",
-    "\n**__Beispiel:__**",
-    " » {p}namehistory JohannesIBK"
-  ],
   "color": [
     "Gibt eine zufällige Farbe aus.",
     "\n**__Command:__** {p}color"
@@ -245,7 +239,7 @@
     " » {p}reverse Dreht den Text um."
   ],
   "avatar": [
-    "Schickt den Avatar eines USers in den Channel.",
+    "Schickt den Avatar eines Users in den Channel.",
     "\n**__Command:__** {p}avatar [ `User` ]",
     "\n**__Beispiel:__**",
     " » {p}avatar @Plyoxx#0000",
@@ -256,24 +250,6 @@
     "\n**__Command:__** {p}resetlevel < **`User`** >",
     "\n**__Beispiel:__**",
     " » {p}resetlevel @Plyoxx#0000"
-  ],
-  "twitchsings": [
-    "Durchsucht die `Twitch Sings`-Songs nach deinen Kriterien.",
-    "\n**__Command:__** {p}twitchsings < **`Argumente`** >",
-    "\n**__Argumente:__**",
-    " » **`--lang`** Sprache des Songs",
-    " » **`--year`** Jahr in dem der Song erschien",
-    " » **`--range`** Jahre mehr oder weniger",
-    " » **`--genre`** Genre des Songs",
-    " » **`--name`** Name des Songs, wenn Abstand: `\"Name des Songs\"`",
-    " » **`--same`** Ob der Name genau dem des Songs entsprechen soll (True|False)",
-    " » **`--count`** Wie viele Songs maximal zurückgegeben werden sollen",
-    " » **`--by`** Von wem der Song sein soll",
-    "\n**__Beispiele:__**",
-    " » {p}twitchsings --by=disney --year=2013 --count=5",
-    " » {p}twitchsings --name=frozen --year=2010 --range=3 --count=2",
-    " » {p}twitchsings --lang=de --by=disney",
-    " » {p}twitchsings --genre=schlager --by=Sia"
   ],
   "members": [
     "Zeigt die Mitgliederanzahl des Discord an.",
@@ -317,10 +293,6 @@
     " » {p}giveaway stop < **`ID`** >",
     " » {p}giveaway end < **`ID`** >",
     "\n**__Infos:__**",
-    " » Dauer in Minuten (min), Stunden (h) oder Tagen (d).",
-    " » (max | min) (90 | 1)d (48 | 1)h (120 | 15)min<",
-    " » Gewinner ist die Anzahl der Gewinner.",
-    " » ID ist die MessageID.",
     " » `{p}giveaway stop` bricht das Giveaway ab.",
     " » `{p}giveaway end` beendet das Giveaway und wählt Gewinner aus.",
     "\n**__Beispiele:__**",
@@ -360,7 +332,7 @@
     "\n**__Command:__** {p}levelroles"
   ],
   "8ball": [
-    "Antwortet zufällig auf eine Ja/Nein Frage",
+    "Antwortet zufällig auf eine Ja/Nein Frage.",
     "\n**__Command:__** {p}8ball < **`Frage`** >",
     "\n**__Beispiel:__**",
     " » {p}8ball Ist Discord cool?"
@@ -375,8 +347,6 @@
     " » {p}reminder create < **`Dauer`** > < **`Text`** >",
     " » {p}reminder list",
     " » {p}reminder delete < **`ID`** >",
-    "\n**__Infos:__**",
-    " » Dauer in Minuten (min), Stunden (h), Tagen (d), Monaten (mdn), oder Jahr (y).",
     "\n**__Beispiele:__**",
     " » {p}reminder 15min Plyoox promoten",
     " » {p}reminder 3mon Rechungen bezahlen"
