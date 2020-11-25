@@ -46,7 +46,6 @@ class Help(commands.Cog):
                     disabledModules.append(cog[0])
                     continue
 
-
                 if ctx.guild.id != 665609018793787422 and module == "briiaande":
                     continue
 
@@ -68,12 +67,18 @@ class Help(commands.Cog):
                 cmdHelpRaw = self.helpText[cmdObj.name.lower()].copy()
             except KeyError:
                 return await ctx.error(lang["help.error.nohelp"])
+
             if cmdObj.aliases:
                 cmdHelpRaw.insert(1, f'\n**__{lang["help.word.alias"]}:__** {", ".join(f"`{alias}`" for alias in cmdObj.aliases)}')
             cmdHelp = '\n'.join(cmdHelpRaw)
-            await ctx.send(embed=discord.Embed(color=standards.help_color,
-                                               title=lang["help.embed.command.title"].format(c=cmdObj.name),
-                                               description=cmdHelp.format(p=ctx.prefix)))
+
+            embed = discord.Embed(
+                color=standards.help_color,
+                title=lang["help.embed.command.title"].format(c=cmdObj.name),
+                description=cmdHelp.format(p=ctx.prefix))
+            embed.set_footer(text=lang["help.embed.footer.args"])
+
+            await ctx.send(embed=embed)
 
         elif arg.lower() in modules:
             cogHelp: commands.Cog = modules[arg.lower()][1]

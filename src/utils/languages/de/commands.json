@@ -169,6 +169,7 @@
     "help.error.notacommand": "Dieser Command exsitiert nicht.",
     "help.embed.modul.title": "Modul-Hilfe",
     "help.embed.command.title": "**__Command Hilfe für `{c}`__**",
+    "help.embed.footer.args": "<> verpflichtend | [] optional",
     "help.word.alias": "Alias",
     "help.word.module": "Modul",
     "help.word.dashboard": "Dashboard",
