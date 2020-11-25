@@ -226,7 +226,7 @@ class Moderation(commands.Cog):
         mod_embed = std.cmdEmbed("unban", reason, lang, mod=ctx.author, user=user.user)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed)
 
-    @commands.command()
+    @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
     async def multiban(self, ctx: Context, users: commands.Greedy[AdvancedMember], *, reason: ActionReason=None):
