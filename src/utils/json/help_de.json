@@ -1,47 +1,33 @@
 {
+  "__user": {
+
+  },
+
   "kick": [
     "Kickt einen User vom Server.",
-    "\n**__Command:__** {p}kick < **`User`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " » {p}kick @Plyoxx#0000",
-    " » {p}kick 505433541916622850 Spamming"
+    "\n**__Command:__** {p}kick < **`User`** > [ `Grund` ]"
   ],
   "ban": [
     "Bannt einen User vom Server.",
-    "\n**__Command:__** {p}ban < **`User`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " » {p}ban @Plyoxx#0000",
-    " » {p}ban 505433541916622850 Werbung"
+    "\n**__Command:__** {p}ban < **`User`** > [ `Grund` ]"
   ],
   "tempban": [
     "Bannt einen User temporär vom Server.",
     "**__Zeiten:__** `h`, `d`, `mon`, `y`",
-    "\n**__Command:__** {p}tempban < **`User`** > < **`Zeit`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " » {p}tempban @Plyoxx#0000 7d Werbung",
-    " » {p}tempban 505433541916622850 1h Spamming"
+    "\n**__Command:__** {p}tempban < **`User`** > < **`Zeit`** > [ `Grund` ]"
   ],
   "tempmute": [
     "Mutet einen User temporär auf dem Server.",
     "**__Zeiten:__** [ `s`, `min`, `d`, `y` ]",
-    "\n**__Command:__** {p}tempmute < **`User`** > < **`Zeit`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " » {p}tempmute @Plyoxx#0000 7d Chatverhalten",
-    " » {p}tempmute 505433541916622850 1h Spamming"
+    "\n**__Command:__** {p}tempmute < **`User`** > < **`Zeit`** > [ `Grund` ]"
   ],
   "clear": [
     "Löscht eine bestimmte Anzahl von Nachrichten in einem Channel.",
-    "\n**__Command:__** {p}clear < **`Anzahl`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " {p}clear 50",
-    " {p}clear 50 Spamming"
+    "\n**__Command:__** {p}clear < **`Anzahl`** > [ `Grund` ]"
   ],
   "softban": [
     "Bannt einen User und entbannt ihn danach sofort wieder.",
-    "\n**__Command:__** {p}softban < **`User`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " » {p}softban @Plyoxx#0000",
-    " » {p}softban 505433541916622850 Spamming"
+    "\n**__Command:__** {p}softban < **`User`** > [ `Grund` ]"
   ],
   "massban": [
     "Bannt mehrere User vom Server.",
@@ -68,17 +54,11 @@
   ],
   "warn": [
     "Warnt einen User und fügt ihn Punkte hinzu.",
-    "\n**__Command:__** {p}warn < **`User`** > < **`Punkte`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " » {p}warn @Plyoxx#0000 5",
-    " » {p}warn 505433541916622850 8 Links"
+    "\n**__Command:__** {p}warn < **`User`** > < **`Punkte`** > [ `Grund` ]"
   ],
   "level": [
     "Zeigt sein eigenes Level oder das Level eines Users an.",
-    "\n**__Command:__** {p}level [ `User` ]",
-    "\n**__Beispiele:__**",
-    " » {p}level",
-    " » {p}level @Plyoxx#0000"
+    "\n**__Command:__** {p}level [ `User` ]"
   ],
   "top": [
     "Zeigt die Top 10 User auf dem Server an.",
@@ -86,17 +66,11 @@
   ],
   "prefix": [
     "Ändert den Prefix auf dem Server.",
-    "\n**__Command:__** {p}prefix < **`Neuer Prefix`** >",
-    "\n**__Beispiele:__**",
-    " » {p}prefix >",
-    " » {p}prefix *"
+    "\n**__Command:__** {p}prefix < **`Neuer Prefix`** >"
   ],
   "info": [
     "Gibt Informationen über einen User oder über sich selbst aus.",
-    "\n**__Command:__** {p}info [ `User` ]",
-    "\n**__Beispiele:__**",
-    " » {p}info",
-    " » {p}info @Plyoxx#0000"
+    "\n**__Command:__** {p}info [ `User` ]"
   ],
   "server": [
     "Gibt Informationen über einen Server aus.",
@@ -112,11 +86,7 @@
   ],
   "joined": [
     "Zeigt die Joinposition eines Users oder den User einer Joinposition aus.",
-    "\n**__Command:__** {p}joined [ `User` | `Position` ]",
-    "\n**__Beispiele:__**",
-    " » {p}joined",
-    " » {p}joined 1",
-    " » {p}joined @Plyoxx#0000"
+    "\n**__Command:__** {p}joined [ `User` | `Position` ]"
   ],
   "bot": [
     "Gibt Informationen über den Bot aus.",
@@ -182,10 +152,7 @@
   ],
   "points": [
     "Erlaubt das Abfragen von Punkten eines bestimmten Users.",
-    "\n**__Command:__** {p}points < **`User`** >",
-    "\n**__Beispiele:__**",
-    " » {p}points @Plyoxx#0000",
-    " » {p}points 505433541916622850"
+    "\n**__Command:__** {p}points < **`User`** >"
   ],
   "coinflip": [
     "Schmeißt eine Münze.",
@@ -199,9 +166,7 @@
   ],
   "ship": [
     "Passen die zwei User zusammen?",
-    "\n**__Command:__** {p}ship < **`User`** > [ `User` ]",
-    "\n**__Beispiel:__**",
-    " » {p}ship @Plyoxx#0000 @JohannesIBK#9220"
+    "\n**__Command:__** {p}ship < **`User`** > [ `User` ]"
   ],
   "slot": [
     "Eine Slotmaschine. Glücksspiel, aber ohne Geld :o",
@@ -209,47 +174,31 @@
   ],
   "rolemembers": [
     "Gibt die Anzahl der User mit dieser Rolle aus.",
-    "\n**__Command:__** {p}rolemembers < **`Rolle`** >",
-    "\n**__Beispiele:__**",
-    " » {p}rolemembers @Admins",
-    " » {p}rolemembers 505807411743948000"
+    "\n**__Command:__** {p}rolemembers < **`Rolle`** >"
   ],
   "bin": [
     "Wandelt eine Zahl in eine Binärzähl um.",
-    "\n**__Command:__** {p}bin < **`Nummer`** >",
-    "\n**__Beispiel:__**",
-    " » {p}bin 10"
+    "\n**__Command:__** {p}bin < **`Nummer`** >"
   ],
   "hex": [
     "Wandelt eine Zahl in eine Hexadezimalzahl um.",
-    "\n**__Command:__** {p}hex < **`Nummer`** >",
-    "\n**__Beispiel:__**",
-    " » {p}hex 10"
+    "\n**__Command:__** {p}hex < **`Nummer`** >"
   ],
   "caseing": [
     "Wandelt den Text in So EiNeN tExT uM.",
-    "\n**__Command:__** {p}caseing < **`Text`** >",
-    "\n**__Beispiel:__**",
-    " » {p}caseing Wie geht es dir? :D"
+    "\n**__Command:__** {p}caseing < **`Text`** >"
   ],
   "reverse": [
     ".mu txeT ned therD",
-    "\n**__Command:__** {p}reverse < **`Text`** >",
-    "\n**__Beispiel:__**",
-    " » {p}reverse Dreht den Text um."
+    "\n**__Command:__** {p}reverse < **`Text`** >"
   ],
   "avatar": [
     "Schickt den Avatar eines Users in den Channel.",
-    "\n**__Command:__** {p}avatar [ `User` ]",
-    "\n**__Beispiel:__**",
-    " » {p}avatar @Plyoxx#0000",
-    " » {p}avatar 768781420067028994"
+    "\n**__Command:__** {p}avatar [ `User` ]"
   ],
   "resetlevel": [
     "Resetet das Level eines Users.",
-    "\n**__Command:__** {p}resetlevel < **`User`** >",
-    "\n**__Beispiel:__**",
-    " » {p}resetlevel @Plyoxx#0000"
+    "\n**__Command:__** {p}resetlevel < **`User`** >"
   ],
   "members": [
     "Zeigt die Mitgliederanzahl des Discord an.",
@@ -268,23 +217,15 @@
   ],
   "mute": [
     "Mutet einen User permanent.",
-    "\n**__Command:__** {p}mute < **`User`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " » {p}mute @Plyoxx#0000 Spam",
-    " » {p}mute 768781420067028994 Beleidigungen und Spam"
+    "\n**__Command:__** {p}mute < **`User`** > [ `Grund` ]"
   ],
   "unmute": [
     "Entmutet einen User.",
-    "\n**__Command:__** {p}unmute < **`User`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " » {p}unmute @Plyoxx#0000",
-    " » {p}unmute 768781420067028994 Entschuldigung vom User"
+    "\n**__Command:__** {p}unmute < **`User`** > [ `Grund` ]"
     ],
   "slowmode": [
     "Setzt den Slowmode für einen Channel.",
-    "\n**__Command:__** {p}slowmode [ `Sekunden` ]",
-    "\n**__Beispiel:__**",
-    " » {p}slowmode 5"
+    "\n**__Command:__** {p}slowmode [ `Sekunden` ]"
   ],
   "giveaway": [
     "Befehle um ein Giveaway zu führen.",
@@ -303,21 +244,15 @@
   ],
   "pat": [
     "Streichle einen User :D",
-    "\n**__Command:__** {p}pat < **`User`** >",
-    "\n**__Beispiel:__**",
-    " » {p}pat @Plyoox#0000"
+    "\n**__Command:__** {p}pat < **`User`** >"
   ],
   "hug": [
     "Umarme einen User :D",
-    "\n**__Command:__** {p}hug < **`User`** >",
-    "\n**__Beispiel:__**",
-    " » {p}hug @Plyoox#0000"
+    "\n**__Command:__** {p}hug < **`User`** >"
   ],
   "highfive": [
     "Gib einem User ein Highfive!",
-    "\n**__Command:__** {p}highfive < **`User`** >",
-    "\n**__Beispiel:__**",
-    " » {p}highfive @Plyoox#0000"
+    "\n**__Command:__** {p}highfive < **`User`** >"
   ],
   "cry": [
     "Traurig? Zeige es mit einem Gif.",
@@ -333,9 +268,7 @@
   ],
   "8ball": [
     "Antwortet zufällig auf eine Ja/Nein Frage.",
-    "\n**__Command:__** {p}8ball < **`Frage`** >",
-    "\n**__Beispiel:__**",
-    " » {p}8ball Ist Discord cool?"
+    "\n**__Command:__** {p}8ball < **`Frage`** >"
   ],
   "dashboard": [
     "Der Link zum Dashboard des Bots.",
@@ -346,10 +279,7 @@
     "\n**__Commands:__**",
     " » {p}reminder create < **`Dauer`** > < **`Text`** >",
     " » {p}reminder list",
-    " » {p}reminder delete < **`ID`** >",
-    "\n**__Beispiele:__**",
-    " » {p}reminder 15min Plyoox promoten",
-    " » {p}reminder 3mon Rechungen bezahlen"
+    " » {p}reminder delete < **`ID`** >"
   ],
   "vote": [
     "Vote für den Bot auf der TOP.GG Bot Liste.",
@@ -357,10 +287,7 @@
   ],
   "unban": [
     "Entbannt einen User",
-    "\n**__Command:__** {p}unban < **`User`** > [ `Grund` ]",
-    "\n**__Beispiele:__**",
-    " » {p}unban @Plyoxx#0000",
-    " » {p}unban 505433541916622850 Strafe abgelaufen"
+    "\n**__Command:__** {p}unban < **`User`** > [ `Grund` ]"
   ],
   "cat": [
     "Ohhh ist die süß <3",
@@ -368,9 +295,7 @@
   ],
   "check": [
     "Zeigt derzeitige Warnungen oder Bestrafungen an.",
-    "\n**__Command:__** {p}unban < **`User`** >",
-    " » {p}check @Plyoxx#0000",
-    " » {p}check 505433541916622850"
+    "\n**__Command:__** {p}unban < **`User`** >"
   ],
   "laugh": [
     ":joy: :rofl:",
