@@ -80,7 +80,9 @@
     "error.discord.forbidden": "Es ist ein unerwarteter Fehler aufgetreten. Überprüfe ob der Bot alle nötigen Rechte hat."
   },
   "commands": {
-    
+    "error.cooldown": "Der Command ist auf Cooldown.",
+    "error.forbiddenrole": "Du darfst diesen Command nicht verwenden.",
+    "error.forbiddenchannel": "Du darfst diesen Command in diesem Channel nicht verwenden."
   },
   "fun": {
     "color.message": "Es wurde eine zufällige Farbe generiert:\nFarbcode in RGB `{r}` und HEX `{h}`",
