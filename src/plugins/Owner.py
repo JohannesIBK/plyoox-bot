@@ -1,3 +1,5 @@
+import time
+
 import codecs
 import datetime
 import importlib
@@ -304,6 +306,25 @@ class Owner(commands.Cog):
             commandsCountList.append(f'**{command[0]}:** {command[1]}')
 
         await ctx.embed('\n'.join(commandsCountList))
+
+    @cmd()
+    @commands.is_owner()
+    async def loadfrommee6(self, ctx: context.Context):
+        if not len(ctx.message.attachments):
+            return await ctx.error("Kein Attachment gegeben.")
+
+        attachment = ctx.message.attachments[0]
+        data = await attachment.read()
+        data = data.decode("utf-8")
+        users = json.loads(data)
+
+        for user in users:
+            await ctx.db.execute(
+                "INSERT INTO extra.levels (uid, sid, xp, time) VALUES ($1, $2, $3, $4)",
+                user["uid"], ctx.guild.id, user["xp"], time.time()
+            )
+
+        await ctx.send("Level gespeichert")
 
 
 def setup(bot):
