@@ -1,4 +1,3 @@
-import codecs
 import json
 
 import discord
@@ -12,11 +11,22 @@ from utils.ext.cmds import cmd
 class Help(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
-        self.helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
+        self.languages = {}
+        self.load_langs()
+
+    def load_langs(self):
+        languages_list = ["de"]
+
+        for lang in languages_list:
+            with open(f"utils/languages/{lang}/help_{lang}.json", encoding="utf-8") as f:
+                data = json.load(f)
+                self.languages.update({lang: data})
 
     @cmd(aliases=["commands"])
     async def help(self, ctx: context.Context, command = None):
         lang = await ctx.lang(module="help")
+        config = await ctx.cache.get(ctx.guild.id)
+
         arg = ''
         if command is not None:
             arg = command.lower()
@@ -24,15 +34,14 @@ class Help(commands.Cog):
         modules = dict((key.lower(), [key, value]) for key, value in self.bot.cogs.items()
                        if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging', 'plyooxsupport', 'botlists'])
 
-
         if arg == '':
             prefix = '@Plyoox#1355'
 
             data = await ctx.db.fetchrow(
-                'SELECT c.prefix, m.* FROM config.guild c INNER JOIN config.modules m ON c.sid = m.sid WHERE c.sid = $1',
+                'SELECT c.prefix, c.lang , m.* FROM config.guild c INNER JOIN config.modules m ON c.sid = m.sid WHERE c.sid = $1',
                 ctx.guild.id)
-            if data['prefix'] is not None:
-                prefix = data['prefix']
+            if config.prefix is not None:
+                prefix = config.prefix
 
             embed = discord.Embed(title=lang["help.embed.title"],
                                                  description=f'[{lang["help.word.dashboard"]}](https://plyoox.net/) | [{lang["help.word.support"]}](https://discordapp.com/invite/5qPPvQe) | [{lang["help.word.invite"]}](https://go.plyoox.net/invite) \n{lang["word.lang.prefix"]}: `{prefix}`',
@@ -64,7 +73,7 @@ class Help(commands.Cog):
         elif arg in self.bot.get_all_commands:
             try:
                 cmdObj: commands.Command = self.bot.get_all_commands[arg]
-                cmdHelpRaw = self.helpText[cmdObj.name.lower()].copy()
+                cmdHelpRaw = self.languages[config.lang][cmdObj.name.lower()].copy()
             except KeyError:
                 return await ctx.error(lang["help.error.nohelp"])
 
@@ -86,7 +95,7 @@ class Help(commands.Cog):
             embed = discord.Embed(color=standards.help_color, title=lang["help.embed.modul.title"])
 
             for command in cogHelp.get_commands():
-                cmdHelpRaw = self.helpText[command.name.lower()].copy()
+                cmdHelpRaw = self.languages[config.lang][command.name.lower()].copy()
                 cmdHelp = cmdHelpRaw[0]
                 embed.add_field(name=f'**{command.name}** {command.signature}', value=cmdHelp.format(p=ctx.prefix), inline=False)
 
