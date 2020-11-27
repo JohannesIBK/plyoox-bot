@@ -48,7 +48,7 @@ class Leveling(commands.Cog):
             return
 
         guildConfig = await self.bot.cache.get(msg.guild.id)
-        if guildConfig is None:
+        if guildConfig is None or not guildConfig.modules.leveling:
             return
         config = guildConfig.leveling
 
@@ -143,7 +143,7 @@ class Leveling(commands.Cog):
         embed.set_thumbnail(url=user.avatar_url)
         embed.add_field(name=std.arrow + lang["level.embed.level.name"], value=f'```{lvl}```')
         embed.add_field(name=std.arrow + lang["level.embed.xp.name"], value=f"```{currentXP}/{lvlXP}```")
-        embed.add_field(name=std.arrow + lang["level.embed.xp.name"], value=f'```#{userData["count"]}```')
+        embed.add_field(name=std.arrow + lang["level.embed.rank.name"], value=f'```#{userData["count"]}```')
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
