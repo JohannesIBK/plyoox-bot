@@ -1,7 +1,4 @@
 import time
-
-import codecs
-import datetime
 import importlib
 import io
 import json
@@ -61,63 +58,11 @@ class Owner(commands.Cog):
         self.bot.unload_extension(cog)
         await ctx.embed(f'Das Modul {cog} wurde entladen.')
 
-    @cmd(hidden=True)
-    @commands.is_owner()
-    async def addRole(self, ctx: context.Context, role: discord.Role):
-        count = 0
-        members = [member for member in ctx.guild.members if len(member.roles) == 1 and not member.bot]
-        for member in members:
-            if ctx.me.top_role > member.top_role:
-                try:
-                    await member.add_roles(role)
-                    count += 1
-                except discord.Forbidden:
-                    break
-        await ctx.embed(f'{count} haben den Rang erhalten.')
-
-    @cmd(hidden=True)
-    @commands.is_owner()
-    async def removeRole(self, ctx: context.Context, role: discord.Role):
-        count = 0
-        f_count = 0
-        for member in role.members:
-            try:
-                await member.remove_roles(role)
-                count += 1
-            except discord.Forbidden:
-                f_count += 1
-
-        await ctx.embed(f'{count} haben den entzogen bekommen, {f_count} haben den Rang behalten.')
-
-    @cmd(hidden=True)
-    @commands.is_owner()
-    async def leave(self, ctx: context.Context):
-        await ctx.guild.leave()
-
     @cmd(hidden=True, aliases=['quit'])
     @commands.is_owner()
     async def shutdown(self, ctx: context.Context):
         await ctx.send("Shutdown")
         await self.bot.logout()
-
-    @cmd()
-    @commands.is_owner()
-    async def permissions(self, ctx: context.Context):
-        permissions = ctx.channel.permissions_for(ctx.me)
-
-        embed = discord.Embed(title='Permissions', color=0x3498db)
-        embed.add_field(name='Server', value=ctx.guild)
-        embed.add_field(name='Channel', value=ctx.channel, inline=False)
-
-        for item, valueBool in permissions:
-            if valueBool is True:
-                value = ':white_check_mark:'
-            else:
-                value = ':x:'
-            embed.add_field(name=item, value=value)
-
-        embed.timestamp = datetime.datetime.utcnow()
-        await self.bot.get_user(263347878150406144).send(embed=embed, delete_after=120)
 
     @cmd(pass_context=True, name='eval', aliases=["exec"])
     @commands.is_owner()
@@ -184,12 +129,6 @@ class Owner(commands.Cog):
 
     @cmd()
     @commands.is_owner()
-    async def reloadLang(self, ctx: context.Context):
-        self.bot.get_cog('Help').helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
-        await ctx.embed('Der Help-Text wurde reloadet.')
-
-    @cmd()
-    @commands.is_owner()
     async def sql(self, ctx: context.Context, pgType: str, *, sql: str):
         if pgType == 'exec':
             resp = await self.bot.db.execute(sql)
@@ -218,52 +157,10 @@ class Owner(commands.Cog):
 
         await ctx.send(f"Reloaded module **{name}**")
 
-    @grp(aliases=['maint'], case_insensitive=True)
-    @commands.is_owner()
-    async def maintenance(self, ctx: context.Context):
-        if ctx.invoked_subcommand is None:
-            with open('utils/json/simpleStorage.json', 'r') as file:
-                data = json.load(file)
-
-            await ctx.embed(f'Maintenance: {data["maintenance"]}')
-
-    @maintenance.command()
-    async def activate(self, ctx: context.Context):
-        with open('utils/json/simpleStorage.json', 'r+') as file:
-            data = json.load(file)
-            file.seek(0)
-            data['maintenance'] = True
-            json.dump(data, file)
-            file.truncate()
-            await ctx.embed('Maintenance: True')
-        await self.bot.change_presence(
-            activity=discord.Activity(
-                type=discord.ActivityType.playing,
-                name='plyoox.net | ⚠ Wartungen'),
-            status=discord.Status.idle)
-
-
-    @maintenance.command()
-    async def deactivate(self, ctx: context.Context):
-        with open('utils/json/simpleStorage.json', 'r+') as file:
-            data = json.load(file)
-            file.seek(0)
-            data['maintenance'] = False
-            json.dump(data, file)
-            file.truncate()
-            await ctx.embed('Maintenance: False')
-
-        await self.bot.change_presence(
-            activity=discord.Activity(
-                type=discord.ActivityType.listening,
-                name='plyoox.net | +help'),
-            status=discord.Status.online)
-
     @grp(case_insensitive=True)
     @commands.is_owner()
     async def globalban(self, ctx: context.Context):
-        if ctx.invoked_subcommand is None:
-            return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
+        pass
 
     @globalban.command()
     async def add(self, ctx: context.Context, userID: int, *, Grund: str):
@@ -320,7 +217,7 @@ class Owner(commands.Cog):
 
         for user in users:
             await ctx.db.execute(
-                "INSERT INTO extra.levels (uid, sid, xp, time) VALUES ($1, $2, $3, $4)",
+                "INSERT INTO extra.levels (uid, sid, xp, time) VALUES ($1, $2, $3, $4) ON CONFLICT (uid, sid) DO UPDATE SET xp = $3",
                 user["uid"], ctx.guild.id, user["xp"], time.time()
             )
 
