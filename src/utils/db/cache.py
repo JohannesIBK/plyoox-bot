@@ -62,6 +62,7 @@ class BotCache:
     __slots__ = 'bot'
 
     cache: dict[int, GuildConfig] = {}
+    fetching: list[int] = []
 
     def __init__(self, bot):
         self.bot = bot
@@ -69,6 +70,17 @@ class BotCache:
     async def get(self, sid) -> GuildConfig:
         cache = self.cache.get(sid)
         if cache is None:
+            if sid in self.fetching:
+                for _ in range(20):
+                    print(self.fetching)
+                    data = self.cache.get(sid)
+                    if data is not None:
+                        return data
+
+                    await asyncio.sleep(.20)
+                return None
+
+            self.fetching.append(sid)
 
             # one request would take 2 seconds fml
             # please help
@@ -92,6 +104,7 @@ class BotCache:
 
             cache = GuildConfig(self.bot, sid, [settings, automodRecord or None, records])
             self.cache.update({ sid: cache })
+            self.fetching.remove(sid)
 
         return cache
 
