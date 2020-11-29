@@ -72,7 +72,6 @@ class BotCache:
         if cache is None:
             if sid in self.fetching:
                 for _ in range(20):
-                    print(self.fetching)
                     data = self.cache.get(sid)
                     if data is not None:
                         return data
