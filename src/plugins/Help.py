@@ -32,28 +32,29 @@ class Help(commands.Cog):
             arg = command.lower()
 
         modules = dict((key.lower(), [key, value]) for key, value in self.bot.cogs.items()
-                       if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging', 'plyooxsupport', 'botlists'])
+                       if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging', 'plyooxsupport', 'botlists', "commands"])
 
         if arg == '':
             prefix = '@Plyoox#1355'
-
-            data = await ctx.db.fetchrow(
-                'SELECT c.prefix, c.lang , m.* FROM config.guild c INNER JOIN config.modules m ON c.sid = m.sid WHERE c.sid = $1',
-                ctx.guild.id)
             if config.prefix is not None:
                 prefix = config.prefix
 
             embed = discord.Embed(title=lang["help.embed.title"],
-                                                 description=f'[{lang["help.word.dashboard"]}](https://plyoox.net/) | [{lang["help.word.support"]}](https://discordapp.com/invite/5qPPvQe) | [{lang["help.word.invite"]}](https://go.plyoox.net/invite) \n{lang["word.lang.prefix"]}: `{prefix}`',
-                                                 color=standards.help_color)
+                                  description=f'[{lang["help.word.dashboard"]}](https://plyoox.net/) | '
+                                              f'[{lang["help.word.support"]}](https://discordapp.com/invite/5qPPvQe) | '
+                                              f'[{lang["help.word.invite"]}](https://go.plyoox.net/invite) '
+                                              f'\n{lang["word.lang.prefix"]}: `{prefix[-1]}`',
+                                  color=standards.help_color)
             embed.set_footer(icon_url=ctx.me.avatar_url)
             disabledModules = []
 
             for module in modules:
                 cog = modules[module]
-                if data.get(module) is not None and data.get(module) == False:
-                    disabledModules.append(cog[0])
-                    continue
+
+                if hasattr(config.modules, module):
+                    if config.modules is not None and config.modules.__getattribute__(module) == False:
+                        disabledModules.append(cog[0])
+                        continue
 
                 if ctx.guild.id != 665609018793787422 and module == "briiaande":
                     continue
