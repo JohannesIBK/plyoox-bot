@@ -195,60 +195,6 @@ class Fun(commands.Cog):
 
         await ctx.embed(f'```{" ".join(newText)}```', signed=True)
 
-    @cmd(aliases=['ts'])
-    @checks.isActive('fun')
-    async def twitchsings(self, ctx: context.Context, *, args):
-        parser = Arguments()
-        parser.add_argument('--lang', '-l')
-        parser.add_argument('--year', '-y', type=int)
-        parser.add_argument('--range', type=int)
-        parser.add_argument('--genre')
-        parser.add_argument('--name')
-        parser.add_argument('--same', type=bool, default=False)
-        parser.add_argument('--by')
-        parser.add_argument('--count', type=int)
-
-        try:
-            argsParsed = parser.parse_args(shlex.split(args))
-        except Exception as e:
-            return await ctx.send(str(e))
-
-
-        with open('utils/json/songs.json') as songFile:
-            songs = json.load(songFile)
-
-        if lang := argsParsed.lang:
-            songs = [song for song in songs if song['lang'] == lang.lower()]
-
-        if year := argsParsed.year:
-            if yearRange := argsParsed.range:
-                songs = [song for song in songs if abs(song['year'] - year) <= yearRange]
-            else:
-                songs = [song for song in songs if song['year'] == year]
-
-        if by := argsParsed.by:
-            songs = [song for song in songs if by.lower() in song['by'].lower()]
-
-        if genre := argsParsed.genre:
-            songs = [song for song in songs if genre.lower() in song['genres']]
-
-        if name := argsParsed.name:
-            if argsParsed.same:
-                songs = [song for song in songs if name == song['song']]
-            else:
-                songs = [song for song in songs if name.lower() in song['song'].lower()]
-
-        if count := argsParsed.count:
-            if count == 0:
-                songs = []
-            else:
-                songs = songs[:count]
-
-        songStr = '\n'.join(f'`{song["by"]}` | `{song["song"]}` | `{song["year"]}`' for song in songs)
-        if songStr == '':
-            songStr = 'Keine Songs gefunden :('
-        await ctx.embed(songStr[:2000])
-
     @cmd()
     @checks.isActive('fun')
     async def pat(self, ctx: context.Context, user: discord.Member):
