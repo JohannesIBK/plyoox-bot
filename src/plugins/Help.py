@@ -15,7 +15,7 @@ class Help(commands.Cog):
         self.load_langs()
 
     def load_langs(self):
-        languages_list = ["de"]
+        languages_list = ["de", "en"]
 
         for lang in languages_list:
             with open(f"utils/languages/{lang}/help_{lang}.json", encoding="utf-8") as f:

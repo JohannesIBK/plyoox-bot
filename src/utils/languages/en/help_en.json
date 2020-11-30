@@ -1,0 +1,295 @@
+{
+  "kick": [
+    "Kicks a user.",
+    "\n**__Command:__** {p}kick < **`user`** > [ `reason` ]"
+  ],
+  "ban": [
+    "Bans a user.",
+    "\n**__Command:__** {p}ban < **`user`** > [ `reason` ]"
+  ],
+  "tempban": [
+    "Temporarily bans a user.",
+    "**__Zeiten:__** `h`, `d`, `mon`, `y`",
+    "\n**__Command:__** {p}tempban < **`user`** > < **`Zeit`** > [ `reason` ]"
+  ],
+  "tempmute": [
+    "Mutes a user temporarily.",
+    "**__Zeiten:__** [ `s`, `min`, `d`, `y` ]",
+    "\n**__Command:__** {p}tempmute < **`user`** > < **`Zeit`** > [ `reason` ]"
+  ],
+  "clear": [
+    "Deletes a certain number of messages in a channel.",
+    "\n**__Command:__** {p}clear < **`Anzahl`** > [ `reason` ]"
+  ],
+  "softban": [
+    "Bans a user and then immediately unbans him again.",
+    "\n**__Command:__** {p}softban < **`user`** > [ `reason` ]"
+  ],
+  "massban": [
+    "Bans multiple users from the server.",
+    "\n**__Command:__** {p}massban [ `arguments` ]",
+    "\n**__Arguments:__**",
+    "`--channel` channel in which messages are searched",
+    "`--reason` reason for the bans (required)",
+    "`--created` accounts that are younger than 'x' minutes",
+    "`--joined` accounts that joined `x` minutes ago",
+    "`--no-avatar` user without avatar (no argument)",
+    "`--no-roles` user without role (no argument)",
+    "`--joined-before` users that are joined before the given userid",
+    "`--joined-after` users who joined after the given userid",
+    "`--regex` Regex of the usernames",
+    "\n**All other arguments require --channel**",
+    "`--contains` what appears in the message",
+    "`--starts`: how the message starts",
+    "`--ends`: how the message ends",
+    "`--search`: how many messages should be searched (default 100; max 2000)",
+    "`--after`: messages after the given messageid",
+    "`--before`: messages before the given messageid",
+    "`--files`: whether the message has a file (no argument)",
+    "`--embeds`: whether the message has embeds (no argument)"
+  ],
+  "warn": [
+    "Warns a user and adds points.",
+    "\n**__Command:__** {p}warn < **`user`** > < **`points`** > [ `reason` ]"
+  ],
+  "level": [
+    "Shows his own level or the level of a user.",
+    "\n**__Command:__** {p}level [ `user` ]"
+  ],
+  "top": [
+    "Shows the top 10 users on the server.",
+    "\n**__Command:__** {p}top"
+  ],
+  "prefix": [
+    "Changes the prefix on the server.",
+    "\n**__Command:__** {p}prefix < **`new prefix`** >"
+  ],
+  "info": [
+    "Outputs information about a user or about yourself.",
+    "\n**__Command:__** {p}info [ `user` ]"
+  ],
+  "server": [
+    "Outputs information about the current server.",
+    "\n**__Command:__** {p}server"
+  ],
+  "todayjoined": [
+    "Shows the number of users that are joined today",
+    "\n**__Command:__** {p}todayjoined"
+  ],
+  "someone": [
+    "Shows a random user.",
+    "\n**__Command:__** {p}someone"
+  ],
+  "joined": [
+    "Shows the join position of a user or the user of a join position.",
+    "\n**__Command:__** {p}joined [ `user` | `position` ]"
+  ],
+  "bot": [
+    "Shows information about the bot.",
+    "\n**__Command:__** {p}bot"
+  ],
+  "invite": [
+    "Sends an invite to invite the bot to a server.",
+    "\n**__Command:__** {p}invite"
+  ],
+  "ping": [
+    "Shows the latency of the bot to the Discord API.",
+    "\n**__Command:__** {p}ping"
+  ],
+  "rules": [
+    "Sends rules to the current channel.",
+    "\n**__Command:__** {p}rules"
+  ],
+  "rules1": [
+    "Sends rules to the current channel.",
+    "\n**__Command:__** {p}rules1"
+  ],
+  "color": [
+    "Shows a random color.",
+    "\n**__Command:__** {p}color"
+  ],
+  "minesweeper": [
+    "Generates a Minesweeper game using spoilers.",
+    "\n**__Command:__** {p}minesweeper"
+  ],
+  "activate": [
+    "Activates a module and its commands.",
+    "\n**__Command:__**",
+    " » {p}activate fun",
+    " » {p}activate leveling",
+    " » {p}activate administration",
+    " » {p}activate welcomer",
+    " » {p}activate globalbans",
+    " » {p}activate logging",
+    " » {p}activate timer"
+  ],
+  "deactivate": [
+    "Deactivates a module and its commands.,",
+    "\n**__Command:__**",
+    " » {p}deactivate fun",
+    " » {p}deactivate leveling",
+    " » {p}deactivate administration",
+    " » {p}deactivate welcomer",
+    " » {p}deactivate globalbans",
+    " » {p}deactivate logging",
+    " » {p}deactivate timer"
+  ],
+  "points": [
+    "Query the points of a specific user.",
+    "\n**__Command:__** {p}points < **`user`** >"
+  ],
+  "coinflip": [
+    "Throws a coin.",
+    "\n**__Command:__** {p}coinflip"
+  ],
+  "thisorthat": [
+    "Selects an option randomly.",
+    "\n**__Command:__** {p}thisorthat < **`questions`** >",
+    "\n**__Beispiel:__**",
+    " » {p}thisorthat Minecraft | Fortnite | Valorant"
+  ],
+  "ship": [
+    "Do the two users like each other?",
+    "\n**__Command:__** {p}ship < **`user`** > [ `user` ]"
+  ],
+  "slot": [
+    "A slot machine. Gambling, but without money :o",
+    "\n**__Command:__** {p}slot"
+  ],
+  "rolemembers": [
+    "Returns the number of users with this role.",
+    "\n**__Command:__** {p}rolemembers < **`Rolle`** >"
+  ],
+  "bin": [
+    "Converts a number into a binary count.",
+    "\n**__Command:__** {p}bin < **`Nummer`** >"
+  ],
+  "hex": [
+    "Converts a number into a hexadecimal number.",
+    "\n**__Command:__** {p}hex < **`Nummer`** >"
+  ],
+  "caseing": [
+    "Converts the text into SuCh A tExT.",
+    "\n**__Command:__** {p}caseing < **`Text`** >"
+  ],
+  "reverse": [
+    ".TxEt A hCuS otni txet eht strevnoC",
+    "\n**__Command:__** {p}reverse < **`Text`** >"
+  ],
+  "avatar": [
+    "Shows the avatar of a user.",
+    "\n**__Command:__** {p}avatar [ `user` ]"
+  ],
+  "resetlevel": [
+    "Resets the level of a user.",
+    "\n**__Command:__** {p}resetlevel < **`user`** >"
+  ],
+  "members": [
+    "Shows the number of members of the server.",
+    "\n**__Command:__** {p}members"
+  ],
+  "dice": [
+    "A simple dice.",
+    "\n**__Command:__** {p}dice"
+  ],
+  "setupmute": [
+    "Setup the mute role.",
+    "\n**__Command:__** {p}setupmute"
+  ],
+  "resetpoints": [
+   "Resets the points of a user.",
+    "\n**__Command:__** {p}resetpoints < **`user`** >"
+  ],
+  "mute": [
+    "Mutes a user permanently.",
+    "\n**__Command:__** {p}mute < **`user`** > [ `reason` ]"
+  ],
+  "unmute": [
+    "Unmutes a user.",
+    "\n**__Command:__** {p}unmute < **`user`** > [ `reason` ]"
+    ],
+  "slowmode": [
+    "Sets a slow mode for a channel.",
+    "\n**__Command:__** {p}slowmode [ `seconds` ]"
+  ],
+  "giveaway": [
+    "Commands to run a giveaway.",
+    "\n**__Commands:__**",
+    " » {p}giveaway start < **`duration`** > < **`winners`** > < **`channel`** > < **`name`** >",
+    " » {p}giveaway stop < **`id`** >",
+    " » {p}giveaway end < **`id`** >",
+    "\n**__Infos:__**",
+    " » `{p}giveaway stop` cancels the giveaway",
+    " » `{p}giveaway end` ends the giveaway and chooses winners"
+  ],
+  "pat": [
+    "Pet a user.",
+    "\n**__Command:__** {p}pat < **`user`** >"
+  ],
+  "hug": [
+    "Hug a user.",
+    "\n**__Command:__** {p}hug < **`user`** >"
+  ],
+  "highfive": [
+    "Give a user a highfive!",
+    "\n**__Command:__** {p}highfive < **`user`** >"
+  ],
+  "cry": [
+    "Sad? Show it with a gif.",
+    "\n**__Command:__** {p}cry"
+  ],
+  "rage": [
+    "Angry? \uD83D\uDE21",
+    "\n**__Command:__** {p}rage"
+  ],
+  "levelroles": [
+    "Shows all roles you can get with the level system.",
+    "\n**__Command:__** {p}levelroles"
+  ],
+  "8ball": [
+    "Answers randomly to a yes/no question.",
+    "\n**__Command:__** {p}8ball < **`question`** >"
+  ],
+  "dashboard": [
+    "The link to the dashboard of the bot.",
+    "\n**__Command:__** {p}dashboard"
+  ],
+  "reminder": [
+    "Set a timer to meet your deadlines!",
+    "\n**__Commands:__**",
+    " » {p}reminder create < **`duration`** > < **`task`** >",
+    " » {p}reminder list",
+    " » {p}reminder delete < **`id`** >"
+  ],
+  "vote": [
+    "Vote for the bot on the TOP.GG Bot list.",
+    "\n**__Command:__** {p}vote"
+  ],
+  "unban": [
+    "Unbans a user.",
+    "\n**__Command:__** {p}unban < **`user`** > [ `reason` ]"
+  ],
+  "cat": [
+    "Ohhh is the sweet <3",
+    "\n**__Command:__** {p}cat"
+  ],
+  "check": [
+    "Shows current warnings and punishments.",
+    "\n**__Command:__** {p}unban < **`user`** >"
+  ],
+  "laugh": [
+    ":joy: :rofl:",
+    "\n**__Command:__** {p}laugh"
+  ],
+  "copyblacklist": [
+    "Copies the blacklist of another server. You must be an admin on both servers.",
+    "\n**__Command:__** {p}copyblacklist < **`guild id`** > [ `overwrite: no` ]",
+    "\n**__Beispiele:__**",
+    " » {p}copyblacklist 505438986672537620 True",
+    " » {p}copyblacklist 505438986672537620"
+  ],
+  "multiban": [
+    "Bans multiple users from a server.",
+    "\n**__Command:__** {p}multiban < **`UserIDs`** > [ `reason` ]"
+  ]
+}
