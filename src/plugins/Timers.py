@@ -208,11 +208,11 @@ class Timers(commands.Cog):
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
 
     @giveaway.command()
-    async def start(self, ctx: Context, duration: FutureTime, winner: int, channel: discord.TextChannel, *, win: str):
+    async def start(self, ctx: Context, duration: FutureTime, winner: int, channel: discord.TextChannel, *, prize: str):
         lang = await ctx.lang()
         data = {
             'winner': winner,
-            'winType': win,
+            'winType': prize,
             'channel_id': channel.id
         }
 
@@ -221,7 +221,7 @@ class Timers(commands.Cog):
         msg = await channel.send(embed=embed)
         await msg.add_reaction('🎉')
         await ctx.send(embed=std.getEmbed(lang["giveaway.message.started"]))
-        embed = discord.Embed(color=std.normal_color, title=win,
+        embed = discord.Embed(color=std.normal_color, title=prize,
                               description=lang["giveaway.embed.description"])
         embed.set_footer(text=lang["giveaway.embed.footer"].format(g=str(winner), id=str(msg.id)))
         embed.timestamp = duration.dt
