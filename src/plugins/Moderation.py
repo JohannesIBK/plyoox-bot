@@ -237,7 +237,7 @@ class Moderation(commands.Cog):
 
         confirm = await ctx.prompt(lang["multiban.prompt"].format(c=total_members), reacquire=False)
         if not confirm:
-            return await ctx.embed(lang["multiban.prompt.abort"])
+            return await ctx.embed(lang["massban.message.abort"])
 
         count = 0
         for user in users:
