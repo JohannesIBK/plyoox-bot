@@ -1,6 +1,3 @@
-import codecs
-import json
-
 import discord
 from discord.ext import commands
 
@@ -11,11 +8,6 @@ from utils.ext import standards as std, context
 class Errors(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
-        self.helpText = json.load(codecs.open(r'utils/json/help_de.json', encoding='utf-8'))
-
-    async def _help(self, ctx: context.Context, text = None):
-        helpText: list = self.helpText[ctx.command.full_parent_name.lower().split(' ')[0]].copy()
-        return discord.Embed(color=std.error_color, title=f'**__Command Hilfe__**', description=f'**{text}**\n\n' + "\n".join(helpText).format(p=ctx.prefix))
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: context.Context, error):
