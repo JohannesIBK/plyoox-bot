@@ -159,7 +159,7 @@ class Fun(commands.Cog):
             selected += random.choice(emojis)
 
         if len(set(selected)) == 1:
-            await ctx.embed(lang["slot.message.win"].format(s=''.join(selected)), signed=True)
+            await ctx.embed(lang["slot.message.prize"].format(s=''.join(selected)), signed=True)
         else:
             await ctx.embed(lang["slot.message.lose"].format(s=''.join(selected)), signed=True)
 
