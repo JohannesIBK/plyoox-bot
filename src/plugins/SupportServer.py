@@ -18,7 +18,7 @@ class PlyooxSupport(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @grp(aliases=['sg'])
+    @grp(aliases=['sg'], hidden=True)
     @commands.is_owner()
     async def suggestion(self, ctx: context.Context):
         pass

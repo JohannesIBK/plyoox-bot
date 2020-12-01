@@ -115,19 +115,19 @@ class Owner(commands.Cog):
                 self._last_result = ret
                 await ctx.send(f'```py\n{value}{ret}\n```')
 
-    @cmd()
+    @cmd(hidden=True)
     @commands.is_owner()
     async def logdata(self, ctx: context.Context):
         file = discord.File("discord.log", filename="discord.log")
         await ctx.send(file=file)
 
-    @cmd()
+    @cmd(hidden=True)
     @commands.is_owner()
     async def setVersion(self, ctx: context.Context, version: str):
         self.bot.version = version
         await ctx.embed(f'Die Version wurde zu {version} geändert.')
 
-    @cmd()
+    @cmd(hidden=True)
     @commands.is_owner()
     async def sql(self, ctx: context.Context, pgType: str, *, sql: str):
         if pgType == 'exec':
@@ -143,7 +143,7 @@ class Owner(commands.Cog):
 
         await ctx.embed(str(resp))
 
-    @cmd()
+    @cmd(hidden=True)
     @commands.is_owner()
     async def reloadutils(self, ctx: context.Context, name: str):
         try:
@@ -157,7 +157,7 @@ class Owner(commands.Cog):
 
         await ctx.send(f"Reloaded module **{name}**")
 
-    @grp(case_insensitive=True)
+    @grp(case_insensitive=True, hidden=True)
     @commands.is_owner()
     async def globalban(self, ctx: context.Context):
         pass
@@ -172,7 +172,7 @@ class Owner(commands.Cog):
         await self.bot.db.execute('DELETE FROM extra.globalbans WHERE userid = $1', userID)
         await ctx.embed('Der User wurde erfolgreich von der Globalban-Liste entfernt.')
 
-    @grp(case_insesitive=True)
+    @grp(case_insesitive=True, hidden=True)
     @commands.is_owner()
     async def commandCount(self, ctx: context.Context):
         pass
@@ -204,7 +204,7 @@ class Owner(commands.Cog):
 
         await ctx.embed('\n'.join(commandsCountList))
 
-    @cmd()
+    @cmd(hidden=True)
     @commands.is_owner()
     async def loadfrommee6(self, ctx: context.Context):
         if not len(ctx.message.attachments):
