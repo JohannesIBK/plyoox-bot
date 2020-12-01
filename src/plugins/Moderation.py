@@ -105,23 +105,6 @@ class Moderation(commands.Cog):
         user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='kick')
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
-    @cmd(aliases=["purge"])
-    @checks.isMod(helper=True)
-    @commands.bot_has_permissions(manage_messages=True)
-    async def clear(self, ctx: Context, amount: int, *, reason: ActionReason=None):
-        lang = await ctx.lang(utils=True)
-
-        if amount > 2000 or amount < 0:
-            return await ctx.error(lang['clear.error.amount'])
-
-        messages = await ctx.channel.history(limit=amount + 1).flatten()
-        content = '\n'.join(f'{msg.author} ({msg.author.id}): {msg.content}' for msg in messages)
-        file = discord.File(io.BytesIO(content.encode()), 'messages.txt')
-
-        deleted_messages = await ctx.channel.purge(limit=amount + 1)
-        await ctx.embed(lang['clear.message.deleted'].format(a=len(deleted_messages) - 1), delete_after=5)
-        await logs.createCmdLog(ctx, std.cmdEmbed("clear", reason, lang, mod=ctx.author, amount=amount), file)
-
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(manage_roles=True)
@@ -341,15 +324,19 @@ class Moderation(commands.Cog):
                 return await ctx.embed(lang["check.nopunish"])
             await ctx.send(embed=embed)
 
-    @grp()
+    @grp(invoke_without_command=True, aliases=["clear", "purge"])
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def remove(self, ctx):
+    async def remove(self, ctx: Context, amount: int, *, reason: str):
         if ctx.invoked_subcommand is None:
-            return await ctx.invoke(self.bot.get_command('help'), "remove")
+            if amount is None:
+                return await ctx.invoke(self.bot.get_command('help'), "remove")
+            else:
+                lang = await ctx.lang(utils=True)
+                await self.do_removal(ctx, amount, lambda m: True, lang, reason)
 
     @staticmethod
-    async def do_removal(ctx: Context, limit: int, predicate, lang, *, before=None, after=None):
+    async def do_removal(ctx: Context, limit: int, predicate, lang, reason=None, *, before=None, after=None):
         if limit > 2000 or limit < 1:
             return await ctx.error(lang['clear.error.amount'])
 
@@ -365,34 +352,35 @@ class Moderation(commands.Cog):
         deleted = len(deleted)
 
         await ctx.embed(lang['clear.message.deleted'].format(a=deleted), delete_after=5)
+        await logs.createCmdLog(ctx, std.cmdEmbed("clear", reason, lang, mod=ctx.author, amount=deleted))
 
     @remove.command()
-    async def embeds(self, ctx, amount):
+    async def embeds(self, ctx, amount: int, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
-        await self.do_removal(ctx, amount, lambda m: len(m.embeds), lang)
+        await self.do_removal(ctx, amount, lambda m: len(m.embeds), lang, reason)
 
     @remove.command()
-    async def files(self, ctx, amount):
+    async def files(self, ctx, amount: int, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
-        await self.do_removal(ctx, amount, lambda m: len(m.attachments), lang)
+        await self.do_removal(ctx, amount, lambda m: len(m.attachments), lang, reason)
 
     @remove.command()
-    async def images(self, ctx, amount):
+    async def images(self, ctx, amount: int, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
-        await self.do_removal(ctx, amount, lambda m: len(m.embeds) or len(m.attachments), lang)
+        await self.do_removal(ctx, amount, lambda m: len(m.embeds) or len(m.attachments), lang, reason)
 
     @remove.command(name='all')
-    async def _remove_all(self, ctx, amount):
+    async def _remove_all(self, ctx, amount: int, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
-        await self.do_removal(ctx, amount, lambda m: True, lang)
+        await self.do_removal(ctx, amount, lambda m: True, lang, reason)
 
     @remove.command()
-    async def user(self, ctx, amount, user: discord.Member):
+    async def user(self, ctx, amount: int, user: discord.Member, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
-        await self.do_removal(ctx, amount, lambda m: m.author == user, lang)
+        await self.do_removal(ctx, amount, lambda m: m.author == user, lang, reason)
 
     @remove.command()
-    async def contains(self, ctx, amount, *, string: str):
+    async def contains(self, ctx, amount: int, *, string: str):
         lang = await ctx.lang(utils=True)
         if len(string) < 3:
             return await ctx.send(lang["remove.error.minlength"])
@@ -400,22 +388,22 @@ class Moderation(commands.Cog):
         await self.do_removal(ctx, amount, lambda m: string in m.content, lang)
 
     @remove.command(name='bot', aliases=['bots'])
-    async def _bot(self, ctx, amount, prefix=None):
+    async def _bot(self, ctx, amount: int, prefix=None, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         def predicate(m):
             return (m.webhook_id is None and m.author.bot) or (prefix and m.content.startswith(prefix))
 
-        await self.do_removal(ctx, amount, predicate, lang)
+        await self.do_removal(ctx, amount, predicate, lang, reason)
 
     @remove.command(name='emoji', aliases=['emojis'])
-    async def _emoji(self, ctx, amount):
+    async def _emoji(self, ctx, amount: int, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         custom_emoji = re.compile(r'<a?:[a-zA-Z0-9_]+:([0-9]+)>')
 
-        await self.do_removal(ctx, amount, lambda m: custom_emoji.search(m.content), lang)
+        await self.do_removal(ctx, amount, lambda m: custom_emoji.search(m.content), lang, reason)
 
     @remove.command(name='reactions')
-    async def _reactions(self, ctx, amount=100):
+    async def _reactions(self, ctx, amount: int):
         lang = await ctx.lang(utils=True)
         if amount > 2000:
             return await ctx.error(lang['clear.error.amount'])
@@ -429,12 +417,12 @@ class Moderation(commands.Cog):
         await ctx.embed(lang['remove.message.reactions'].format(a=total_reactions), delete_after=5)
 
     @remove.command(name="links")
-    async def _links(self, ctx: Context, amount: int=100):
+    async def _links(self, ctx: Context, amount: int, *, reason: ActionReason=None):
         lang = await ctx.lang(utils=True)
         if amount > 2000:
             return await ctx.error(lang['clear.error.amount'])
 
-        await self.do_removal(ctx, amount, lambda m: linkRegex.search(m.content), lang)
+        await self.do_removal(ctx, amount, lambda m: linkRegex.search(m.content), lang, reason)
 
     @remove.command()
     async def custom(self, ctx, *, args: str):
