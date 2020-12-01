@@ -27,7 +27,7 @@ class Administration(commands.Cog):
 
         await ctx.db.execute("UPDATE config.guild SET prefix = $1 WHERE sid = $2", prefix, ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
-        await cache.modules.reload()
+        cache.prefix = prefix
         await ctx.embed(lang["prefix.message"].format(p=prefix))
 
     @grp(case_insensitive=True)
