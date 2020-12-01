@@ -64,7 +64,7 @@ class Owner(commands.Cog):
         await ctx.send("Shutdown")
         await self.bot.logout()
 
-    @cmd(pass_context=True, name='eval', aliases=["exec"])
+    @cmd(name='eval', aliases=["exec"], hidden=True)
     @commands.is_owner()
     async def _eval(self, ctx: context.Context, *, body: str):
         def cleanup_code(content):
