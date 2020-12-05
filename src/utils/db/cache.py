@@ -27,7 +27,7 @@ class GuildConfig:
 
     @property
     def prefix(self) -> list:
-        prefixes = [f'<@{self.bot.user.id}', f'<@!{self.bot.user.id}']
+        prefixes = [f'<@{self.bot.user.id}> ', f'<@!{self.bot.user.id}> ']
         if self._prefix:
             prefixes.append(self._prefix)
         return prefixes
