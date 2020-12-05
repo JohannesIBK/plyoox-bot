@@ -20,8 +20,11 @@ class Commands(commands.Cog):
 
     async def command_list(self, ctx: Context):
         lang = await ctx.lang(module="commands")
-        msgSplited = ctx.message.content.split(" ")[0]
-        commandName = msgSplited.replace(ctx.prefix, '').lower()
+        msg_splited = ctx.message.content.split(" ")
+        commandName = msg_splited[0].replace(ctx.prefix, '').lower()
+        if str(ctx.bot.user.id) in commandName:
+            commandName = msg_splited[1]
+
         mentions = [ False, False, False ]
         msg = None
 
