@@ -1,110 +1,164 @@
+from typing import Mapping, Optional
+
 import json
 
 import discord
 from discord.ext import commands
 
-import main
-from utils.ext import standards, context
-from utils.ext.cmds import cmd
+from utils.ext import context
+from utils.ext import standards as std
 
 
-class Help(commands.Cog):
-    def __init__(self, bot: main.Plyoox):
-        self.bot = bot
-        self.languages = {}
-        self.load_langs()
+languages = {}
 
-    def load_langs(self):
-        languages_list = ["de", "en"]
+def load_langs():
+    languages_list = ["de", "en"]
 
-        for lang in languages_list:
-            with open(f"utils/languages/{lang}/help_{lang}.json", encoding="utf-8") as f:
-                data = json.load(f)
-                self.languages.update({lang: data})
+    for lang in languages_list:
+        with open(f"utils/languages/{lang}/help_{lang}.json", encoding="utf-8") as f:
+            data = json.load(f)
+            languages.update({lang: data})
 
-    @cmd(aliases=["commands"])
-    async def help(self, ctx: context.Context, command = None):
-        lang = await ctx.lang(module="help")
-        config = await ctx.cache.get(ctx.guild.id)
+load_langs()
 
-        arg = ''
-        if command is not None:
-            arg = command.lower()
 
-        modules = dict((key.lower(), [key, value]) for key, value in self.bot.cogs.items()
-                       if key.lower() not in ['loader', 'errors', 'owner', 'help', 'private', 'events', 'logging', 'plyooxsupport', 'botlists', "commands"])
+class HelpCommand(commands.HelpCommand):
+    def get_context(self) -> context.Context:
+        return self.context
 
-        if arg == '':
-            prefix = '@Plyoox#1355'
-            if config.prefix is not None:
-                prefix = config.prefix
+    def get_command_signature(self, command: commands.Command, prefix=True):
+        prefix = self.clean_prefix if prefix else ""
+        signature = "" or command.signature
+        if signature:
+            signature = " " + signature.replace("<", "< **`").replace(">", "`** >").replace("[", "[ `").replace("]", "` ]")
 
-            embed = discord.Embed(title=lang["help.embed.title"],
-                                  description=f'[{lang["help.word.dashboard"]}](https://plyoox.net/) | '
-                                              f'[{lang["help.word.support"]}](https://discordapp.com/invite/5qPPvQe) | '
-                                              f'[{lang["help.word.invite"]}](https://go.plyoox.net/invite) '
-                                              f'\n{lang["word.lang.prefix"]}: `{prefix[-1]}`',
-                                  color=standards.help_color)
-            embed.set_footer(icon_url=ctx.me.avatar_url)
-            disabledModules = []
+        return prefix + command.qualified_name + signature
 
-            for module in modules:
-                cog = modules[module]
+    async def subcommand_not_found(self, command: commands.Command, string: str):
+        await self.send_command_help(command)
 
-                if hasattr(config.modules, module):
-                    if config.modules is not None and config.modules.__getattribute__(module) == False:
-                        disabledModules.append(cog[0])
-                        continue
+    async def send_cog_help(self, cog: commands.Cog):
+        context = self.get_context()
+        lang = await context.lang(module="help")
+        config = await context.cache.get(context.guild.id)
 
-                if ctx.guild.id != 665609018793787422 and module == "briiaande":
-                    continue
+        embed = discord.Embed(color=std.help_color, description=lang["embed.description.cmdhelp"].format(p=self.clean_prefix))
 
-                cmds = [module_cmd for module_cmd in cog[1].get_commands() if module_cmd.showHelp]
+        for command in cog.get_commands():
+            if command.hidden:
+                continue
+            embed.add_field(
+                name=command.qualified_name + " " + command.signature,
+                value=languages[config.lang][command.qualified_name.lower()][0],
+                inline=False
+            )
 
-                embed.add_field(name=cog[0], value=f'> {", ".join(f"`{module_cmd}`" for module_cmd in cmds)}', inline=False)
-                embed.set_footer(text=f"{ctx.prefix}help <{lang['help.word.module']}>",
-                                 icon_url=ctx.me.avatar_url)
+        embed.set_footer(text=lang["embed.footer.args"])
 
-            if disabledModules:
-                embed.add_field(name=lang["help.embed.deactivated.title"],
-                                value=' '.join(f'`{module}`' for module in disabledModules))
+        await self.get_destination().send(embed=embed)
 
-            await ctx.send(embed=embed)
+    async def send_command_help(self, command: commands.Command):
+        context = self.get_context()
+        lang = await context.lang(module="help")
+        config = await context.cache.get(context.guild.id)
 
-        elif arg in self.bot.get_all_commands:
+        if command.hidden:
+            return await self.send_error_message(lang["error.command.nohelp"])
+
+        embed = discord.Embed(title=self.get_command_signature(command, False), color=std.help_color)
+        embed.set_footer(text=lang["embed.footer.args"])
+
+        if len(command.qualified_name.split()) > 1:
             try:
-                cmdObj: commands.Command = self.bot.get_all_commands[arg]
-                cmdHelpRaw = self.languages[config.lang][cmdObj.name.lower()].copy()
+                raw_description = languages[config.lang][command.qualified_name.lower().split()[0]][1][command.qualified_name.lower().split()[1]]
+                if isinstance(raw_description, list):
+                    raw_description = "\n".join(raw_description)
+                embed.description = raw_description
             except KeyError:
-                return await ctx.error(lang["help.error.nohelp"])
-
-            if cmdObj.aliases:
-                cmdHelpRaw.insert(1, f'\n**__{lang["help.word.alias"]}:__** {", ".join(f"`{alias}`" for alias in cmdObj.aliases)}')
-            cmdHelp = '\n'.join(cmdHelpRaw)
-
-            embed = discord.Embed(
-                color=standards.help_color,
-                title=lang["help.embed.command.title"].format(c=cmdObj.name),
-                description=cmdHelp.format(p=ctx.prefix))
-            embed.set_footer(text=lang["help.embed.footer.args"])
-
-            await ctx.send(embed=embed)
-
-        elif arg.lower() in modules:
-            cogHelp: commands.Cog = modules[arg.lower()][1]
-            command: commands.Command
-            embed = discord.Embed(color=standards.help_color, title=lang["help.embed.modul.title"])
-
-            for command in cogHelp.get_commands():
-                cmdHelpRaw = self.languages[config.lang][command.name.lower()].copy()
-                cmdHelp = cmdHelpRaw[0]
-                embed.add_field(name=f'**{command.name}** {command.signature}', value=cmdHelp.format(p=ctx.prefix), inline=False)
-
-            await ctx.send(embed=embed)
-
+                return await self.command_not_found(command.qualified_name)
         else:
-            await ctx.error(lang["help.error.notacommand"])
+            raw_description = languages[config.lang][command.qualified_name.lower().split()[0]]
+            if isinstance(raw_description, list):
+                raw_description = "\n".join(raw_description)
+            embed.description = raw_description
 
+        if command.qualified_name.split(" ")[0] in ["giveaway", "tempban", "tempmute", "reminder"]:
+            embed.description = embed.description.format(t=lang["word.times"])
+
+        if command.aliases:
+            embed.description += "\n\n**" + lang["word.aliases"] + ":** " + ", ".join(f"`{alias}`" for alias in command.aliases)
+
+        await self.get_destination().send(embed=embed)
+
+    async def send_group_help(self, group: commands.Group):
+        context = self.get_context()
+        lang = await context.lang(module="help")
+        config = await context.cache.get(context.guild.id)
+
+        if group.hidden:
+            return await self.send_error_message(lang["error.command.nohelp"])
+
+        embed = discord.Embed(title=self.get_command_signature(group, False), color=std.help_color)
+        embed.set_footer(text=lang["embed.footer.args"])
+        embed.description = languages[config.lang][group.qualified_name.lower()][0]
+
+        if group.aliases:
+            embed.description += "\n\n**" + lang["word.aliases"] + ":** " + ", ".join(f"`{alias}`" for alias in group.aliases)
+
+        subcommands = []
+        for command in group.commands:
+            subcommands.append(self.get_command_signature(command, False))
+
+        embed.add_field(
+            name=lang["embed.group.subcommands"],
+            value="\n".join(subcommands)
+        )
+
+        await self.get_destination().send(embed=embed)
+
+    async def send_bot_help(self, mapping: Mapping[Optional[commands.Cog], list[commands.Command]]):
+        context = self.get_context()
+        lang = await context.lang(module="help")
+
+        embed = discord.Embed(color=std.help_color)
+        embed.description = lang["embed.description.help"].format(p=self.clean_prefix)
+        embed.set_footer(text=lang["embed.footer.args"])
+
+        for cog in mapping:
+            commands = []
+            for command in mapping[cog]:
+                if not command.hidden:
+                    commands.append("`" + command.qualified_name + "`")
+
+            if len(commands):
+                embed.add_field(
+                    name=cog.qualified_name,
+                    value=", ".join(commands),
+                    inline=False
+                )
+
+        await self.get_destination().send(embed=embed)
+
+
+    async def command_not_found(self, command_name: str):
+        lang = await self.get_context().lang(module="help")
+        return lang["error.command.notfound"].format(c=command_name)
+
+    async def send_error_message(self, error: str):
+        destination = self.get_destination()
+        embed = std.getErrorEmbed(error)
+        await destination.send(embed=embed)
+
+
+class NewHelp(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self._original_help_command = bot.help_command
+        bot.help_command = HelpCommand()
+        bot.help_command.cog = self
+
+    def cog_unload(self):
+        self.bot.help_command = self._original_help_command
 
 def setup(bot):
-    bot.add_cog(Help(bot))
+    bot.add_cog(NewHelp(bot))
