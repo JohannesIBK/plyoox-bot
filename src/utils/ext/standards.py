@@ -1,5 +1,4 @@
 import datetime
-
 import discord
 
 yes_emoji = "<:yes:703900321465892914>"
@@ -78,6 +77,11 @@ def quote(string: str, shorten=False):
         string = string[:1015] + "..."
     return "```" + str(string) + "```"
 
+
+def cut(string: str, max_len=1024):
+    if len(string) > max_len:
+        string = string[:1021] + "..."
+    return string
 
 # Embeds
 def getEmbed(description: str = None, signed: discord.Member = None) -> discord.Embed:
