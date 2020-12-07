@@ -82,7 +82,7 @@
     "Sends rules to the current channel."
   ],
   "color": [
-    "Outputs a randomly generated colour."
+    "Outputs a randomly generated color."
   ],
   "minesweeper": [
     "Generates a minesweeper field from spoiler messages."
@@ -169,7 +169,7 @@
     "Hug a user."
   ],
   "highfive": [
-    "Give a user a highfive!"
+    "Give a user a high five!"
   ],
   "cry": [
     "Sad? Show it with a gif."
@@ -214,7 +214,7 @@
   ],
   "copyblacklist": [
     "Copies the blacklist of another server",
-    "**You must be admin on both guilds.**"
+    "**You must be an admin on both guilds.**"
   ],
   "multiban": [
     "Bans multiple users from the guild."
