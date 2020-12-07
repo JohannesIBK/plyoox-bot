@@ -168,19 +168,17 @@
     "resetlevel.message": "Das Level des Users `{u}` wurde erfolgreich zurückgesetzt."
   },
   "help": {
-    "help.embed.title": "Command Hilfe",
-    "help.embed.deactivated.title": "Deaktivierte Module",
-    "help.error.nohelp": "Für diesen Command ist keine Hilfe verfügbar.",
-    "help.error.notacommand": "Dieser Command exsitiert nicht.",
-    "help.embed.modul.title": "Modul-Hilfe",
-    "help.embed.command.title": "**__Command Hilfe für `{c}`__**",
-    "help.embed.footer.args": "<> verpflichtend | [] optional",
-    "help.word.alias": "Alias",
-    "help.word.module": "Modul",
-    "help.word.dashboard": "Dashboard",
-    "help.word.support": "Support Server",
-    "help.word.invite": "Einladung",
-    "word.lang.prefix": "Prefix"
+    "error.command.notfound": "Der Command `{c}` wurde nicht gefunden.",
+    "error.command.nohelp": "Für diesen Command ist keine Hilfe verfügbar.",
+    "embed.footer.args": "<> verpflichtend | [] optional",
+    "embed.command.title": "Plyoox Command Hilfe",
+    "embed.module.title": "Plyoox Modul Hilfe",
+    "embed.group.subcommands": "Subcommands",
+    "word.aliases": "Aliases",
+    "embed.description.help": "Verwende `{p}help [Command]` für Hilfe über einen Command\nund `{p}help [Modul]` für Hilfe über ein Modul.",
+    "embed.description.subhelp": "Verwende `{p}help [Command] [Subcommand]` für genauere Hilfe über einen Command",
+    "embed.description.cmdhelp": "Verwende `{p}help [Command]` für genauere Hilfe über einen Command",
+    "word.times": "\n**__Zeiten:__**\n**`s`** Sekunden\n**`min`** Minuten\n**`h`** Stunden\n**`d`** Tage\n**`mon`** Monate\n**`y`** Jahre"
   },
   "utilities": {
     "someone.embed.title": "Zufälliger User",
