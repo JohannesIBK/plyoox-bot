@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils import rules
+from utils.rules import rules
 from utils.ext import checks, context
 from utils.ext.cmds import grp, cmd
 
@@ -164,8 +164,7 @@ class Administration(commands.Cog):
     @checks.isAdmin()
     async def rules(self, ctx: context.Context):
         await ctx.message.delete()
-        msg = rules.rules
-        await ctx.send(msg)
+        await ctx.send(rules)
 
     @cmd()
     @checks.isAdmin()
