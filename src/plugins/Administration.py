@@ -16,11 +16,11 @@ class Administration(commands.Cog):
         lang = await ctx.lang()
         cache = await self.bot.cache.get(ctx.guild.id)
 
-        if prefix is not None and not ctx.author.guild_permissions.administrator:
-            raise commands.MissingPermissions(["administrator"])
+        if prefix is None:
+            return await ctx.embed(lang["prefix.message.currentprefix"].format(p=cache.prefix[-1]))
 
         if not ctx.author.guild_permissions.administrator:
-            return await ctx.embed(lang["prefix.message.currentprefix"].format(p=cache.prefix[-1]))
+            raise commands.MissingPermissions(["administrator"])
 
         if len(prefix) > 3:
             return await ctx.error(lang["prefix.error.maxlength"])
