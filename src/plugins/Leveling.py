@@ -198,7 +198,7 @@ class Leveling(commands.Cog):
             if count == 11:
                 break
 
-            embed.add_field(name=f"{count}. {member.display_name}", value=std.quote(lang["top.embed.user.value"].fomat(l=lvl, c=currentXP, x=lvlXP)))
+            embed.add_field(name=f"{count}. {member.display_name}", value=std.quote(lang["top.embed.user.value"].format(l=lvl, c=currentXP, x=lvlXP)))
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
