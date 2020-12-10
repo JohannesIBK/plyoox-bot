@@ -45,7 +45,7 @@ class Moderation(commands.Cog):
             return
         
         ctx = await self.bot.get_context(msg)
-        automod(ctx)
+        await automod(ctx)
     
     # pylint: disable=unsubscriptable-object
     @staticmethod
