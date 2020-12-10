@@ -9,3 +9,4 @@ src/other/Archiv/
 TODO.txt
 src/utils/json/simpleStorage.json
 src/plugins/BotLists.py
+.vscode/
