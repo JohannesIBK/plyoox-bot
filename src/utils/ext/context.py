@@ -1,5 +1,7 @@
 import asyncio
+from datetime import date
 import io
+import re
 
 import discord
 from asyncpg.pool import Pool
@@ -39,10 +41,18 @@ class Context(commands.Context):
     async def lang(self, utils = False, module = None):
         if module is None:
             module = self.cog.qualified_name
-        if utils:
-            return { **self.bot._lang[module.lower()], **self.bot._lang["utils"]}
+        
+        if isinstance(module, list):
+            data = {}
+            for _module in module:
+                data |= self.bot._lang[_module.lower()]
         else:
-            return self.bot._lang[module.lower()]
+            data = self.bot._lang[module.lower()]
+
+        if utils:
+            data |= self.bot._lang["utils"]
+
+        return data
 
     async def release(self):
         if self._db is not None:
