@@ -3,7 +3,6 @@
 
 import asyncio
 import argparse
-import os
 
 import server
 from main import Plyoox as Bot
@@ -31,12 +30,7 @@ try:
     loop.run_until_complete(bot.create_db_pool(port))
 except:
     print('Es konnte keine Verbindung zu PostgreSQL aufgebaut werden...')
-    try:
-        os.popen("sudo service postgresql start")
-        loop.run_until_complete(bot.create_db_pool(port))
-    except Exception as e:
-        print(e)
-        exit()
+    exit()
 
 try:
     web = server.app(bot, bot.db)
