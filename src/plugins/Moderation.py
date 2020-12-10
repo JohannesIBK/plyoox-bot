@@ -10,7 +10,7 @@ import discord
 from discord.ext import commands
 
 import main
-from utils import automod
+from utils.automod import automod, managePunishment, add_points
 from utils.ext import checks, logs, standards as std
 from utils.ext.cmds import cmd, grp
 from utils.ext.context import Context
@@ -18,7 +18,7 @@ from utils.ext.converters import ActionReason, BannedMember, AdvancedMember
 from utils.ext.errors import FakeArgument
 from utils.ext.time import FutureTime
 
-linkRegex = re.compile('((https?://(www\.)?|www\.)[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})', re.IGNORECASE)
+linkRegex = re.compile(r'((https?://(www\.)?|www\.)[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})', re.IGNORECASE)
 
 
 def can_execute_action(ctx, user, target):
@@ -36,6 +36,18 @@ class Moderation(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot: main.Plyoox = bot
 
+    @commands.Cog.listener()
+    async def on_message(self, msg: discord.Message):
+        if msg.author.bot:
+            return
+
+        if msg.guild is None:
+            return
+        
+        ctx = await self.bot.get_context(msg)
+        automod(ctx)
+    
+    # pylint: disable=unsubscriptable-object
     @staticmethod
     async def can_punish_user(ctx: Context, user: Union[discord.Member, discord.User]):
         if isinstance(user, discord.User):
@@ -249,7 +261,7 @@ class Moderation(commands.Cog):
         if points <= 0 or points > 20:
             return await ctx.error(lang["warn.error.points"])
 
-        await automod.add_points(ctx, points, reason, user=user)
+        await add_points(ctx, points, reason, user=user)
         await ctx.embed(lang["warn.message"].format(u=str(user), r=reason, p=str(points)), delete_after=5)
         await ctx.message.delete(delay=5)
 
@@ -297,6 +309,7 @@ class Moderation(commands.Cog):
         await ctx.embed(lang["slowmode.message"].format(s=str(seconds)), delete_after=5)
         await ctx.message.delete(delay=5)
 
+    # pylint: disable=unsubscriptable-object
     @cmd()
     @checks.isMod()
     async def check(self, ctx: Context, user: Union[BannedMember, discord.Member]):
