@@ -205,5 +205,6 @@ def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime, r
         embed.add_field(name=arrow + lang["word.points"], value=quote(points))
 
     embed.add_field(name=arrow + lang["word.reason"], value=quote(reason))
-
     embed.add_field(name=arrow + lang["word.message"], value=quote(message))
+
+    return embed
