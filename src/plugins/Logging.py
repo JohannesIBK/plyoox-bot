@@ -1,4 +1,5 @@
 import datetime
+from os import name
 from typing import Union
 
 import discord
@@ -39,7 +40,8 @@ class Logging(commands.Cog):
                 break
         else:
             await self.bot.db.execute('UPDATE config.logging SET id = NULL, token = NULL, channelid = NULL WHERE sid = $1', channel.guild.id)
-
+    
+    # pylint: disable=unsubscriptable-object
     @commands.Cog.listener()
     async def on_member_ban(self, guild: discord.Guild, user: Union[discord.Member, discord.User]):
         lang = await self.bot.lang(guild.id, "logging", utils=True)
@@ -49,15 +51,16 @@ class Logging(commands.Cog):
         if not data or not data['logging'] or not data['memberban']:
             return
 
-        since_joined_guild = '-----'
+        since_joined_guild = '-'
         if isinstance(user, discord.Member):
             since_joined_guild = (datetime.datetime.now() - user.joined_at).days
 
-        embed = discord.Embed(color=std.normal_color, title=lang["ban.embed.title"])
+        embed = discord.Embed(color=discord.Color.red())
         embed.timestamp = datetime.datetime.utcnow()
-        embed.description = std.quote(lang["ban.embed.description"].format(u=user, d=str(since_joined_guild)))
+        embed.set_author(name=lang["ban.embed.title"], icon_url=user.avatar_url)
+        embed.description = lang["ban.embed.description"].format(u=user, d=since_joined_guild)
         embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
+        embed.set_footer(text=f'ID: {user.id}')
 
         if data['id'] and data['token']:
             try:
@@ -73,15 +76,17 @@ class Logging(commands.Cog):
         data = await self.bot.db.fetchrow(
             'SELECT l.id, l.token, l.memberunban, m.logging FROM config.logging l INNER JOIN config.modules m ON l.sid = m.sid WHERE l.sid = $1',
             guild.id)
+
         if not data or not data['logging'] or not data['memberunban']:
             return
 
         account_age = (datetime.datetime.now() - user.created_at).days
 
-        embed = discord.Embed(color=std.normal_color, title=lang["unban.embed.title"])
+        embed = discord.Embed(color=discord.Color.green())
         embed.timestamp = datetime.datetime.utcnow()
-        embed.description = std.quote(lang["ban.embed.description"].format(u=user, d=str(account_age)))
-        embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
+        embed.set_author(name=lang["unban.embed.title"], icon_url=user.avatar_url)
+        embed.description = lang["unban.embed.description"].format(u=user, d=account_age)
+        embed.set_footer(text=f'ID: {user.id}')
 
         if data['id'] and data['token']:
             try:
@@ -96,15 +101,17 @@ class Logging(commands.Cog):
         data = await self.bot.db.fetchrow(
             'SELECT l.id, l.token, l.memberjoin, m.logging FROM config.logging l INNER JOIN config.modules m ON l.sid = m.sid WHERE l.sid = $1',
             user.guild.id)
+
         if not data or not data['logging'] or not data['memberjoin']:
             return
 
         account_age = (datetime.datetime.now() - user.created_at).days
-        embed = discord.Embed(color=std.normal_color, title=lang["join.embed.description"])
-        embed.set_thumbnail(url=user.avatar_url)
-        embed.description = std.quote(lang["unban.embed.description"].format(u=user, d=str(account_age)))
+
+        embed = discord.Embed(color=discord.Color.green())
+        embed.set_author(name=lang["join.embed.title"], icon_url=user.avatar_url)
+        embed.description = lang["join.embed.description"].format(u=user, d=account_age)
         embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
+        embed.set_footer(text=f'ID {user.id}')
 
         if data['id'] and data['token']:
             try:
@@ -119,18 +126,21 @@ class Logging(commands.Cog):
         data = await self.bot.db.fetchrow(
             'SELECT l.id, l.token, l.memberleave, m.logging FROM config.logging l INNER JOIN config.modules m ON l.sid = m.sid WHERE l.sid = $1',
             user.guild.id)
+
         if not data or not data['memberleave'] or not data['memberleave']:
             return
 
         since_joined_guild = (datetime.datetime.now() - user.joined_at).days
-        embed = discord.Embed(color=std.normal_color, title=lang["remove.embed.title"])
-        embed.set_thumbnail(url=user.avatar_url)
+        embed = discord.Embed(color=discord.Color.red())
         embed.timestamp = datetime.datetime.utcnow()
-        embed.description = std.quote(lang["ban.embed.description"].format(u=user, d=str(since_joined_guild)))
+        embed.set_author(name=lang["remove.embed.title"], icon_url=user.avatar_url)
+        embed.description = lang["remove.embed.description"].format(u=user, d=since_joined_guild)
         roles = [role.mention for role in user.roles if role.name != '@everyone']
-        embed.add_field(name=std.arrow + lang["words.roles"],
-                        value=' '.join(roles) if len(roles) != 0 else '-----')
-        embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
+        embed.add_field(
+            name=std.arrow + lang["words.roles"],
+            value=' '.join(roles) if len(roles) != 0 else '-----'
+        )
+        embed.set_footer(text=f'ID: {user.id}')
 
         if data['id'] and data['token']:
             try:
@@ -140,41 +150,40 @@ class Logging(commands.Cog):
                 await self.createWebhook(user.guild.id)
 
     @commands.Cog.listener()
-    async def on_message_delete(self, msg: discord.Message):
-        if msg.guild is None:
+    async def on_message_delete(self, cached_message: discord.Message):
+        if cached_message.guild is None:
             return
 
-        lang = await self.bot.lang(msg.guild.id, "logging", utils=True)
+        lang = await self.bot.lang(cached_message.guild.id, "logging", utils=True)
         data = await self.bot.db.fetchrow(
             'SELECT l.id, l.token, l.msgdelete, m.logging FROM config.logging l INNER JOIN config.modules m ON l.sid = m.sid WHERE l.sid = $1',
-            msg.guild.id)
+            cached_message.guild.id)
+
         if not data or not data['logging'] or not data['msgdelete']:
             return
 
-        embed = discord.Embed(color=std.normal_color, title=lang["delete.embed.title"])
-        embed.description = std.quote(lang["delete.embed.description"].format(u=msg.author))
+        embed = discord.Embed(color=discord.Color.red())
+        embed.set_author(name=lang["delete.embed.title"], icon_url=cached_message.author.avatar_url)
+        embed.description = lang["delete.embed.description"].format(c=cached_message.channel.mention, u=cached_message.author)
         embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
-        embed.add_field(name=std.arrow + lang["word.channel"], value=msg.channel.mention, inline=False)
+        embed.set_footer(text=f'ID: {cached_message.author.id}')
 
-        if not msg.content and not msg.attachments:
+        if not cached_message.content and not cached_message.attachments:
             return
 
-        if msg.content:
-            embed.add_field(name=std.arrow + lang["delete.embed.message.title"], value=std.quote(msg.content, True), inline=False)
+        if cached_message.content:
+            embed.add_field(
+                name=std.arrow + lang["delete.embed.message.title"], 
+                value=std.cut(cached_message.content), 
+                inline=False
+            )
 
         if data['id'] and data['token']:
             try:
                 webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
-                file = None
-                if len(msg.attachments):
-                    file = await msg.attachments[0].to_file(use_cached=True, spoiler=True)
-                if file is not None:
-                    webhook.execute(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url, file=file)
-                else:
-                    webhook.execute(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
+                webhook.execute(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
             except discord.NotFound:
-                await self.createWebhook(msg.guild.id)
+                await self.createWebhook(cached_message.guild.id)
 
     @commands.Cog.listener()
     async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent):
@@ -188,34 +197,48 @@ class Logging(commands.Cog):
         if not data or not data['logging'] or not data['msgedit']:
             return
 
-        msgData = payload.data
-        if 'author' not in msgData:
+        payload_message = payload.data
+        if 'author' not in payload_message:
             return
 
         guild = self.bot.get_guild(int(payload.data["guild_id"]))
-        user = guild.get_member(int(msgData['author']['id']))
-        embed = discord.Embed(color=std.normal_color, title=lang["edit.embed.title"])
-        embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
-        msg = payload.cached_message
-        jump_link = f'https://discord.com/channels/{msgData["guild_id"]}/{payload.channel_id}/{payload.message_id}'
-        embed.description = lang["edit.embed.description"].format(u=user, l=jump_link)
-        embed.add_field(name=std.arrow + lang["word.channel"], value=guild.get_channel(int(payload.data["channel_id"])).mention, inline=False)
+        user = guild.get_member(int(payload_message['author']['id']))
+        cached_message = payload.cached_message
 
-        if msg is None:
-            if msgData['content']:
-                embed.add_field(name=std.arrow + lang["edit.embed.new.title"],
-                                value=std.quote(msgData['content'], True))
+        embed = discord.Embed(color=discord.Color.orange())
+        embed.timestamp = datetime.datetime.utcnow()
+        embed.set_author(name=lang["edit.embed.title"], icon_url=user.avatar_url)
+        embed.set_footer(text=f"ID: {payload_message['author']['id']}", icon_url=self.bot.user.avatar_url)
+
+        jump_link = f'https://discord.com/channels/{guild.id}/{payload.channel_id}/{payload.message_id}'
+        embed.description = lang["edit.embed.description"].format(
+            l=jump_link, 
+            c=guild.get_channel(int(payload.data["channel_id"])).mention,
+            u=user    
+        )
+
+        if cached_message is None:
+            if payload_message['content']:
+                embed.add_field(
+                    name=std.arrow + lang["edit.embed.new.title"],
+                    value=std.cut(payload_message['content'])
+                )
             else:
                 return
         else:
-            if msgData['content'] and msg.content is not None:
-                if msgData['content'] == msg.content:
+            if payload_message['content'] and cached_message.content is not None:
+                if payload_message['content'] == cached_message.content:
                     return
-                embed.add_field(name=std.arrow + lang["edit.embed.old.title"],
-                                value=std.quote(msg.content, True), inline=False)
-                embed.add_field(name=std.arrow + lang["edit.embed.new.title"],
-                                value=std.quote(msgData['content'], True), inline=False)
+                embed.add_field(
+                    name=std.arrow + lang["edit.embed.old.title"],
+                    value=std.cut(cached_message.content),
+                    inline=False
+                )
+                embed.add_field(
+                    name=std.arrow + lang["edit.embed.new.title"],
+                    value=std.cut(payload_message['content']),
+                    inline=False
+                )
             else:
                 return
 
@@ -224,12 +247,11 @@ class Logging(commands.Cog):
                 webhook = discord.Webhook.partial(data['id'], data['token'], adapter=discord.RequestsWebhookAdapter())
                 webhook.execute(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
             except discord.NotFound:
-                await self.createWebhook(int(payload.data['guild_id']))
+                await self.createWebhook(guild.id)
 
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         lang = await self.bot.lang(before.guild.id, "logging")
-        since_joined_guild = (datetime.datetime.now() - after.joined_at).days
 
         if before.display_name != after.display_name:
             data = await self.bot.db.fetchrow(
@@ -238,17 +260,11 @@ class Logging(commands.Cog):
             if not data or not data['logging'] or not data['membername']:
                 return
 
-            embed = discord.Embed(color=std.normal_color, title=lang["update.embed.name.title"])
-            embed.set_thumbnail(url=after.avatar_url)
+            embed = discord.Embed(color=discord.Color.orange())
+            embed.set_author(name=lang["name.embed.title"], icon_url=after.avatar_url)
             embed.timestamp = datetime.datetime.utcnow()
-            embed.description = std.quote(lang["ban.embed.description"].format(u=after, d=str(since_joined_guild)))
-            embed.add_field(name=std.arrow + lang["update.embed.name.old.title"],
-                            value=f"`{before.display_name}`",
-                            inline=False)
-            embed.add_field(name=std.arrow + lang["update.embed.name.new.title"],
-                            value=f"`{after.display_name}`",
-                            inline=False)
-            embed.set_footer(text='Plyoox Logging', icon_url=self.bot.user.avatar_url)
+            embed.description = lang["name.embed.description"].format(b=before, a=after)
+            embed.set_footer(text=f'ID: {after.id}')
 
             if data['id'] and data['token']:
                 try:
@@ -264,17 +280,20 @@ class Logging(commands.Cog):
             if not data or not data['logging'] or not data['memberrole']:
                 return
 
-            embed = discord.Embed(color=std.normal_color, title=lang["update.embed.role.title"])
-            embed.set_thumbnail(url=after.avatar_url)
+            embed = discord.Embed()
+            embed.set_author(name=lang["role.embed.title"], icon_url=after.avatar_url)
+            embed.set_footer(text=f"ID: {after.id}")
             embed.timestamp = datetime.datetime.utcnow()
-            embed.description = std.quote(lang["ban.embed.description"].format(u=after, d=str(since_joined_guild)))
 
             role = list(set(before.roles) - set(after.roles)) or list(set(after.roles) - set(before.roles))
 
-            remove = len(before.roles) > len(after.roles)
             try:
-                embed.add_field(name=std.arrow + lang["update.embed.role.name" + ("remove" if remove else "add")],
-                                value=role[0].mention)
+                if len(before.roles) > len(after.roles):
+                    embed.color = discord.Color.dark_blue()
+                    embed.description = lang["role.embed.remove"].format(r=role[0], u=after)
+                else:
+                    embed.color = discord.Color.blue()
+                    embed.description = lang["role.embed.add"].format(r=role[0], u=after)
             except:
                 raise IndexError(role)
 
