@@ -8,9 +8,9 @@ import discord
 from utils.ext import standards as std, checks, logs
 from utils.ext.context import Context
 
-DISCORD_INVITE = '(discord(app\.com\/invite|\.com(\/invite)?|\.gg)\/?[a-zA-Z0-9-]{2,32})'
-EXTERNAL_LINK = '((https?:\/\/(www\.)?|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})'
-EVERYONE_MENTION = '@(here|everyone)'
+DISCORD_INVITE = r'(discord(app\.com\/invite|\.com(\/invite)?|\.gg)\/?[a-zA-Z0-9-]{2,32})'
+EXTERNAL_LINK = r'((https?:\/\/(www\.)?|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})'
+EVERYONE_MENTION = r'@(here|everyone)'
 discordRegex = re.compile(DISCORD_INVITE, re.IGNORECASE)
 linkRegex = re.compile(EXTERNAL_LINK, re.IGNORECASE)
 everyoneRegex = re.compile(EVERYONE_MENTION)
@@ -26,7 +26,7 @@ async def managePunishment(ctx: Context, punishment, reason):
     except discord.NotFound:
         return
 
-    lang = await ctx.lang(module="automod", utils=True)
+    lang = await ctx.lang(module=["automod", "moderation"], utils=True)
     config = await ctx.bot.cache.get(ctx.guild.id)
     if not config.automod:
         return
@@ -160,15 +160,15 @@ async def add_points(ctx: Context, addPoints, reason, user: discord.Member = Non
     await logs.createLog(ctx=ctx, mEmbed=mod_embed, uEmbed=user_embed, user=punishedUser, automod=True)
 
 
-async def automod(ctx):
+async def automod(ctx: Context):
     bot = ctx.bot
     guild = ctx.guild
     msg = ctx.message
     channel = ctx.channel
-    config = await bot.cache.get(ctx.guild.id)
+    config = await ctx.cache.get(ctx.guild.id)
     modules =  config.modules
     automod = config.automod
-    lang = await ctx.lang(module="automod", utils=True)
+    lang = await ctx.lang(module=["automod", "moderation"], utils=True)
 
     if not modules.automod or not config.automod:
         return
