@@ -1,5 +1,5 @@
 import datetime
-from os import name
+import logging
 from typing import Union
 
 import discord
@@ -8,40 +8,46 @@ from discord.ext import commands
 import main
 from utils.ext import standards as std
 
+log = logging.getLogger(__name__)
+
 
 class Logging(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
 
     async def createWebhook(self, guildID):
+        log.info(f"Try to create webhookon guild {guildID}")
         guild = self.bot.get_guild(guildID)
         channelID = await self.bot.db.fetchval('SELECT channelid FROM config.logging WHERE sid = $1', guild.id)
         channel = guild.get_channel(channelID)
+
         if channel is None:
             return
+
         if guild.me.permissions_in(channel).manage_webhooks:
             avatar = await self.bot.user.avatar_url_as(format='webp').read()
             webhook = await channel.create_webhook(name=self.bot.user.name, avatar=avatar)
             await self.bot.db.execute('UPDATE config.logging SET token = $1, id = $2 WHERE sid = $3', webhook.token, webhook.id, guild.id)
 
-
     @commands.Cog.listener()
     async def on_webhooks_update(self, channel: discord.TextChannel):
         try:
             webhooks = await channel.webhooks()
+            webhookID = await self.bot.db.fetchval('SELECT id FROM config.logging WHERE sid = $1', channel.guild.id)
+
+            log.info(f"Webhook change on guild {channel.guild.id}: {webhookID}\n{webhooks}")
         except discord.Forbidden:
             return
+
         if len(webhooks) == 0:
             return
 
-        webhookID = await self.bot.db.fetchval('SELECT id FROM config.logging WHERE sid = $1', channel.guild.id)
         for webhook in webhooks:
             if webhook.id == webhookID:
                 break
         else:
             await self.bot.db.execute('UPDATE config.logging SET id = NULL, token = NULL, channelid = NULL WHERE sid = $1', channel.guild.id)
-    
-    # pylint: disable=unsubscriptable-object
+
     @commands.Cog.listener()
     async def on_member_ban(self, guild: discord.Guild, user: Union[discord.Member, discord.User]):
         lang = await self.bot.lang(guild.id, "logging", utils=True)
@@ -68,7 +74,6 @@ class Logging(commands.Cog):
                 webhook.execute(embed=embed, username=self.bot.user.name, avatar_url=self.bot.user.avatar_url)
             except discord.NotFound:
                 await self.createWebhook(guild.id)
-
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild: discord.Guild, user: discord.User):
@@ -173,8 +178,8 @@ class Logging(commands.Cog):
 
         if cached_message.content:
             embed.add_field(
-                name=std.arrow + lang["delete.embed.message.title"], 
-                value=std.cut(cached_message.content), 
+                name=std.arrow + lang["delete.embed.message.title"],
+                value=std.cut(cached_message.content),
                 inline=False
             )
 
@@ -212,9 +217,9 @@ class Logging(commands.Cog):
 
         jump_link = f'https://discord.com/channels/{guild.id}/{payload.channel_id}/{payload.message_id}'
         embed.description = lang["edit.embed.description"].format(
-            l=jump_link, 
+            l=jump_link,
             c=guild.get_channel(int(payload.data["channel_id"])).mention,
-            u=user    
+            u=user
         )
 
         if cached_message is None:
@@ -294,8 +299,8 @@ class Logging(commands.Cog):
                 else:
                     embed.color = discord.Color.blue()
                     embed.description = lang["role.embed.add"].format(r=role[0], u=after)
-            except:
-                raise IndexError(role)
+            except IndexError:
+                log.exception(f"Could not send ROLE CHANGE log on guild {before.guild.id}: {role}\n{before.roles} | {after.roles}")
 
             if data['id'] and data['token']:
                 try:
