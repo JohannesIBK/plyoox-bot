@@ -1,5 +1,4 @@
 import asyncio
-import asyncpg
 import argparse
 import logging
 import contextlib
@@ -74,7 +73,7 @@ def run_bot():
 
         try:
             loop.run_until_complete(bot.create_db_pool(port))
-        except asyncpg.ConnectionRefusedError:
+        except Exception:
             print('Es konnte keine Verbindung zu PostgreSQL aufgebaut werden...')
             log.error("Could not connect to Postgres.")
             return
