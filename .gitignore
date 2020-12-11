@@ -10,3 +10,4 @@ TODO.txt
 src/utils/json/simpleStorage.json
 src/plugins/BotLists.py
 .vscode/
+.flake8
