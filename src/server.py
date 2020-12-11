@@ -43,7 +43,7 @@ class TopGGVoteHandler(BaseHandler):
                     color=discord.Color.gold(),
                     title='Thank you for voting on TOP.GG <:booster4:703906534534414346>')
                 await user.send(embed=embed)
-            except:
+            except discord.Forbidden:
                 pass
         self.set_status(200)
 
@@ -62,7 +62,7 @@ class DiscordBotListVoteHandler(BaseHandler):
                     color=discord.Color.gold(),
                     title='Thank you for voting on DBL! <:booster4:703906534534414346>')
                 await user.send(embed=embed)
-            except:
+            except discord.Forbidden:
                 pass
         self.set_status(200)
 

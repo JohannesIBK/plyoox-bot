@@ -31,6 +31,7 @@ class BannedMember(commands.Converter):
             raise commands.BadArgument(lang["converters.notbanned"])
         return user
 
+
 class AdvancedMember(commands.Converter):
     async def convert(self, ctx, argument):
         try:

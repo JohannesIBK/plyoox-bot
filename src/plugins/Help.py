@@ -11,6 +11,7 @@ from utils.ext import standards as std
 
 languages = {}
 
+
 def load_langs():
     languages_list = ["de", "en"]
 
@@ -18,6 +19,7 @@ def load_langs():
         with open(f"utils/languages/{lang}/help_{lang}.json", encoding="utf-8") as f:
             data = json.load(f)
             languages.update({lang: data})
+
 
 load_langs()
 
@@ -139,7 +141,6 @@ class HelpCommand(commands.HelpCommand):
 
         await self.get_destination().send(embed=embed)
 
-
     async def command_not_found(self, command_name: str):
         lang = await self.get_context().lang(module="help")
         return lang["error.command.notfound"].format(c=command_name)
@@ -159,6 +160,7 @@ class NewHelp(commands.Cog):
 
     def cog_unload(self):
         self.bot.help_command = self._original_help_command
+
 
 def setup(bot):
     bot.add_cog(NewHelp(bot))

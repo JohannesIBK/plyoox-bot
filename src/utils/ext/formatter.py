@@ -4,6 +4,7 @@ import discord
 class NoRoleReached(Exception):
     pass
 
+
 class __Member:
     def __init__(self, member: discord.Member):
         self.name = member.name
@@ -54,7 +55,7 @@ class __Level:
         return self.lvl
 
 
-def formatMessage(msg: str, user: discord.Member, lvl = None, role: discord.Role = None) -> str or None:
+def formatMessage(msg: str, user: discord.Member, lvl=None, role: discord.Role = None) -> str or None:
     guild = __Guild(user.guild)
     member = __Member(user)
     level = __Level(lvl, role)
@@ -64,5 +65,5 @@ def formatMessage(msg: str, user: discord.Member, lvl = None, role: discord.Role
             return msg.format(guild=guild, user=member, lvl=level)
         else:
             return msg.format(guild=guild, user=member)
-    except:
+    except KeyError:
         return None

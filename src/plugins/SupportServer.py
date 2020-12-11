@@ -24,7 +24,7 @@ class PlyooxSupport(commands.Cog):
         pass
 
     @suggestion.command()
-    async def accept(self, ctx: context.Context, ID: int, *, message = None):
+    async def accept(self, ctx: context.Context, ID: int, *, message=None):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -50,7 +50,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def deny(self, ctx: context.Context, ID: int, *, message = None):
+    async def deny(self, ctx: context.Context, ID: int, *, message=None):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -76,7 +76,7 @@ class PlyooxSupport(commands.Cog):
         await ctx.message.delete()
 
     @suggestion.command()
-    async def wait(self, ctx: context.Context, ID: int, *, message = None):
+    async def wait(self, ctx: context.Context, ID: int, *, message=None):
         with open('utils/json/simpleStorage.json', 'r+') as file:
             data = json.load(file)
             file.seek(0)
@@ -120,12 +120,12 @@ class PlyooxSupport(commands.Cog):
         channel = ctx.guild.get_channel(DEVELOPED_SUGGESTION_CHANNEL)
         implementedChannel = ctx.guild.get_channel(IMPLEMENTED_SUGGESTION_CHANNEL)
         messages = await channel.history(limit=500).flatten()
-    
+
         for msg in messages[::-1]:
             if not msg.embeds:
                 continue
             embed = msg.embeds[0]
-            embed.color = discord.Color.blue()  
+            embed.color = discord.Color.blue()
             if msg.attachments:
                 attachment = await msg.attachments[0].to_file()
                 await implementedChannel.send(embed=embed, file=attachment)
@@ -133,7 +133,7 @@ class PlyooxSupport(commands.Cog):
                 await implementedChannel.send(embed=embed)
             await msg.delete()
         await ctx.message.delete()
-        
+
     @suggestion.command()
     async def developed(self, ctx: context.Context, ID: int):
         msg = await ctx.channel.fetch_message(ID)

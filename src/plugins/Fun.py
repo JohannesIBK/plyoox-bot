@@ -1,7 +1,6 @@
 import argparse
 import json
 import random
-import shlex
 
 import discord
 from discord.ext import commands
@@ -162,7 +161,6 @@ class Fun(commands.Cog):
             await ctx.embed(lang["slot.message.prize"].format(s=''.join(selected)), signed=True)
         else:
             await ctx.embed(lang["slot.message.lose"].format(s=''.join(selected)), signed=True)
-
 
     @cmd()
     @checks.isActive('fun')

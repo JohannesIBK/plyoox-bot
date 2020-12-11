@@ -68,7 +68,7 @@ async def managePunishment(ctx: Context, punishment, reason):
 
     mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason)
     user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType=punishment_str, duration=date)
-    await logs.createLog(ctx, mEmbed=mod_embed, uEmbed=user_embed, automod=True)
+    await logs.createLog(ctx, mEmbed=mod_embed, uEmbed=user_embed, automod=True, user=user)
 
 
 async def add_points(ctx: Context, addPoints, reason, user: discord.Member = None):
@@ -166,7 +166,7 @@ async def automod(ctx: Context):
     msg = ctx.message
     channel = ctx.channel
     config = await ctx.cache.get(ctx.guild.id)
-    modules =  config.modules
+    modules = config.modules
     automod = config.automod
     lang = await ctx.lang(module=["automod", "moderation"], utils=True)
 
@@ -223,7 +223,6 @@ async def automod(ctx: Context):
             else:
                 return await managePunishment(ctx, invites.state, lang["reason.invite"])
 
-
     elif linkRegex.findall(msg.content):
         links = automod.links
         if await checks.ignoresAutomod(ctx):
@@ -253,7 +252,6 @@ async def automod(ctx: Context):
                         return await add_points(ctx, links.points, lang["reason.link"])
                     else:
                         return await managePunishment(ctx, links.state, lang["reason.link"])
-
 
     if not msg.clean_content.islower() and len(msg.content) > 15:
         caps = automod.caps

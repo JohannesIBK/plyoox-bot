@@ -105,7 +105,7 @@ class Owner(commands.Cog):
             value = stdout.getvalue()
             try:
                 await ctx.message.add_reaction('\u2705')
-            except:
+            except discord.Forbidden:
                 pass
 
             if ret is None:

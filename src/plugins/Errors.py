@@ -1,8 +1,10 @@
+import logging
 import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards as std, context
+from utils.ext import standards as std
+from utils.ext.context import Context
 
 
 class Errors(commands.Cog):
@@ -10,7 +12,7 @@ class Errors(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: context.Context, error):
+    async def on_command_error(self, ctx: Context, error):
         lang = await ctx.lang(module=self.qualified_name)
 
         if hasattr(ctx.command, "on_error") or (ctx.command and hasattr(ctx.cog, f"_{ctx.command.cog_name}__error")):
@@ -58,8 +60,8 @@ class Errors(commands.Cog):
             if isinstance(error, discord.Forbidden):
                 try:
                     await ctx.error(lang["error.discord.forbidden"])
-                except:
-                    pass
+                except discord.Forbidden:
+                    logging.warning(f"No permissions to write in {ctx.channel.mention} of guild {ctx.guild.name} [{ctx.guild.id}]")
 
             else:
                 userEmbed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")

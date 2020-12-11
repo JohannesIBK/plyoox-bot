@@ -10,8 +10,8 @@ law_emoji = '<:law:704432646356467814>'
 level_emoji = '<:level:704442402718482432>'
 question_emoji = '\u2754'
 coin_emoji = '<:coin:718169101821804564>'
-upvote_emoji = '+' # '\u2795'
-downvote_emoji = '-' # '\u2796'
+upvote_emoji = '+'  # '\u2795'
+downvote_emoji = '-'  # '\u2796'
 
 # Status
 online_emoji = "<:online:703932456289435659>"
@@ -72,6 +72,7 @@ plyoox_color = 0x24c689
 
 avatar_url = 'https://cdn.discordapp.com/avatars/505433541916622850/ccc8ba894dd4188ecf37de0a53430f22.webp?size=1024'
 
+
 def quote(string: str, shorten=False):
     if shorten and len(string) > 1018:
         string = string[:1015] + "..."
@@ -82,6 +83,7 @@ def cut(string: str, max_len=1024):
     if len(string) > max_len:
         string = string[:1021] + "..."
     return string
+
 
 # Embeds
 def getEmbed(description: str = None, signed: discord.Member = None) -> discord.Embed:
@@ -114,7 +116,7 @@ def getErrorEmbed(errorMessage: str) -> discord.Embed:
     return embed
 
 
-def dmEmbed(lang, *, reason, guildName, punishType, duration: datetime.datetime=None)  -> discord.Embed:
+def dmEmbed(lang, *, reason, guildName, punishType, duration: datetime.datetime = None) -> discord.Embed:
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text=lang['log.embed.footer'], icon_url=avatar_url)
@@ -163,7 +165,7 @@ def automodUserEmbed(lang, reason, guildName, type, points=None, duration=None):
     return embed
 
 
-def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member=None, user: discord.Member=None, amount=None, duration=None) -> discord.Embed:
+def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member = None, user: discord.Member = None, amount=None, duration=None) -> discord.Embed:
     reason = reason or lang['log.noreason']
     embed = discord.Embed(color=discord.Color.orange(), title=lang["word." + action].upper())
     embed.set_footer(text="Plyoox", icon_url=avatar_url)
@@ -184,7 +186,7 @@ def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member=None, use
     return embed
 
 
-def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime, reason, points = None, extra_user: discord.Member = None):
+def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime, reason, points=None, extra_user: discord.Member = None):
     user = ctx.author or extra_user
     embed = discord.Embed(color=plyoox_color, title=lang["word.automod"] + f'[{lang["word." + action]}]')
 

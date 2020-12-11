@@ -108,7 +108,6 @@ class Timers(commands.Cog):
         mod_embed = std.cmdEmbed("unban", lang["ban.temp.reason.expired"], lang, user=ban.user, mod=fake_context.me)
         await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
 
-
     @commands.Cog.listener()
     async def on_tempmute_end(self, timer):
         guild = self.bot.get_guild(timer.sid)
@@ -167,8 +166,11 @@ class Timers(commands.Cog):
 
         if len(winners) == 0:
             await channel.send(lang["giveaway.event.nowinners"].format(w=win))
-            embed = discord.Embed(color=std.normal_color, title=win,
-                                                   description=lang["giveaway.event.nowinners.edited"])
+            embed = discord.Embed(
+                color=std.normal_color,
+                title=win,
+                description=lang["giveaway.event.nowinners.edited"]
+            )
             embed.set_footer(text=lang["giveaway.embed.footer"].format(g=str(winnerCount), id=str(message.id)))
         else:
             winnerMention = ' '.join(member.mention for member in winners)
@@ -244,7 +246,7 @@ class Timers(commands.Cog):
         if msg is not None:
             try:
                 await msg.delete()
-            except:
+            except discord.Forbidden:
                 pass
 
     @giveaway.command()
@@ -265,7 +267,7 @@ class Timers(commands.Cog):
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
 
     @reminder.command(cooldown_after_parsing=True)
-    @commands.cooldown(rate=2 , per=30.0, type=commands.BucketType.user)
+    @commands.cooldown(rate=2, per=30.0, type=commands.BucketType.user)
     async def create(self, ctx: context.Context, duration: FutureTime, *, reason: str):
         lang = await ctx.lang()
         noreminder = await ctx.db.fetchval('SELECT noreminderrole FROM config.timers WHERE sid = $1', ctx.guild.id)
@@ -322,6 +324,7 @@ class Timers(commands.Cog):
         if deleted:
             return await ctx.embed(lang["reminder.message.deleted"])
         await ctx.error(lang["reminder.error.delete"])
+
 
 def setup(bot):
     bot.add_cog(Timers(bot))

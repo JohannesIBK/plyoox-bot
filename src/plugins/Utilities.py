@@ -61,12 +61,12 @@ class Utilities(commands.Cog):
     async def infos(self, ctx: context.Context):
         embed = discord.Embed(title='**__Links__**', color=std.normal_color)
         embed.description = \
-            f'**[Seite](https://plyoox.net)** `plyoox.net`\n' \
-            f'**[Discord](https://go.plyoox.net/discord)** `go.plyoox.net/discord`\n' \
-            f'**[Twitter](https://go.plyoox.net/twitter)** `go.plyoox.net/twitter`\n' \
-            f'**[Invite](https://go.plyoox.net/invite)** `go.plyoox.net/invite`\n' \
-            f'**[Voten](https://go.plyoox.net/vote)** `go.plyoox.net/vote`\n' \
-            f'**[Code](https://go.plyoox.net/code)** `go.plyoox.net/code`'
+            '**[Seite](https://plyoox.net)** `plyoox.net`\n' \
+            '**[Discord](https://go.plyoox.net/discord)** `go.plyoox.net/discord`\n' \
+            '**[Twitter](https://go.plyoox.net/twitter)** `go.plyoox.net/twitter`\n' \
+            '**[Invite](https://go.plyoox.net/invite)** `go.plyoox.net/invite`\n' \
+            '**[Voten](https://go.plyoox.net/vote)** `go.plyoox.net/vote`\n' \
+            '**[Code](https://go.plyoox.net/code)** `go.plyoox.net/code`'
 
         embed.add_field(name='**#support**',
                         value='[*(click)*](https://canary.discordapp.com/channels/694790265382109224/694790266275496004/) '

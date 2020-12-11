@@ -58,7 +58,6 @@ class Private(commands.Cog):
                 await before.channel.delete(reason='Channel Creation | Remove')
                 self.channelIDs.remove(before.channel.id)
 
-
     @cmd(showHelp=False)
     @checks.hasPerms(manage_messages=True)
     async def channelCreator(self, ctx):

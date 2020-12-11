@@ -87,7 +87,7 @@ class Infos(commands.Cog):
             return std.dnd_emoji
 
     @cmd(aliases=["serverinfo", "guild"])
-    async def server(self, ctx: context.Context, guildID = None):
+    async def server(self, ctx: context.Context, guildID=None):
         lang = await ctx.lang(utils=True)
 
         guild = ctx.guild
@@ -106,33 +106,44 @@ class Infos(commands.Cog):
         created = guild.created_at.strftime(lang["date.format.small"])
         days = datetime.datetime.utcnow() - guild.created_at
 
-
         embed = discord.Embed(color=std.normal_color, title=lang["info.embed.title"].format(n=guild.name))
         embed.set_thumbnail(url=guild.icon_url)
         embed.description = std.quote(lang["guild.embed.description"].format(g=guild))
-        embed.add_field(name=std.arrow + lang["guild.embed.members.name"],
-                        value=f'```{guild.member_count}```',
-                        inline=False)
-        embed.add_field(name=std.arrow + lang["guild.embed.data.name"],
-                        value=lang["guild.embed.data.value"].format(c=created, d=str(days)),
-                        inline=False)
-        embed.add_field(name=std.arrow + lang["info.embed.roles.name"].format(r=str(len(guild.roles))),
-                        value=roles,
-                        inline=False)
-        embed.add_field(name=std.arrow + lang["guild.embed.channels.name"],
-                        value=std.quote(lang["guild.embed.channels.value"].format(a=str(len(guild.channels)),
-                                                               t=str(len(guild.text_channels)),
-                                                               v=str(len(guild.voice_channels)),
-                                                               c=str(len(guild.categories)))),
-                        inline=False)
-        embed.add_field(name=std.arrow + lang["guild.embed.boosts.name"].format(l=str(guild.premium_tier)),
-                        value=std.quote(lang["guild.embed.boosts.value"]
-                                        .format(b=str(guild.premium_subscription_count), m=str(boosts[min(guild.premium_tier + 1, 3)]))),
-                        inline=False)
-
-        embed.add_field(name=std.arrow + lang["guild.embed.emojis.name"].format(e=str(len(guild.emojis))),
-                        value=emojis,
-                        inline=False)
+        embed.add_field(
+            name=std.arrow + lang["guild.embed.members.name"],
+            value=f'```{guild.member_count}```',
+            inline=False
+        )
+        embed.add_field(
+            name=std.arrow + lang["guild.embed.data.name"],
+            value=lang["guild.embed.data.value"].format(c=created, d=str(days)),
+            inline=False
+        )
+        embed.add_field(
+            name=std.arrow + lang["info.embed.roles.name"].format(r=str(len(guild.roles))),
+            value=roles,
+            inline=False
+        )
+        embed.add_field(
+            name=std.arrow + lang["guild.embed.channels.name"],
+            value=std.quote(lang["guild.embed.channels.value"].format(
+                a=str(len(guild.channels)),
+                t=str(len(guild.text_channels)),
+                v=str(len(guild.voice_channels)),
+                c=str(len(guild.categories)))),
+            inline=False
+        )
+        embed.add_field(
+            name=std.arrow + lang["guild.embed.boosts.name"].format(l=str(guild.premium_tier)),
+            value=std.quote(lang["guild.embed.boosts.value"]
+                            .format(b=str(guild.premium_subscription_count), m=str(boosts[min(guild.premium_tier + 1, 3)]))),
+            inline=False
+        )
+        embed.add_field(
+            name=std.arrow + lang["guild.embed.emojis.name"].format(e=str(len(guild.emojis))),
+            value=emojis,
+            inline=False
+        )
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 

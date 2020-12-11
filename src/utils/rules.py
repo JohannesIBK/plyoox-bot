@@ -10,7 +10,7 @@ Die Regeln gelten für dein ganzes Erscheinen, also Chatnachrichten, Name, Avata
 ```
 `§2` **__Werbung__**
 ```
-» Jegliche Form von Werbung ist strengstens untersagt. 
+» Jegliche Form von Werbung ist strengstens untersagt.
 » Discord-Invites werden ausnahmslos gebannt.
 ```
 `§3` __**Name und Avatar**__
@@ -19,13 +19,13 @@ Die Regeln gelten für dein ganzes Erscheinen, also Chatnachrichten, Name, Avata
 ```
 `§4` __**Verhalten in den Channeln**__
 ```
-» Spam und Capslock vermeiden. Channel-Thema beachten. 
+» Spam und Capslock vermeiden. Channel-Thema beachten.
 » Keine Stimmverzerrer oder andere laute/störende Geräusche.
 ```
 `§5` __**Datenschutz**__
 ```
-» Keine Aufnahmen oder ähnliches ohne Zustimmung aller zu hörenden/sehenden Personen. 
-» Keine fremden Daten veröffentlichen. 
+» Keine Aufnahmen oder ähnliches ohne Zustimmung aller zu hörenden/sehenden Personen.
+» Keine fremden Daten veröffentlichen.
 » Private Missverständnisse privat klären
 ```
 `§6` __**Verkäufe und Geschäfte**__
@@ -34,7 +34,7 @@ Die Regeln gelten für dein ganzes Erscheinen, also Chatnachrichten, Name, Avata
 ```
 `§7` __**Sonstiges**__
 ```
-» Das Serverteam muss sich gegenüber den Usern nicht rechtfertigen. 
+» Das Serverteam muss sich gegenüber den Usern nicht rechtfertigen.
 » Jeder Regelbruch wird je nach Vergehen bestraft.
 » Der User ist für seinen Account verantwortlich.
 ```

@@ -12,7 +12,7 @@ class Administration(commands.Cog):
         self.bot = bot
 
     @cmd()
-    async def prefix(self, ctx: context.Context, prefix: str=None):
+    async def prefix(self, ctx: context.Context, prefix: str = None):
         lang = await ctx.lang()
         cache = await self.bot.cache.get(ctx.guild.id)
 
@@ -172,25 +172,35 @@ class Administration(commands.Cog):
         await ctx.message.delete()
         embed = discord.Embed(color=0xc90c0c)
         embed.add_field(name="**__Regeln des Discord Servers__**",
-                        value="Im folgenden Text werden die Regeln des Discords aufgelistet.\n**Beim Betreten des Servers stimmt man automatisch den Regeln zu.**")
+                        value="Im folgenden Text werden die Regeln des Discords aufgelistet.\n"
+                              "**Beim Betreten des Servers stimmt man automatisch den Regeln zu.**")
         embed.add_field(name="__§1.1 | Discord-Guidelines__",
-                        value="**»** Die **[Discord Nutzungsbedingungen](https://discordapp.com/terms)** und die **[Discord Community-Richtlinien](https://discordapp.com/guidelines)** müssen befolgt werden. Bei einem Verstoß gegen diese, wird der Account dem Discord Trust and Safety Team gemeldet.")
+                        value="**»** Die **[Discord Nutzungsbedingungen](https://discordapp.com/terms)** und die **[Discord Community-Richtlinien]"
+                              "(https://discordapp.com/guidelines)** müssen befolgt werden. Bei einem Verstoß gegen diese, wird der Account dem"
+                              "Discord Trust and Safety Team gemeldet.")
         embed.add_field(name="__§2.1 | Verhalten auf dem Discord__",
                         value="**»** Seid gegenüber jeder Person respektvoll. Behandelt jeden so, wie ihr selbst behandelt werden wollt.")
         embed.add_field(name="__§2.2 | Verhalten in den Chats__",
-                        value="**»** Jeglicher Art von Spam (Mention, Caps, Emoji, …) ist verboten.\n**»** Jegliche Arten von Beleidigungen sind verboten.\n**»** NSFW-Content ist verboten.\n**»** Rassistische, sexistische, radikale, diskriminierende und ethisch inkorrekte Aussagen, Bilder und Videos sind verboten.")
+                        value="**»** Jeglicher Art von Spam (Mention, Caps, Emoji, …) ist verboten.\n**»** Jegliche Arten von Beleidigungen "
+                              "sind verboten.\n**»** NSFW-Content ist verboten.\n**»** Rassistische, sexistische, radikale, diskriminierende und "
+                              "ethisch inkorrekte Aussagen, Bilder und Videos sind verboten.")
         embed.add_field(name="__§3.1 | Verbreitung von Links, Bildern und Dateien__",
-                        value="**»** Das Verbreiten von schädlichen Links, Bildern, Texten, Dateien oder Ähnlichem ist in jeglicher Form verboten.\n**»** Jegliche Programme, egal ob schädlich oder nicht, sind unerwünscht und können gelöscht werden. ")
+                        value="**»** Das Verbreiten von schädlichen Links, Bildern, Texten, Dateien oder Ähnlichem ist in jeglicher Form verboten."
+                              "\n**»** Jegliche Programme, egal ob schädlich oder nicht, sind unerwünscht und können gelöscht werden.")
         embed.add_field(name="__§3.2 | Verbreitung von Werbung__",
-                        value="**»** Jegliche Art von Werbung, ob für einen Eigennutzen oder Nutzen für einen anderen, ist auf dem Discord verboten. Dazu zählt die Verbreitung in Chats, Avataren, Namen und sonstigen Medien.")
+                        value="**»** Jegliche Art von Werbung, ob für einen Eigennutzen oder Nutzen für einen anderen, ist auf dem Discord verboten. "
+                              "Dazu zählt die Verbreitung in Chats, Avataren, Namen und sonstigen Medien.")
         embed.add_field(name="__§3.3 | Verbreitung von privaten Daten__",
-                        value="**»** Private Daten sollen privat bleiben. Telefonnummern, Adressen, E-Mails und ähnliches sind privat zu halten und nicht öffentlich zu teilen.")
+                        value="**»** Private Daten sollen privat bleiben. Telefonnummern, Adressen, E-Mails und ähnliches sind privat zu halten und"
+                              " nicht öffentlich zu teilen.")
         embed.add_field(name="__§3.4 | Handel und Geschäfte__",
                         value="**»** Der Handel mit jeglichen Dingen ist auf dem Discord untersagt. Geschäfte und Handel sind privat zu regeln. ")
         embed.add_field(name="__§4.1 |  Nickname, Profilbild, Spieleanzeige__",
-                        value="**»** Nicknamen, Spieleanzeigen und Profilbilder dürfen weder beleidigend, rassistisch, sexistisch, radikal, diskriminierend oder ethisch inkorrekt sein.")
+                        value="**»** Nicknamen, Spieleanzeigen und Profilbilder dürfen weder beleidigend, rassistisch, sexistisch, radikal, "
+                              "diskriminierend oder ethisch inkorrekt sein.")
         embed.add_field(name="__§5.1 | Sonstiges - Ausnahmen__",
-                        value="**»** Falls eine Änderung der Regeln für einen bestimmten Channel existiert, kann man dies in der Channelbeschreibung finden.")
+                        value="**»** Falls eine Änderung der Regeln für einen bestimmten Channel existiert, kann man dies in der Channelbeschreibung "
+                              "finden.")
         embed.add_field(name="__§5.2 | Sonstiges - Selbstverständlichkeit__",
                         value="**»** Selbstverständliche Regeln müssen eingehalten werden, auch ohne, dass sie in diesem Regelwerk erwähnt werden")
         embed.add_field(name="__§5.3 | Sonstiges - Moderatoren__",
@@ -270,7 +280,6 @@ class Administration(commands.Cog):
                 words, ctx.guild.id)
 
         await ctx.embed(lang["copyblacklist.message"])
-
 
     # @cmd()
     # @checks.isAdmin()

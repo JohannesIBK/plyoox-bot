@@ -25,7 +25,7 @@ class Commands(commands.Cog):
         if str(ctx.bot.user.id) in commandName:
             commandName = msg_splited[1]
 
-        mentions = [ False, False, False ]
+        mentions = [False, False, False]
         msg = None
 
         command = await self.bot.db.fetchrow(
@@ -47,11 +47,11 @@ class Commands(commands.Cog):
                     self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message).update_rate_limit(current=current)
             else:
                 self.cooldowns.update({ctx.guild.id: {command['name']: commands.CooldownMapping.from_cooldown(
-                        1, command['cooldown'], commands.BucketType.member)}})
+                    1, command['cooldown'], commands.BucketType.member)}})
                 self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message).update_rate_limit(current=current)
 
         if command['ignoredroles']:
-            userRoles = [ role.id for role in ctx.author.roles ]
+            userRoles = [role.id for role in ctx.author.roles]
             if any(role in userRoles for role in command['ignoredroles']):
                 return await ctx.error(lang["error.notallowed"])
 
@@ -87,10 +87,10 @@ class Commands(commands.Cog):
                 await msg.delete()
 
     @commands.Cog.listener()
-    async def on_message(self, msg: discord.Message):        
+    async def on_message(self, msg: discord.Message):
         if msg.author.bot:
             return
-        
+
         if msg.guild is None:
             return
 

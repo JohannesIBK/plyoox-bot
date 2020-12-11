@@ -85,7 +85,7 @@ class Leveling(commands.Cog):
             addRoleID = list(filter(lambda role: role[1] == currentLvl, roles))
             if addRoleID:
                 addRole = guild.get_role(addRoleID[0][0])
-            roles.sort(key = lambda role: role[1])
+            roles.sort(key=lambda role: role[1])
             if config.remove:
                 if not addRole:
                     return

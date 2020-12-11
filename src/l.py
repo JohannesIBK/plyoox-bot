@@ -1,4 +1,5 @@
 import asyncio
+import asyncpg
 import argparse
 import logging
 import contextlib
@@ -12,7 +13,7 @@ from main import Plyoox as Bot
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 class RemoveNoise(logging.Filter):
@@ -28,7 +29,7 @@ class RemoveNoise(logging.Filter):
 @contextlib.contextmanager
 def setup_logging():
     try:
-        max_bytes = 32 * 1024 * 1024 # 32 MiB
+        max_bytes = 32 * 1024 * 1024
         logging.getLogger('discord').setLevel(logging.INFO)
         logging.getLogger('discord.http').setLevel(logging.WARNING)
         logging.getLogger('discord.state').addFilter(RemoveNoise())
@@ -73,20 +74,20 @@ def run_bot():
 
         try:
             loop.run_until_complete(bot.create_db_pool(port))
-        except:
+        except asyncpg.ConnectionRefusedError:
             print('Es konnte keine Verbindung zu PostgreSQL aufgebaut werden...')
             log.error("Could not connect to Postgres.")
             return
 
         try:
-            
-                web = server.app(bot, bot.db)
-                web.listen(8888)
-                asyncio.ensure_future(bot.start(token))
+            web = server.app(bot, bot.db)
+            web.listen(8888)
+            asyncio.ensure_future(bot.start(token))
         except KeyboardInterrupt:
             loop.run_until_complete(bot.logout())
             print('Bot disconnected')
 
         loop.run_forever()
+
 
 run_bot()

@@ -1,7 +1,5 @@
 import asyncio
-from datetime import date
 import io
-import re
 
 import discord
 from asyncpg.pool import Pool
@@ -38,10 +36,10 @@ class Context(commands.Context):
     def cache(self) -> BotCache:
         return self.bot.cache
 
-    async def lang(self, utils = False, module = None):
+    async def lang(self, utils=False, module=None):
         if module is None:
             module = self.cog.qualified_name
-        
+
         if isinstance(module, list):
             data = {}
             for _module in module:
@@ -127,4 +125,3 @@ class FakeContext:
     @property
     def me(self):
         return self.guild.me
-
