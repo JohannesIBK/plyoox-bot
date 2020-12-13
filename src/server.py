@@ -67,6 +67,12 @@ class DiscordBotListVoteHandler(BaseHandler):
         self.set_status(200)
 
 
+class CacheUpdater(BaseHandler):
+    async def get(self):
+        if not self.request.remote_ip == "::1":
+            return self.set_status(403)
+
+
 def app(bot, database):
     extras = {
         'bot': bot,
@@ -74,5 +80,6 @@ def app(bot, database):
     }
     return tornado.web.Application([
         ('/vote/topgg', TopGGVoteHandler, extras),
-        ('/vote/dbl', DiscordBotListVoteHandler, extras)
+        ('/vote/dbl', DiscordBotListVoteHandler, extras),
+        ('/update/cache', CacheUpdater, extras)
     ])

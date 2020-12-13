@@ -1,3 +1,4 @@
+import logging
 import re
 import typing
 
@@ -10,6 +11,7 @@ from utils.ext import standards as std
 from utils.ext.formatter import formatMessage
 
 CHANNEL_REGEX = r'#\w+'
+
 
 class Events(commands.Cog):
     def __init__(self, bot: main.Plyoox):
@@ -34,7 +36,6 @@ class Events(commands.Cog):
                                       f'__VoiceChannels:__ {len(guild.voice_channels)}',
                                 inline=False)
                 await self.bot.get_channel(715260033926955070).send(embed=embed)
-
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: typing.Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]):
@@ -189,8 +190,8 @@ class Events(commands.Cog):
                 await guild.ban(member, reason=f"Globalban:\n{reason}")
                 logchannel = await self.bot.db.fetchval('SELECT logchannel FROM automod.config WHERE config.sid = $1', guild.id)
                 if logchannel:
-                    embed = std.getBaseModEmbed(f'Globalban: {reason}', member)
-                    embed.title = f'Automoderation [GLOBALBAN]'
+                    embed = std.getEmbed(f'Globalban: {reason}', member)
+                    embed.title = 'Automoderation [GLOBALBAN]'
                     logchannel = member.guild.get_channel(logchannel)
                     if logchannel is not None:
                         await logchannel.send(embed=embed)
@@ -218,8 +219,8 @@ class Events(commands.Cog):
             role = guild.get_role(data["joinrole"])
             try:
                 await member.add_roles(role)
-            except:
-                pass
+            except discord.Forbidden:
+                logging.info(f"Could not add role to {member.id}")
 
         punishData = await self.bot.db.fetchrow(
             'SELECT timers.type, config.muterole FROM automod.config INNER JOIN extra.timers '
@@ -231,7 +232,6 @@ class Events(commands.Cog):
             muterole = guild.get_role(muteroleID)
             if muterole is not None:
                 await member.add_roles(muterole)
-
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):

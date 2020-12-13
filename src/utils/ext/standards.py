@@ -188,14 +188,18 @@ def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member = None, u
 
 def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime, reason, points=None, extra_user: discord.Member = None):
     user = ctx.author or extra_user
-    embed = discord.Embed(color=plyoox_color, title=lang["word.automod"] + f'[{lang["word." + action]}]')
-
-    embed.add_field(name=arrow + lang["word.user"].upper(), value=f"```{user} [{user.id}]```")
-    embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
-    embed.add_field(name=arrow + lang["word.channel"], value=str(ctx.channel))
-    embed.timestamp = datetime.datetime.utcnow()
-
-    message = ctx.message if len(ctx.message.content) <= 1018 else ctx.message.content[:1015] + "..."
+    embed = discord.Embed(
+        color=plyoox_color,
+        title=lang["word." + action],
+        timestamp=datetime.datetime.utcnow()
+    )
+    embed.set_author(name=lang["word.automod"], icon_url=ctx.author.avatar_url)
+    embed.set_footer(text=f'ID: {user.id}')
+    embed.description = lang[action.replace("temp", "") + ".embed.description"].format(
+        u=user,
+        c=ctx.channel,
+        r=reason.replace(lang["word.automod"] + ": ", "")
+    )
 
     if extra_user:
         embed.add_field(name=arrow + lang["word.moderator"], value=ctx.author.mention)
@@ -206,7 +210,6 @@ def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime, r
     if points is not None:
         embed.add_field(name=arrow + lang["word.points"], value=quote(points))
 
-    embed.add_field(name=arrow + lang["word.reason"], value=quote(reason))
-    embed.add_field(name=arrow + lang["word.message"], value=quote(message))
+    embed.add_field(name=arrow + lang["word.message"], value=quote(ctx.message.content))
 
     return embed

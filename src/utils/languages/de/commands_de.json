@@ -220,7 +220,7 @@
     "name.embed.title": "Namen Änderung",
     "name.embed.description": "Der User **{b.display_name}** heißt nun **{a.display_name}**.",
     "edit.embed.title": "Nachricht editiert",
-    "edit.embed.description": "**{u}** hat eine Nachricht in {c} editiert.\n[Springe zur Nachricht]({l})",
+    "edit.embed.description": "**{u}** hat eine Nachricht in {c}+ editiert.\n[Springe zur Nachricht]({l})",
     "edit.embed.new.title": "Neue Nachricht",
     "edit.embed.old.title": "Alte Nachricht",
     "delete.embed.title": "Nachricht gelöscht",
@@ -234,7 +234,6 @@
     "ban.embed.description": "Der User **{u}** wurde nach {d} Tagen auf dem Server gebannt.",
     "unban.embed.title": "User entbannt",
     "unban.embed.description": "Der User **{u}** wurde entbannt. Dieser Account ist {d} Tage alt.",
-
     "words.roles": "Rollen",
     "word.channel": "Channel"
   },
@@ -262,6 +261,9 @@
     "reminder.event.timermessage": "Hey {u}, hier ist dein Timer:\n{m}"
   },
   "automod": {
+    "kick.embed.description": "Der User **{u}** wurde für **{r}** in {c.mention} gekickt.",
+    "ban.embed.description": "Der User **{u}** wurde für **{r}** in {c.mention} gebannt.",
+    "mute.embed.description": "Der User **{u}** wurde für **{r}** in {c.mention} gemutet.",
     "word.automod": "Automod",
     "word.points": "Punkte",
     "word.punishuntil": "Bestraft bis",
@@ -282,8 +284,8 @@
     "reason.blacklistedword": "Verbotenes Wort",
     "reason.invite": "Discord-Einladung",
     "reason.link": "Link",
-    "reason.caps": "Zu viele Großbuchstaben",
-    "reason.mentions": "Zu viele Erwähnungen"
+    "reason.caps": "Großbuchstaben-Spam",
+    "reason.mentions": "Erwähnungen-Spam"
   },
   "utils": {
     "date.format.small": "%d. %m. %Y",

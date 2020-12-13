@@ -2,8 +2,6 @@ import asyncio
 import json
 import logging
 import time
-import traceback
-from logging.handlers import RotatingFileHandler
 
 import aiohttp
 import asyncpg
@@ -12,19 +10,11 @@ from asyncpg.pool import Pool
 from discord.ext import commands
 
 from utils.db.cache import BotCache
-from utils.ext import context
+from utils.ext.context import Context
 
-# ---------------------------------------------------------------
+logger = logging.getLogger(__name__)
 
-handler = RotatingFileHandler(filename='logs/discord.log', maxBytes=1024 * 10, encoding='utf-8', mode='w')
-handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-
-logger = logging.getLogger('discord')
-logger.setLevel(logging.ERROR)
-logger.addHandler(handler)
-# ---------------------------------------------------------------
-
-with open("./utils/languages/de/commands.json", 'r') as f:
+with open("utils/languages/de/commands_de.json", 'r') as f:
     lang = dict(json.load(f))
 
 cogs = [
@@ -44,7 +34,7 @@ cogs = [
     'plugins.SupportServer'
 ]
 
-intents = discord.Intents()
+intents = discord.Intents.none()
 intents.guild_messages = True
 intents.bans = True
 intents.presences = True
@@ -59,9 +49,13 @@ intents.emojis = False
 intents.voice_states = False
 intents.integrations = False
 
+
 async def getPrefix(bot, msg: discord.Message):
     config = await bot.cache.get(msg.guild.id)
-    return config.prefix
+    if config is not None:
+        return config.prefix
+
+    return [f'<@{bot.user.id}> ', f'<@!{bot.user.id}> ']
 
 
 async def setGame(bot):
@@ -76,18 +70,17 @@ async def setGame(bot):
 
 class Plyoox(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=getPrefix,
-                         case_insensitive=True,
-                         max_messages=10000,
-                         allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
-                         intents=intents)
+        super().__init__(
+            command_prefix=getPrefix,
+            case_insensitive=True,
+            max_messages=10000,
+            allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
+            intents=intents
+        )
 
         self.startTime = time.time()
         self.version = 'v2.7.0'
         self.owner_id = 263347878150406144
-        self.get_all_commands = {}
-        self.logger = logger
-        self.remove_command("help")
         self.commandsCount = {}
         self.cache: BotCache = BotCache(self)
         self._lang = lang
@@ -105,18 +98,14 @@ class Plyoox(commands.Bot):
         if self.user.id == 505433541916622850:
             self.load_extension('plugins.BotLists')
 
-        for cmd in self.commands:
-            self.get_all_commands.update({cmd.name.lower(): cmd})
-            for alias in cmd.aliases:
-                self.get_all_commands.update({alias.lower(): cmd})
-
-        logger.info(time.strftime("Started: %d.%m.%Y um %H:%M:%S"))
-        print(time.strftime("StartTime: %d.%m.%Y um %H:%M:%S"))
-        print(f"Boot-Time: {round(time.time() - self.startTime, 2)}")
+        logger.info(time.strftime("Started at %d.%m.%Y %H:%M:%S"))
+        logger.info(f"Boot-Time: {round(time.time() - self.startTime, 2)}s")
+        logger.info(f'{len(cogs)} Plugins loaded.')
+        print(f"Boot-Time: {round(time.time() - self.startTime, 2)}s")
         print(f'Server: {len(self.guilds)} [{self.shard_count}]')
-        print(f'{len(cogs)} Cogs loaded.')
+        print(f'{len(cogs)} Plugins loaded.')
 
-    async def get_context(self, message, *, cls = context.Context):
+    async def get_context(self, message, *, cls=Context):
         return await super().get_context(message, cls=cls)
 
     async def process_commands(self, message: discord.Message):
