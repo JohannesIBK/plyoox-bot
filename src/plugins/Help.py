@@ -40,9 +40,9 @@ class HelpCommand(commands.HelpCommand):
         await self.send_command_help(command)
 
     async def send_cog_help(self, cog: commands.Cog):
-        context = self.get_context()
-        lang = await context.lang(module="help")
-        config = await context.cache.get(context.guild.id)
+        ctx = self.get_context()
+        lang = await ctx.lang(module="help")
+        config = await ctx.cache.get(ctx.guild.id)
 
         embed = discord.Embed(color=std.help_color, description=lang["embed.description.cmdhelp"].format(p=self.clean_prefix))
 
@@ -60,9 +60,9 @@ class HelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_command_help(self, command: commands.Command):
-        context = self.get_context()
-        lang = await context.lang(module="help")
-        config = await context.cache.get(context.guild.id)
+        ctx = self.get_context()
+        lang = await ctx.lang(module="help")
+        config = await ctx.cache.get(ctx.guild.id)
 
         if command.hidden:
             return await self.send_error_message(lang["error.command.nohelp"])
@@ -93,9 +93,9 @@ class HelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_group_help(self, group: commands.Group):
-        context = self.get_context()
-        lang = await context.lang(module="help")
-        config = await context.cache.get(context.guild.id)
+        ctx = self.get_context()
+        lang = await ctx.lang(module="help")
+        config = await ctx.cache.get(ctx.guild.id)
 
         if group.hidden:
             return await self.send_error_message(lang["error.command.nohelp"])
@@ -119,23 +119,23 @@ class HelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_bot_help(self, mapping: Mapping[Optional[commands.Cog], list[commands.Command]]):
-        context = self.get_context()
-        lang = await context.lang(module="help")
+        ctx = self.get_context()
+        lang = await ctx.lang(module="help")
 
         embed = discord.Embed(color=std.help_color)
         embed.description = lang["embed.description.help"].format(p=self.clean_prefix)
         embed.set_footer(text=lang["embed.footer.args"])
 
         for cog in mapping:
-            commands = []
+            cmds = []
             for command in mapping[cog]:
                 if not command.hidden:
-                    commands.append("`" + command.qualified_name + "`")
+                    cmds.append("`" + command.qualified_name + "`")
 
-            if len(commands):
+            if len(cmds):
                 embed.add_field(
                     name=cog.qualified_name,
-                    value=", ".join(commands),
+                    value=", ".join(cmds),
                     inline=False
                 )
 

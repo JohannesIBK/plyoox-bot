@@ -216,12 +216,12 @@ class Administration(commands.Cog):
         lang = await ctx.lang()
         guild = ctx.guild
 
-        muteRoleID: int = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
-        muteRole = guild.get_role(muteRoleID)
-        if muteRole is None:
+        mute_role_id: int = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
+        mute_role = guild.get_role(mute_role_id)
+        if mute_role is None:
             return await ctx.error(lang["setupmute.error.nomuterole"])
 
-        await muteRole.edit(permissions=discord.Permissions.none())
+        await mute_role.edit(permissions=discord.Permissions.none())
 
         for channel in guild.channels:
             if isinstance(channel, discord.TextChannel):
@@ -231,7 +231,7 @@ class Administration(commands.Cog):
                 overwrite = discord.PermissionOverwrite.from_pair(
                     deny=discord.Permissions(2112),
                     allow=discord.Permissions(0))
-                await channel.set_permissions(muteRole, overwrite=overwrite)
+                await channel.set_permissions(mute_role, overwrite=overwrite)
 
             if isinstance(channel, discord.VoiceChannel):
                 if channel.permissions_synced:
@@ -240,13 +240,13 @@ class Administration(commands.Cog):
                 overwrite = discord.PermissionOverwrite.from_pair(
                     deny=discord.Permissions(permissions=2097664),
                     allow=discord.Permissions(permissions=0))
-                await channel.set_permissions(muteRole, overwrite=overwrite)
+                await channel.set_permissions(mute_role, overwrite=overwrite)
 
             if isinstance(channel, discord.CategoryChannel):
                 overwrite = discord.PermissionOverwrite.from_pair(
                     deny=discord.Permissions(permissions=2099776),
                     allow=discord.Permissions(permissions=0))
-                await channel.set_permissions(muteRole, overwrite=overwrite)
+                await channel.set_permissions(mute_role, overwrite=overwrite)
 
         await ctx.embed(lang["setupmute.message"])
 

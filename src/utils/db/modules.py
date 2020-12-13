@@ -33,7 +33,7 @@ class Modules:
             self.commands = False
             self.timers = False
 
-    async def reload(self, record = None):
+    async def reload(self, record=None):
         if not record:
             record = await self.bot.db.fetchrow('SELECT * FROM config.modules WHERE sid = $1', self.sid)
         if record is not None:

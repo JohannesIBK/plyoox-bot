@@ -27,7 +27,6 @@ class Leveling:
             self.noxpchannelIDs = record.get('noxpchannels') or []
             self.roles = record.get('roles') or []
 
-
     @property
     def channel(self):
         guild = self.bot.get_guild(self.sid)

@@ -179,30 +179,30 @@ class Owner(commands.Cog):
 
     @commandCount.command()
     async def reverse(self, ctx: context.Context):
-        commandsCount = self.bot.commandsCount
-        commandsCountSorted = sorted(commandsCount.items(), key=operator.itemgetter(1))
-        commandsCountList = []
-        commandRange = 15 and len(commandsCountSorted)
+        commands_count = self.bot.commandsCount
+        commands_count_sorted = sorted(commands_count.items(), key=operator.itemgetter(1))
+        commands_count_list = []
+        command_range = 15 and len(commands_count_sorted)
 
-        for i in range(commandRange):
-            command = commandsCountSorted[i]
-            commandsCountList.append(f'**{command[0]}:** {command[1]}')
+        for i in range(command_range):
+            command = commands_count_sorted[i]
+            commands_count_list.append(f'**{command[0]}:** {command[1]}')
 
-        await ctx.embed('\n'.join(commandsCountList))
+        await ctx.embed('\n'.join(commands_count_list))
 
     @commandCount.command()
     async def top(self, ctx: context.Context):
-        commandsCount = self.bot.commandsCount
-        commandsCountSorted = sorted(commandsCount.items(), key=operator.itemgetter(1))
-        commandsCountSorted.reverse()
-        commandsCountList = []
-        commandRange = 15 and len(commandsCountSorted)
+        commands_count = self.bot.commandsCount
+        commands_count_sorted = sorted(commands_count.items(), key=operator.itemgetter(1))
+        commands_count_sorted.reverse()
+        commands_count_list = []
+        command_range = 15 and len(commands_count_sorted)
 
-        for i in range(commandRange):
-            command = commandsCountSorted[i]
-            commandsCountList.append(f'**{command[0]}:** {command[1]}')
+        for i in range(command_range):
+            command = commands_count_sorted[i]
+            commands_count_list.append(f'**{command[0]}:** {command[1]}')
 
-        await ctx.embed('\n'.join(commandsCountList))
+        await ctx.embed('\n'.join(commands_count_list))
 
     @cmd(hidden=True)
     @commands.is_owner()

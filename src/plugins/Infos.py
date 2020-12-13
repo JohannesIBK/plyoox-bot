@@ -33,7 +33,7 @@ class Infos(commands.Cog):
             return string
 
     @staticmethod
-    def _getEmojis(emojis):
+    def _get_emojis(emojis):
         emojis = [f'{emoji}' for emoji in emojis]
         string = ''
 
@@ -49,30 +49,30 @@ class Infos(commands.Cog):
             return string
 
     @staticmethod
-    def _getBadges(flags: discord.PublicUserFlags):
-        flagList = []
+    def _get_badges(flags: discord.PublicUserFlags):
+        flag_list = []
         if flags.staff:
-            flagList.append(std.staff_emoji)
+            flag_list.append(std.staff_emoji)
         if flags.partner:
-            flagList.append(std.partner_emoji)
+            flag_list.append(std.partner_emoji)
         if flags.bug_hunter:
-            flagList.append(std.bughunter_badge)
+            flag_list.append(std.bughunter_badge)
         if flags.early_supporter:
-            flagList.append(std.supporter_emoji)
+            flag_list.append(std.supporter_emoji)
         if flags.hypesquad:
-            flagList.append(std.hypesquad_emoji)
+            flag_list.append(std.hypesquad_emoji)
         if flags.hypesquad_balance:
-            flagList.append(std.balance_emoji)
+            flag_list.append(std.balance_emoji)
         if flags.hypesquad_brilliance:
-            flagList.append(std.brilliance_emoji)
+            flag_list.append(std.brilliance_emoji)
         if flags.hypesquad_bravery:
-            flagList.append(std.bravery_emoji)
+            flag_list.append(std.bravery_emoji)
         if flags.verified_bot_developer:
-            flagList.append(std.botdev_emoji)
+            flag_list.append(std.botdev_emoji)
         if flags.bug_hunter_level_2:
-            flagList.append(std.bughunter2_badge)
+            flag_list.append(std.bughunter2_badge)
 
-        return flagList
+        return flag_list
 
     @staticmethod
     def statusEmoji(status):
@@ -94,15 +94,15 @@ class Infos(commands.Cog):
         if guildID is not None:
             if ctx.author.id == self.bot.owner_id:
                 try:
-                    foreignGuild = self.bot.get_guild(int(guildID))
-                    if foreignGuild is not None:
-                        guild = foreignGuild
+                    foreign_guild = self.bot.get_guild(int(guildID))
+                    if foreign_guild is not None:
+                        guild = foreign_guild
                 except TypeError:
                     pass
 
         boosts = {1: 2, 2: 15, 3: 30}
         roles = self._getRoles(guild.roles)
-        emojis = self._getEmojis(guild.emojis)
+        emojis = self._get_emojis(guild.emojis)
         created = guild.created_at.strftime(lang["date.format.small"])
         days = datetime.datetime.utcnow() - guild.created_at
 
@@ -162,7 +162,7 @@ class Infos(commands.Cog):
         since_joined_guild = (datetime.datetime.now() - user.joined_at).days
         roles = self._getRoles(user.roles)
         members = ctx.guild.members
-        flags = self._getBadges(user.public_flags)
+        flags = self._get_badges(user.public_flags)
         members.sort(key=sort)
         join_pos = members.index(user) + 1
 

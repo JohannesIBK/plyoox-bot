@@ -315,23 +315,24 @@ class Moderation(commands.Cog):
         lang = await ctx.lang(utils=True)
 
         if not isinstance(user, discord.Member):
-            banData = await ctx.bot.db.fetchrow("SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempban'", user.user.id, ctx.guild.id)
-            if banData is None:
+            ban_data\
+                = await ctx.bot.db.fetchrow("SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempban'", user.user.id, ctx.guild.id)
+            if ban_data is None:
                 return await ctx.embed(lang["check.ban.perma"].format(r=user.reason))
             else:
-                timestamp = datetime.datetime.fromtimestamp(banData['time']).strftime(lang["date.format.large"])
+                timestamp = datetime.datetime.fromtimestamp(ban_data['time']).strftime(lang["date.format.large"])
                 await ctx.embed(lang["check.ban.temp"].format(d=timestamp, r=user.reason))
         else:
             embed = discord.Embed(color=std.normal_color)
-            muteData = await ctx.bot.db.fetchrow("SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempmute'", user.id, ctx.guild.id)
+            mute_data = await ctx.bot.db.fetchrow("SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempmute'", user.id, ctx.guild.id)
             punishments = await ctx.bot.db.fetch("SELECT * FROM automod.users WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
 
-            if muteData:
-                timestamp = datetime.datetime.utcfromtimestamp(muteData['time']).strftime(lang["date.format.large"])
-                embed.description = lang["check.mute.temp"].format(d=timestamp, r=muteData.get("reason"))
+            if mute_data:
+                timestamp = datetime.datetime.utcfromtimestamp(mute_data['time']).strftime(lang["date.format.large"])
+                embed.description = lang["check.mute.temp"].format(d=timestamp, r=mute_data.get("reason"))
             elif punishments:
-                punishmentList = [f'{pm["reason"]} [{pm["points"]}]' for pm in punishments]
-                embed.add_field(name=lang["check.punish"].format(p=str(len(punishmentList))), value='\n'.join(punishmentList))
+                punishment_list = [f'{pm["reason"]} [{pm["points"]}]' for pm in punishments]
+                embed.add_field(name=lang["check.punish"].format(p=str(len(punishment_list))), value='\n'.join(punishment_list))
             else:
                 return await ctx.embed(lang["check.nopunish"])
             await ctx.send(embed=embed)

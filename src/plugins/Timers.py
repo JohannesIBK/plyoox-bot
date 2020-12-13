@@ -9,11 +9,14 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards as std, checks, context, logs
+from utils.ext import checks
+from utils.ext import context
+from utils.ext import logs
+from utils.ext import standards as std
 from utils.ext.cmds import grp
 from utils.ext.context import Context
-from utils.ext.time import FutureTime
 from utils.ext.reminder import Timer
+from utils.ext.time import FutureTime
 
 
 # BAN       0
@@ -71,7 +74,7 @@ class Timers(commands.Cog):
         self.bot.dispatch(f'{timer.type}_end', timer)
 
     async def create_timer(self, guild_id: int, *, date: datetime.datetime, object_id: int, type: str, data: dict = None):
-        seconds = date.timestamp()
+        seconds = int(date.timestamp())
         delta = (date - datetime.datetime.utcnow()).total_seconds()
         timer = await Timer.create_timer(guild_id, time=seconds, object_id=object_id, type=type, data=data)
 
@@ -148,17 +151,17 @@ class Timers(commands.Cog):
 
         reactions = message.reactions
         winners = []
-        winnerCount = timer.data['winner']
+        winner_count = timer.data['winner']
         win = timer.data['winType']
 
         for reaction in reactions:
             if reaction.emoji == '🎉':
                 users = await reaction.users().flatten()
                 users.remove(message.guild.me)
-                if len(users) <= winnerCount:
+                if len(users) <= winner_count:
                     winners = users
                 else:
-                    for _ in range(winnerCount):
+                    for _ in range(winner_count):
                         user = random.choice(users)
                         winners.append(user)
                         users.remove(user)
@@ -171,23 +174,23 @@ class Timers(commands.Cog):
                 title=win,
                 description=lang["giveaway.event.nowinners.edited"]
             )
-            embed.set_footer(text=lang["giveaway.embed.footer"].format(g=str(winnerCount), id=str(message.id)))
+            embed.set_footer(text=lang["giveaway.embed.footer"].format(g=str(winner_count), id=str(message.id)))
         else:
-            winnerMention = ' '.join(member.mention for member in winners)
+            winner_mention = ' '.join(member.mention for member in winners)
             if len(winners) == 1:
-                await channel.send(lang["giveaway.event.message.single"].format(w=win, m=winnerMention),
+                await channel.send(lang["giveaway.event.message.single"].format(w=win, m=winner_mention),
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
                 await message.edit(embed=discord.Embed(color=std.normal_color, title=win,
-                                                       description=lang["giveaway.event.edit.single"].format(m=winnerMention)))
+                                                       description=lang["giveaway.event.edit.single"].format(m=winner_mention)))
             else:
-                await channel.send(lang["giveaway.event.message.multiple"].format(w=win, m=winnerMention),
+                await channel.send(lang["giveaway.event.message.multiple"].format(w=win, m=winner_mention),
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
                 await message.edit(embed=discord.Embed(color=std.normal_color, title=win,
-                                                       description=lang["giveaway.event.edit.multiple"].format(m=winnerMention)))
-            roleID = await self.bot.db.fetchval('SELECT winnerrole FROM config.timers WHERE sid = $1', message.guild.id)
-            role = message.guild.get_role(roleID)
+                                                       description=lang["giveaway.event.edit.multiple"].format(m=winner_mention)))
+            role_id = await self.bot.db.fetchval('SELECT winnerrole FROM config.timers WHERE sid = $1', message.guild.id)
+            role = message.guild.get_role(role_id)
             if role is not None:
                 for winner in winners:
                     try:
@@ -200,8 +203,8 @@ class Timers(commands.Cog):
         if not ctx.author.guild_permissions.administrator:
             manager = await ctx.db.fetchval('SELECT giveawaymanager FROM config.timers WHERE sid = $1', ctx.guild.id)
             if manager:
-                userRoles = [role.id for role in ctx.author.roles]
-                if not any(role in userRoles for role in manager):
+                user_roles = [role.id for role in ctx.author.roles]
+                if not any(role in user_roles for role in manager):
                     raise commands.MissingPermissions(['giveawaymanager'])
             else:
                 raise commands.MissingPermissions(['giveawaymanager'])
@@ -213,8 +216,8 @@ class Timers(commands.Cog):
     async def start(self, ctx: Context, duration: FutureTime, winner: int, channel: discord.TextChannel, *, prize: str):
         lang = await ctx.lang()
         data = {
-            'winner': winner,
-            'winType': prize,
+            'winner'    : winner,
+            'winType'   : prize,
             'channel_id': channel.id
         }
 
@@ -240,8 +243,8 @@ class Timers(commands.Cog):
 
         await ctx.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
         await ctx.embed(lang["giveaway.message.stopped"])
-        giveawayData = json.loads(data['data'])
-        channel = ctx.guild.get_channel(giveawayData['channel'])
+        giveaway_data = json.loads(data['data'])
+        channel = ctx.guild.get_channel(giveaway_data['channel'])
         msg = await channel.fetch_message(data['objid'])
         if msg is not None:
             try:
@@ -275,11 +278,11 @@ class Timers(commands.Cog):
             if noreminder in [role.id for role in ctx.author.roles]:
                 return await ctx.error(lang["reminder.error.forbidden"])
 
-        timerCount = await ctx.db.fetchval(
+        timer_count = await ctx.db.fetchval(
             'SELECT count(*) FROM extra.timers WHERE sid = $1 AND objid = $2',
             ctx.guild.id, ctx.author.id)
 
-        if timerCount >= 25:
+        if timer_count >= 25:
             await ctx.error(lang["reminder.error.maxtimer"])
 
         await Timers.create_timer(self, ctx.guild.id, date=duration.dt, object_id=ctx.author.id, type='timer',
@@ -306,13 +309,13 @@ class Timers(commands.Cog):
         if not reminders:
             return await ctx.error(lang["reminder.error.notimers"])
 
-        timerListEmbed = discord.Embed(color=std.normal_color, title='Timer')
-        timerListEmbed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
+        timer_list_embed = discord.Embed(color=std.normal_color, title='Timer')
+        timer_list_embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
         for timer in reminders:
             reason = json.loads(timer['data'])['message']
-            timerListEmbed.add_field(name='TimerID: ' + str(timer['id']), value=f'```{reason}```')
+            timer_list_embed.add_field(name='TimerID: ' + str(timer['id']), value=f'```{reason}```')
 
-        await ctx.send(embed=timerListEmbed)
+        await ctx.send(embed=timer_list_embed)
 
     @reminder.command(alias=["delete"])
     async def remove(self, ctx: context.Context, ID: int):

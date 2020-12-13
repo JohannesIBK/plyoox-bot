@@ -21,16 +21,16 @@ class Commands(commands.Cog):
     async def command_list(self, ctx: Context):
         lang = await ctx.lang(module="commands")
         msg_splited = ctx.message.content.split(" ")
-        commandName = msg_splited[0].replace(ctx.prefix, '').lower()
-        if str(ctx.bot.user.id) in commandName:
-            commandName = msg_splited[1]
+        command_name = msg_splited[0].replace(ctx.prefix, '').lower()
+        if str(ctx.bot.user.id) in command_name:
+            command_name = msg_splited[1]
 
         mentions = [False, False, False]
         msg = None
 
         command = await self.bot.db.fetchrow(
             "SELECT c.*, m.commands FROM extra.commands c LEFT JOIN config.modules m ON c.sid = m.sid WHERE c.sid = $1 AND c.name = $2",
-            ctx.guild.id, commandName)
+            ctx.guild.id, command_name)
         if command is None or not command['commands']:
             return
 
@@ -51,8 +51,8 @@ class Commands(commands.Cog):
                 self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message).update_rate_limit(current=current)
 
         if command['ignoredroles']:
-            userRoles = [role.id for role in ctx.author.roles]
-            if any(role in userRoles for role in command['ignoredroles']):
+            user_roles = [role.id for role in ctx.author.roles]
+            if any(role in user_roles for role in command['ignoredroles']):
                 return await ctx.error(lang["error.notallowed"])
 
         if command['ignoredchannels']:

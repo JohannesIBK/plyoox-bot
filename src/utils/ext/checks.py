@@ -19,8 +19,8 @@ def isMod(*, helper: bool = False):
         if helper:
             roles.extend(config.config.helperroles)
 
-        userRoles = [role.id for role in ctx.author.roles]
-        if any(role in roles for role in userRoles):
+        user_roles = [role.id for role in ctx.author.roles]
+        if any(role in roles for role in user_roles):
             return True
         else:
             if helper:
@@ -103,6 +103,6 @@ async def ignoresAutomod(ctx: context.Context):
     roles.extend(data.automod.config.modroles)
     roles.extend(data.automod.config.helperroles)
 
-    authorRoles = [role.id for role in ctx.author.roles]
-    if any(roleID in roles for roleID in authorRoles):
+    author_roles = [role.id for role in ctx.author.roles]
+    if any(roleID in roles for roleID in author_roles):
         return True

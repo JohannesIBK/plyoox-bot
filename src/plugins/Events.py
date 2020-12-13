@@ -20,10 +20,10 @@ class Events(commands.Cog):
     async def checkGuilds(self):
         await self.bot.wait_until_ready()
         guilds = self.bot.guilds
-        dbGuilds = (entry['sid'] for entry in await self.bot.db.fetch('SELECT sid FROM config.guild'))
+        db_guilds = (entry['sid'] for entry in await self.bot.db.fetch('SELECT sid FROM config.guild'))
 
         for guild in guilds:
-            if guild.id not in dbGuilds:
+            if guild.id not in db_guilds:
                 await db.gotAddet(self.bot, guild)
                 bots = len(list(filter(lambda m: m.bot, guild.members)))
                 embed = discord.Embed(color=discord.Color.green(), title="**__SERVER JOINED__**")
@@ -43,9 +43,9 @@ class Events(commands.Cog):
         if not guild.me.guild_permissions.manage_channels:
             return
 
-        muteRoleID = await self.bot.db.fetchval('SELECT muterole from automod.config WHERE sid = $1', guild.id)
-        muteRole = guild.get_role(muteRoleID)
-        if muteRole is None:
+        mute_role_id = await self.bot.db.fetchval('SELECT muterole from automod.config WHERE sid = $1', guild.id)
+        mute_role = guild.get_role(mute_role_id)
+        if mute_role is None:
             return
 
         if isinstance(channel, discord.TextChannel):
@@ -55,7 +55,7 @@ class Events(commands.Cog):
             overwrite = discord.PermissionOverwrite.from_pair(
                 deny=discord.Permissions(permissions=2099776),
                 allow=discord.Permissions(permissions=0))
-            return await channel.set_permissions(muteRole, overwrite=overwrite)
+            return await channel.set_permissions(mute_role, overwrite=overwrite)
 
         if isinstance(channel, discord.VoiceChannel):
             if channel.permissions_synced:
@@ -64,13 +64,13 @@ class Events(commands.Cog):
             overwrite = discord.PermissionOverwrite.from_pair(
                 deny=discord.Permissions(permissions=2097664),
                 allow=discord.Permissions(permissions=0))
-            return await channel.set_permissions(muteRole, overwrite=overwrite)
+            return await channel.set_permissions(mute_role, overwrite=overwrite)
 
         if isinstance(channel, discord.CategoryChannel):
             overwrite = discord.PermissionOverwrite.from_pair(
                 deny=discord.Permissions(permissions=2099776),
                 allow=discord.Permissions(permissions=0))
-            return await channel.set_permissions(muteRole, overwrite=overwrite)
+            return await channel.set_permissions(mute_role, overwrite=overwrite)
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role):
@@ -184,9 +184,9 @@ class Events(commands.Cog):
             return
 
         if data['globalbans']:
-            banData = await self.bot.db.fetchrow('SELECT reason, userid FROM extra.globalbans WHERE userid = $1', member.id)
-            if banData is not None and banData['reason'] and banData['userid']:
-                reason = banData['reason']
+            ban_data = await self.bot.db.fetchrow('SELECT reason, userid FROM extra.globalbans WHERE userid = $1', member.id)
+            if ban_data is not None and ban_data['reason'] and ban_data['userid']:
+                reason = ban_data['reason']
                 await guild.ban(member, reason=f"Globalban:\n{reason}")
                 logchannel = await self.bot.db.fetchval('SELECT logchannel FROM automod.config WHERE config.sid = $1', guild.id)
                 if logchannel:
@@ -203,9 +203,9 @@ class Events(commands.Cog):
             msg = formatMessage(data["joinmessage"], member)
 
             for channelMention in channels:
-                channelToMention = discord.utils.find(lambda c: c.name == channelMention[1:], guild.channels)
-                if channelToMention is not None:
-                    msg = msg.replace(channelMention, channelToMention.mention)
+                channel_to_mention = discord.utils.find(lambda c: c.name == channelMention[1:], guild.channels)
+                if channel_to_mention is not None:
+                    msg = msg.replace(channelMention, channel_to_mention.mention)
 
             if msg is None:
                 return
@@ -222,14 +222,14 @@ class Events(commands.Cog):
             except discord.Forbidden:
                 logging.info(f"Could not add role to {member.id}")
 
-        punishData = await self.bot.db.fetchrow(
+        punish_data = await self.bot.db.fetchrow(
             'SELECT timers.type, config.muterole FROM automod.config INNER JOIN extra.timers '
             'ON config.sid=timers.sid WHERE config.sid = $1 AND timers.objid = $2 AND timers.type = 1',
             guild.id, member.id)
 
-        if punishData is not None:
-            muteroleID: int = punishData['muterole']
-            muterole = guild.get_role(muteroleID)
+        if punish_data is not None:
+            muterole_id: int = punish_data['muterole']
+            muterole = guild.get_role(muterole_id)
             if muterole is not None:
                 await member.add_roles(muterole)
 

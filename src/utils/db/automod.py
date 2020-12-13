@@ -9,6 +9,7 @@ class Base:
     points: int
     whitelist: list[int]
 
+
 class Invites(Base):
     __slots__ = 'partner'
 
@@ -29,7 +30,7 @@ class Invites(Base):
             self.whitelist = record.get('invitewhitelist') or []
             self.partner = record.get('invitepatner') or []
 
-    async def reload(self, record = None):
+    async def reload(self, record=None):
         if record is None:
             record = await self.bot.db.fetchrow(
                 'SELECT sid, invitepatner, invitewhitelist, invitepoints, invitestate FROM automod.automod WHERE sid = $1',
@@ -45,6 +46,7 @@ class Invites(Base):
             self.points = record.get('invitepoints')
             self.whitelist = record.get('invitewhitelist') or []
             self.partner = record.get('invitepatner') or []
+
 
 class Blacklist(Base):
     __slots__ = 'words'
@@ -66,7 +68,7 @@ class Blacklist(Base):
             self.whitelist = record.get('blacklistwhitelist') or []
             self.words = record.get('blacklistwords') or []
 
-    async def reload(self, record = None):
+    async def reload(self, record=None):
         if record is None:
             record = await self.bot.db.fetchrow(
                 'SELECT sid, blacklistpoints, blackliststate, blacklistwhitelist, blacklistwords FROM automod.automod WHERE sid = $1',
@@ -82,6 +84,7 @@ class Blacklist(Base):
             self.whitelist = record.get('blacklistwhitelist') or []
             self.words = record.get('blacklistwords') or []
 
+
 class Caps(Base):
     def __init__(self, bot, record, sid):
         self.sid = sid
@@ -96,7 +99,7 @@ class Caps(Base):
             self.points = record.get('capspoints')
             self.whitelist = record.get('capswhitelist') or []
 
-    async def reload(self, record = None):
+    async def reload(self, record=None):
         if record is None:
             record = await self.bot.db.fetchrow(
                 'SELECT capspoints, capsstate, capswhitelist FROM automod.automod WHERE sid = $1',
@@ -109,6 +112,7 @@ class Caps(Base):
             self.state = record.get('capsstate')
             self.points = record.get('capspoints')
             self.whitelist = record.get('capswhitelist') or []
+
 
 class Links(Base):
     __slots__ = ('links', 'iswhitelist')
@@ -133,7 +137,7 @@ class Links(Base):
             self.links = record.get('linkslinks') or []
             self.iswhitelist = record.get('linksiswhitelist')
 
-    async def reload(self, record = None):
+    async def reload(self, record=None):
         if record is None:
             record = await self.bot.db.fetchrow(
                 'SELECT linksiswhitelist, linkslinks, linkspoints, linksstate, linkswhitelist FROM automod.automod WHERE sid = $1',
@@ -151,6 +155,7 @@ class Links(Base):
             self.whitelist = record.get('linkswhitelist') or []
             self.links = record.get('linkslinks') or []
             self.iswhitelist = record.get('linksiswhitelist')
+
 
 class Mentions(Base):
     __slots__ = ('count', 'everyone')
@@ -175,7 +180,7 @@ class Mentions(Base):
             self.count = record.get('mentionscount')
             self.everyone = record.get('mentionseveryone')
 
-    async def reload(self, record = None):
+    async def reload(self, record=None):
         if record is None:
             record = await self.bot.db.fetchrow(
                 'SELECT mentionscount, mentionseveryone, mentionspoints, mentionsstate, mentionswhitelist FROM automod.automod WHERE sid = $1',
@@ -191,6 +196,7 @@ class Mentions(Base):
             self.whitelist = record.get('mentionswhitelist') or []
             self.count = record.get('mentionscount')
             self.everyone = record.get('mentionseveryone')
+
 
 class Config:
     __slots__ = (

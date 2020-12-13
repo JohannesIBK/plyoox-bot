@@ -1,6 +1,8 @@
 import asyncio
 
-from . import leveling, modules, automod
+import leveling
+import modules
+import automod
 
 
 class GuildConfig:
@@ -57,7 +59,6 @@ class GuildConfig:
         return self._modules
 
 
-
 class BotCache:
     __slots__ = 'bot'
 
@@ -67,7 +68,7 @@ class BotCache:
     def __init__(self, bot):
         self.bot = bot
 
-    async def get(self, sid) -> GuildConfig:
+    async def get(self, sid) -> GuildConfig or None:
         cache = self.cache.get(sid)
         if cache is None:
             if sid in self.fetching:
@@ -83,7 +84,7 @@ class BotCache:
 
             # one request would take 2 seconds fml
             # please help
-            part1, part2, part3, part4, automodConfig, settings = await asyncio.gather(*[
+            part1, part2, part3, part4, automod_config, settings = await asyncio.gather(*[
                 self.bot.db.fetchrow('SELECT sid, invitestate, invitepoints, invitewhitelist, invitepatner FROM automod.automod WHERE sid = $1', sid),
                 self.bot.db.fetchrow('SELECT linksstate, linkspoints, linkswhitelist, linksiswhitelist, linkslinks, mentionseveryone FROM automod.automod WHERE sid = $1', sid),
                 self.bot.db.fetchrow('SELECT mentionsstate, mentionspoints, mentionswhitelist, mentionscount, capspoints FROM automod.automod WHERE sid = $1', sid),
@@ -92,17 +93,17 @@ class BotCache:
                 self.bot.db.fetchrow('SELECT prefix, lang FROM config.guild WHERE sid = $1', sid)
             ])
 
-            automodRecord = dict(automodConfig) if automodConfig else {}
+            automod_record = dict(automod_config) if automod_config else {}
             if part1:
-                automodRecord.update(dict(part1))
-                automodRecord.update(dict(part2))
-                automodRecord.update(dict(part3))
-                automodRecord.update(dict(part4))
+                automod_record.update(dict(part1))
+                automod_record.update(dict(part2))
+                automod_record.update(dict(part3))
+                automod_record.update(dict(part4))
 
             records = await self.bot.db.fetchrow('SELECT * FROM config.leveling l FULL JOIN config.modules m ON l.sid = m.sid WHERE l.sid = $1', sid)
 
-            cache = GuildConfig(self.bot, sid, [settings, automodRecord or None, records])
-            self.cache.update({ sid: cache })
+            cache = GuildConfig(self.bot, sid, [settings, automod_record or None, records])
+            self.cache.update({sid: cache})
             self.fetching.remove(sid)
 
         return cache
@@ -118,6 +119,3 @@ class BotCache:
 
     def remove(self, sid):
         self.cache.pop(sid)
-
-
-

@@ -38,8 +38,8 @@ async def main():
     await get_level()
     print(len(user_list))
 
-    with open("users.json", "w") as f:
-        json.dump(user_list, fp=f)
+    with open("users.json_files", "w") as f:
+        json_files.dump(user_list, fp=f)
 
 
 asyncio.run(main())

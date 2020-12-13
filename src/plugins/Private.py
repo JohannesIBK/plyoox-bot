@@ -45,9 +45,9 @@ class Private(commands.Cog):
         if before.channel is not None:
             if before.channel.id == CHANNEL_ID:
                 for channel in self.channelIDs:
-                    channelObj = member.guild.get_channel(channel)
-                    if channelObj and not len(channelObj.members) and channel != CHANNEL_ID:
-                        await channelObj.delete()
+                    channel_obj = member.guild.get_channel(channel)
+                    if channel_obj and not len(channel_obj.members) and channel != CHANNEL_ID:
+                        await channel_obj.delete()
                         self.channelIDs.remove(channel)
                 return
 

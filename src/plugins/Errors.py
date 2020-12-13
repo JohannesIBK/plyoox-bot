@@ -7,6 +7,9 @@ from utils.ext import standards as std
 from utils.ext.context import Context
 
 
+log = logging.getLogger(__name__)
+
+
 class Errors(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
@@ -64,12 +67,12 @@ class Errors(commands.Cog):
                     logging.warning(f"No permissions to write in {ctx.channel.mention} of guild {ctx.guild.name} [{ctx.guild.id}]")
 
             else:
-                userEmbed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")
-                userEmbed.add_field(name="Original Error", value=f'```py\n{error}```')
+                user_embed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")
+                user_embed.add_field(name="Original Error", value=f'```py\n{error}```')
                 try:
-                    await ctx.send(embed=userEmbed)
+                    await ctx.send(embed=user_embed)
                 except Exception as e:
-                    self.bot.logger.exception(f'Error\n{type(e).__name__}: {e}')
+                    log.exception(f'Error\n{type(e).__name__}: {e}')
                     channel = self.bot.get_guild(694790265382109224).get_channel(718554837771616316)
                     embed = discord.Embed(color=discord.Color.red())
                     embed.add_field(name=ctx.guild.name,

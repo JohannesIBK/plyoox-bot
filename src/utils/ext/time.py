@@ -9,7 +9,7 @@ en['minutes'].append('mins')
 en['seconds'].append('secs')
 
 
-class plural:
+class Plural:
     def __init__(self, value):
         self.value = value
 
@@ -241,7 +241,7 @@ def human_timedelta(dt, *, source=None, accuracy=3, brief=False, suffix=True):
             if weeks:
                 elem -= weeks * 7
                 if not brief:
-                    output.append(format(plural(weeks), 'week'))
+                    output.append(format(Plural(weeks), 'week'))
                 else:
                     output.append(f'{weeks}w')
 
@@ -251,7 +251,7 @@ def human_timedelta(dt, *, source=None, accuracy=3, brief=False, suffix=True):
         if brief:
             output.append(f'{elem}{brief_attr}')
         else:
-            output.append(format(plural(elem), attr))
+            output.append(format(Plural(elem), attr))
 
     if accuracy is not None:
         output = output[:accuracy]

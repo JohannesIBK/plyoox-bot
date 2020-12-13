@@ -73,7 +73,7 @@ plyoox_color = 0x24c689
 avatar_url = 'https://cdn.discordapp.com/avatars/505433541916622850/ccc8ba894dd4188ecf37de0a53430f22.webp?size=1024'
 
 
-def quote(string: str, shorten=False):
+def quote(string, shorten=False):
     if shorten and len(string) > 1018:
         string = string[:1015] + "..."
     return "```" + str(string) + "```"
@@ -122,20 +122,20 @@ def dmEmbed(lang, *, reason, guildName, punishType, duration: datetime.datetime 
     embed.set_footer(text=lang['log.embed.footer'], icon_url=avatar_url)
 
     if duration:
-        messageStart = lang['log.embed.duration'].format(d=str(duration.strftime(lang["date.format.large"]))) + " "
+        message_start = lang['log.embed.duration'].format(d=str(duration.strftime(lang["date.format.large"]))) + " "
     else:
-        messageStart = lang['log.embed.perma'] + " "
+        message_start = lang['log.embed.perma'] + " "
 
     reason = reason or ''
     if reason:
         reason = lang['log.embed.reason'].format(r=reason) + " "
 
     if punishType in ["ban", "tempban"]:
-        embed.description = messageStart + lang["log.embed.ban"].format(n=guildName, r=reason)
+        embed.description = message_start + lang["log.embed.ban"].format(n=guildName, r=reason)
     elif punishType == 'kick':
         embed.description = lang["log.embed.kick"].format(n=guildName, r=reason)
     elif punishType in ["tempban", "mute"]:
-        embed.description = messageStart + lang['log.embed.mute'].format(n=guildName, r=reason)
+        embed.description = message_start + lang['log.embed.mute'].format(n=guildName, r=reason)
 
     return embed
 

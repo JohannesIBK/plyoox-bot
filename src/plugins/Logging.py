@@ -18,8 +18,8 @@ class Logging(commands.Cog):
     async def createWebhook(self, guildID):
         log.info(f"Try to create webhookon guild {guildID}")
         guild = self.bot.get_guild(guildID)
-        channelID = await self.bot.db.fetchval('SELECT channelid FROM config.logging WHERE sid = $1', guild.id)
-        channel = guild.get_channel(channelID)
+        channel_id = await self.bot.db.fetchval('SELECT channelid FROM config.logging WHERE sid = $1', guild.id)
+        channel = guild.get_channel(channel_id)
 
         if channel is None:
             return
@@ -33,9 +33,9 @@ class Logging(commands.Cog):
     async def on_webhooks_update(self, channel: discord.TextChannel):
         try:
             webhooks = await channel.webhooks()
-            webhookID = await self.bot.db.fetchval('SELECT id FROM config.logging WHERE sid = $1', channel.guild.id)
+            webhook_id = await self.bot.db.fetchval('SELECT id FROM config.logging WHERE sid = $1', channel.guild.id)
 
-            log.info(f"Webhook change on guild {channel.guild.id}: {webhookID}\n{webhooks}")
+            log.info(f"Webhook change on guild {channel.guild.id}: {webhook_id}\n{webhooks}")
         except discord.Forbidden:
             return
 
@@ -43,7 +43,7 @@ class Logging(commands.Cog):
             return
 
         for webhook in webhooks:
-            if webhook.id == webhookID:
+            if webhook.id == webhook_id:
                 break
         else:
             await self.bot.db.execute('UPDATE config.logging SET id = NULL, token = NULL, channelid = NULL WHERE sid = $1', channel.guild.id)
@@ -285,7 +285,9 @@ class Logging(commands.Cog):
             if not data or not data['logging'] or not data['memberrole']:
                 return
 
-            embed = discord.Embed()
+            remove = len(before.roles) > len(after.roles)
+
+            embed = discord.Embed(color=discord.Color.dark_blue() if remove else discord.Color.blue())
             embed.set_author(name=lang["role.embed.title"], icon_url=after.avatar_url)
             embed.set_footer(text=f"ID: {after.id}")
             embed.timestamp = datetime.datetime.utcnow()
@@ -293,11 +295,9 @@ class Logging(commands.Cog):
             role = list(set(before.roles) - set(after.roles)) or list(set(after.roles) - set(before.roles))
 
             try:
-                if len(before.roles) > len(after.roles):
-                    embed.color = discord.Color.dark_blue()
+                if remove:
                     embed.description = lang["role.embed.remove"].format(r=role[0], u=after)
                 else:
-                    embed.color = discord.Color.blue()
                     embed.description = lang["role.embed.add"].format(r=role[0], u=after)
             except IndexError:
                 log.exception(f"Could not send ROLE CHANGE log on guild {before.guild.id}: {role}\n{before.roles} | {after.roles}")

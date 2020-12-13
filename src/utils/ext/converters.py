@@ -18,14 +18,14 @@ class BannedMember(commands.Converter):
     async def convert(self, ctx: Context, argument):
         lang = await ctx.lang()
         if argument.isdigit():
-            memberID = int(argument, base=10)
+            member_id = int(argument, base=10)
             try:
-                return await ctx.guild.fetch_ban(discord.Object(id=memberID))
+                return await ctx.guild.fetch_ban(discord.Object(id=member_id))
             except discord.NotFound as e:
                 raise commands.BadArgument(lang["converters.notbanned"]) from e
 
-        banList = await ctx.guild.bans()
-        user = discord.utils.find(lambda u: str(u.user) == argument, banList)
+        ban_list = await ctx.guild.bans()
+        user = discord.utils.find(lambda u: str(u.user) == argument, ban_list)
 
         if user is None:
             raise commands.BadArgument(lang["converters.notbanned"])

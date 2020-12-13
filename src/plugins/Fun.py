@@ -16,7 +16,7 @@ class Arguments(argparse.ArgumentParser):
 
 
 class Fun(commands.Cog):
-    with open('utils/json/gif_links.json', encoding='utf-8') as gifs:
+    with open('utils/json_files/gif_links.json_files', encoding='utf-8') as gifs:
         gifData = json.load(gifs)
 
     def __init__(self, bot: main.Plyoox):
@@ -33,9 +33,9 @@ class Fun(commands.Cog):
         for _ in range(0, 3, 1):
             rgbs.append(random.choice(range(256)))
         color = discord.Colour.from_rgb(rgbs[0], rgbs[1], rgbs[2])
-        colorHex = "#%02x%02x%02x" % (rgbs[0], rgbs[1], rgbs[2])
+        color_hex = "#%02x%02x%02x" % (rgbs[0], rgbs[1], rgbs[2])
         await ctx.send(embed=discord.Embed(color=color,
-                                           description=lang["color.message"].format(r=rgbs, h=colorHex)))
+                                           description=lang["color.message"].format(r=rgbs, h=color_hex)))
 
     @cmd()
     @checks.isActive('fun')
@@ -135,8 +135,8 @@ class Fun(commands.Cog):
         if questions.count('|') == 0:
             return await ctx.error(lang["thisorthat.error.needmultiple"])
 
-        questionsList = questions.split('|')
-        choosen = random.choice(questionsList)
+        questions_list = questions.split('|')
+        choosen = random.choice(questions_list)
         await ctx.embed(lang["thisorthat.message"].format(c=choosen.strip()), allowed_mentions=discord.AllowedMentions.none(), signed=True)
 
     @cmd()
@@ -165,33 +165,33 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def reverse(self, ctx: context.Context, *, text: str):
-        reversedText = text[::-1]
-        if 'discord.gg' in reversedText.lower() or 'discord.com/invite' in reversedText.lower():
+        reversed_text = text[::-1]
+        if 'discord.gg' in reversed_text.lower() or 'discord.com/invite' in reversed_text.lower():
             return
 
-        await ctx.embed(reversedText, signed=True)
+        await ctx.embed(reversed_text, signed=True)
 
     @cmd()
     @checks.isActive('fun')
     async def caseing(self, ctx: context.Context, *, text: str):
         if 'discord.gg' in text.lower() or 'discord.com/invite' in text.lower():
             return
-        newText = []
-        lastUpper = False
+        new_text = []
+        last_upper = False
 
         for word in text.split(" "):
             t = ""
             for i in range(len(word)):
                 char = word[i]
-                if not lastUpper:
+                if not last_upper:
                     t += char.upper()
-                    lastUpper = True
+                    last_upper = True
                 else:
                     t += char.lower()
-                    lastUpper = False
-            newText.append(t)
+                    last_upper = False
+            new_text.append(t)
 
-        await ctx.embed(f'```{" ".join(newText)}```', signed=True)
+        await ctx.embed(f'```{" ".join(new_text)}```', signed=True)
 
     @cmd()
     @checks.isActive('fun')

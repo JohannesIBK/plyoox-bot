@@ -120,12 +120,12 @@ class Plyoox(commands.Bot):
 
     async def on_command(self, ctx):
         command = ctx.command.parent or ctx.command
-        commandName = command.name.lower()
+        command_name = command.name.lower()
 
-        if commandName not in self.commandsCount:
-            self.commandsCount[commandName] = 1
+        if command_name not in self.commandsCount:
+            self.commandsCount[command_name] = 1
         else:
-            self.commandsCount[commandName] += 1
+            self.commandsCount[command_name] += 1
 
     async def lang(self, guild_id, modul, utils=False):
         if utils:
