@@ -50,7 +50,7 @@ intents.voice_states = False
 intents.integrations = False
 
 
-async def getPrefix(bot, msg: discord.Message):
+async def get_prefix(bot, msg: discord.Message):
     config = await bot.cache.get(msg.guild.id)
     if config is not None:
         return config.prefix
@@ -58,7 +58,7 @@ async def getPrefix(bot, msg: discord.Message):
     return [f'<@{bot.user.id}> ', f'<@!{bot.user.id}> ']
 
 
-async def setGame(bot):
+async def set_game(bot):
     while True:
         await bot.change_presence(
             activity=discord.Activity(
@@ -71,7 +71,7 @@ async def setGame(bot):
 class Plyoox(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix=getPrefix,
+            command_prefix=get_prefix,
             case_insensitive=True,
             max_messages=10000,
             allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
@@ -86,7 +86,7 @@ class Plyoox(commands.Bot):
         self._lang = lang
 
     async def on_ready(self):
-        self.gamesLoop = asyncio.create_task(setGame(self))
+        self.gamesLoop = asyncio.create_task(set_game(self))
         self.session = aiohttp.ClientSession(loop=self.loop)
 
         for cog in cogs:
