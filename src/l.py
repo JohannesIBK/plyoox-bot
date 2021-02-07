@@ -2,6 +2,8 @@ import asyncio
 import argparse
 import logging
 import contextlib
+import time
+
 import uvloop
 import warnings
 from logging.handlers import RotatingFileHandler
@@ -72,12 +74,17 @@ def run_bot():
         loop = asyncio.get_event_loop()
         bot = Bot()
 
-        # try:
-        loop.run_until_complete(bot.create_db_pool(port))
-        # except Exception:
-        #     print('Es konnte keine Verbindung zu PostgreSQL aufgebaut werden...')
-        #     log.error("Could not connect to Postgres.")
-        #     return
+        for _ in range(10):
+            try:
+                loop.run_until_complete(bot.create_db_pool(port))
+                break
+            except Exception:
+                log.info("Try to connect to database...")
+                time.sleep(3)
+        else:
+            print('Es konnte keine Verbindung zu PostgreSQL aufgebaut werden...')
+            log.error("Could not connect to Postgres.")
+            return
 
         try:
             web = server.app(bot, bot.db)
