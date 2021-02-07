@@ -61,7 +61,7 @@ if args.prod:
     print("\n\nBot startet...\n")
 else:
     with open(r"utils/keys/testbot.env") as f:
-        port = 15432
+        port = 5432
         token = f.read()
     print("\n\nStarting Test...\n")
 
@@ -72,12 +72,12 @@ def run_bot():
         loop = asyncio.get_event_loop()
         bot = Bot()
 
-        try:
-            loop.run_until_complete(bot.create_db_pool(port))
-        except Exception:
-            print('Es konnte keine Verbindung zu PostgreSQL aufgebaut werden...')
-            log.error("Could not connect to Postgres.")
-            return
+        # try:
+        loop.run_until_complete(bot.create_db_pool(port))
+        # except Exception:
+        #     print('Es konnte keine Verbindung zu PostgreSQL aufgebaut werden...')
+        #     log.error("Could not connect to Postgres.")
+        #     return
 
         try:
             web = server.app(bot, bot.db)
