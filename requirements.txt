@@ -1,0 +1,6 @@
+uvloop >= 0.14.0
+discord.py >= 1.6.0
+tornado >= 6.1
+parsedatetime >= 2.6
+dateutils >= 0.6.12
+asyncpg >= 0.21.0
