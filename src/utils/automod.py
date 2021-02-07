@@ -16,11 +16,11 @@ linkRegex = re.compile(EXTERNAL_LINK, re.IGNORECASE)
 everyoneRegex = re.compile(EVERYONE_MENTION)
 
 
-def findWord(word):
+def find_word(word):
     return re.compile(r'\b({0})\b'.format(word), flags=re.IGNORECASE).search
 
 
-async def managePunishment(ctx: Context, punishment, reason):
+async def manage_punishment(ctx: Context, punishment, reason):
     try:
         await ctx.message.delete()
     except discord.NotFound:
@@ -71,7 +71,7 @@ async def managePunishment(ctx: Context, punishment, reason):
     await logs.createLog(ctx, mEmbed=mod_embed, uEmbed=user_embed, automod=True, user=user)
 
 
-async def add_points(ctx: Context, addPoints, reason, user: discord.Member = None):
+async def add_points(ctx: Context, new_points, reason, user: discord.Member = None):
     try:
         await ctx.message.delete()
     except discord.NotFound:
@@ -90,7 +90,7 @@ async def add_points(ctx: Context, addPoints, reason, user: discord.Member = Non
 
     await ctx.bot.db.execute(
         'INSERT INTO automod.users (uid, sid, points, time, reason) VALUES ($1, $2, $3, $4, $5)',
-        punished_user.id, ctx.guild.id, addPoints, time.time(), reason)
+        punished_user.id, ctx.guild.id, new_points, time.time(), reason)
 
     points = await ctx.bot.db.fetchval(
         'SELECT sum(points) FROM automod.users WHERE uid = $1 AND sid = $2 AND $3 - time < 2592000',
@@ -176,7 +176,7 @@ async def automod(ctx: Context):
     if automod_cf.blacklist.state:
         blacklist = automod_cf.blacklist
         for word in blacklist.words:
-            if findWord(word)(msg.content.lower()):
+            if find_word(word)(msg.content.lower()):
                 if not await checks.ignoresAutomod(ctx):
                     if channel.id in blacklist.whitelist:
                         return
@@ -184,7 +184,7 @@ async def automod(ctx: Context):
                     if blacklist.state == 5:
                         return await add_points(ctx, blacklist.points, lang["reason.blacklistedword"])
                     else:
-                        return await managePunishment(ctx, blacklist.state, lang["reason.blacklistedword"])
+                        return await manage_punishment(ctx, blacklist.state, lang["reason.blacklistedword"])
 
     if discordRegex.findall(msg.content):
         invites = automod_cf.invites
@@ -211,7 +211,7 @@ async def automod(ctx: Context):
                 if invites.state == 5:
                     return await add_points(ctx, invites.points, lang["reason.invite"])
                 else:
-                    return await managePunishment(ctx, invites.state, lang["reason.invite"])
+                    return await manage_punishment(ctx, invites.state, lang["reason.invite"])
 
             if invite.guild.id not in whitelisted_servers:
                 has_invite = True
@@ -221,7 +221,7 @@ async def automod(ctx: Context):
             if invites.state == 5:
                 return await add_points(ctx, invites.points, lang["reason.invite"])
             else:
-                return await managePunishment(ctx, invites.state, lang["reason.invite"])
+                return await manage_punishment(ctx, invites.state, lang["reason.invite"])
 
     elif linkRegex.findall(msg.content):
         links = automod_cf.links
@@ -245,13 +245,13 @@ async def automod(ctx: Context):
                     if links.state == 5:
                         return await add_points(ctx, links.points, lang["reason.link"])
                     else:
-                        return await managePunishment(ctx, links.state, lang["reason.link"])
+                        return await manage_punishment(ctx, links.state, lang["reason.link"])
             else:
                 if link in links:
                     if links.state == 5:
                         return await add_points(ctx, links.points, lang["reason.link"])
                     else:
-                        return await managePunishment(ctx, links.state, lang["reason.link"])
+                        return await manage_punishment(ctx, links.state, lang["reason.link"])
 
     if not msg.clean_content.islower() and len(msg.content) > 15:
         caps = automod_cf.caps
@@ -270,7 +270,7 @@ async def automod(ctx: Context):
             if caps.state == 5:
                 return await add_points(ctx, caps.points, lang["reason.caps"])
             else:
-                return await managePunishment(ctx, caps.state, lang["reason.caps"])
+                return await manage_punishment(ctx, caps.state, lang["reason.caps"])
 
     if len(msg.raw_mentions) + len(msg.raw_role_mentions) + len(everyoneRegex.findall(msg.content)) >= 3:
         mentions = automod_cf.mentions
@@ -292,4 +292,4 @@ async def automod(ctx: Context):
             if mentions.state == 5:
                 return await add_points(ctx, mentions.points, lang["reason.mentions"])
             else:
-                return await managePunishment(ctx, mentions.state, lang["reason.mentions"])
+                return await manage_punishment(ctx, mentions.state, lang["reason.mentions"])

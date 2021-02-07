@@ -104,6 +104,7 @@ class FutureTime(Time):
 class UserFriendlyTime(commands.Converter):
     """That way quotes aren't absolutely necessary."""
     def __init__(self, converter=None, *, default=None):
+        self.dt = None
         if isinstance(converter, type) and issubclass(converter, commands.Converter):
             converter = converter()
 

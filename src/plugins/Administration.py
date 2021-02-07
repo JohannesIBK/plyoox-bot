@@ -252,8 +252,8 @@ class Administration(commands.Cog):
 
     @cmd()
     @checks.isAdmin()
-    async def copyblacklist(self, ctx: context.Context, guildID: int, overwrite: bool = False):
-        guild = ctx.bot.get_guild(guildID)
+    async def copyblacklist(self, ctx: context.Context, guild_id: int, overwrite: bool = False):
+        guild = ctx.bot.get_guild(guild_id)
         lang = await ctx.lang()
 
         if guild is None:

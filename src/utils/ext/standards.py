@@ -1,5 +1,10 @@
 import datetime
+from typing import Union
+
 import discord
+
+from utils.ext.converters import AdvancedMember
+
 
 yes_emoji = "<:yes:703900321465892914>"
 no_emoji = "<:no:703900335327936602>"
@@ -165,7 +170,7 @@ def automodUserEmbed(lang, reason, guildName, type, points=None, duration=None):
     return embed
 
 
-def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member = None, user: discord.Member = None, amount=None, duration=None) -> discord.Embed:
+def cmdEmbed(action, reason, lang: dict[str, str], mod: discord.Member = None, user: Union[discord.Member, AdvancedMember] = None, amount=None, duration=None) -> discord.Embed:
     reason = reason or lang['log.noreason']
     embed = discord.Embed(color=discord.Color.orange(), title=lang["word." + action].upper())
     embed.set_footer(text="Plyoox", icon_url=avatar_url)

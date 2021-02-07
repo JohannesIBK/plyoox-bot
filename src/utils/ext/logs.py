@@ -4,6 +4,7 @@ import discord
 import logging
 from utils.ext.context import Context
 from utils.ext.context import FakeContext
+from utils.ext.converters import AdvancedMember
 
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ async def createCmdLog(ctx, embed, file=None):
                 await config.logchannel.send(embed=embed)
 
 
-async def createLog(ctx: Union[Context, FakeContext], *, user: discord.Member = None, mEmbed=None, uEmbed=None, automod=False):
+async def createLog(ctx: Union[Context, FakeContext], *, user: [discord.Member, AdvancedMember] = None, mEmbed=None, uEmbed=None, automod=False):
     data = await ctx.cache.get(ctx.guild.id)
     config = data.automod.config
 

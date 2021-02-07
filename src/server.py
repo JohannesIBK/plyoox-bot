@@ -1,3 +1,4 @@
+from abc import ABC
 from logging.handlers import RotatingFileHandler
 
 import discord
@@ -18,7 +19,7 @@ with open('utils/keys/voting.env') as f:
     token = f.read()
 
 
-class BaseHandler(tornado.web.RequestHandler):
+class BaseHandler(tornado.web.RequestHandler, ABC):
     def initialize(self, bot, db):
         self.bot = bot
         self.db = db
@@ -27,7 +28,7 @@ class BaseHandler(tornado.web.RequestHandler):
         await self.bot.wait_until_ready()
 
 
-class TopGGVoteHandler(BaseHandler):
+class TopGGVoteHandler(BaseHandler, ABC):
     async def post(self):
         if self.request.headers.get('Authorization') != token:
             return self.set_status(401)
@@ -48,7 +49,7 @@ class TopGGVoteHandler(BaseHandler):
         self.set_status(200)
 
 
-class DiscordBotListVoteHandler(BaseHandler):
+class DiscordBotListVoteHandler(BaseHandler, ABC):
     async def post(self):
         if self.request.headers.get('Authorization') != token:
             return self.set_status(401)
@@ -67,7 +68,7 @@ class DiscordBotListVoteHandler(BaseHandler):
         self.set_status(200)
 
 
-class CacheUpdater(BaseHandler):
+class CacheUpdater(BaseHandler, ABC):
     async def get(self):
         if not self.request.remote_ip == "::1":
             return self.set_status(403)

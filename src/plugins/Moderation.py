@@ -48,7 +48,7 @@ class Moderation(commands.Cog):
         await automod(ctx)
 
     @staticmethod
-    async def can_punish_user(ctx: Context, user: Union[discord.Member, discord.User]):
+    async def can_punish_user(ctx: Context, user: Union[discord.Member, discord.User, AdvancedMember]):
         if isinstance(user, discord.User):
             return True
 

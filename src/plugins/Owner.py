@@ -129,14 +129,14 @@ class Owner(commands.Cog):
 
     @cmd(hidden=True)
     @commands.is_owner()
-    async def sql(self, ctx: context.Context, pgType: str, *, sql: str):
-        if pgType == 'exec':
+    async def sql(self, ctx: context.Context, pg_type: str, *, sql: str):
+        if pg_type == 'exec':
             resp = await self.bot.db.execute(sql)
-        elif pgType == 'fetch':
+        elif pg_type == 'fetch':
             resp = await self.bot.db.fetch(sql)
-        elif pgType == 'fetchrow':
+        elif pg_type == 'fetchrow':
             resp = await self.bot.db.fetchrow(sql)
-        elif pgType == 'fetchval':
+        elif pg_type == 'fetchval':
             resp = await self.bot.db.fetchval(sql)
         else:
             return await ctx.error('Keine valider type')
@@ -163,13 +163,13 @@ class Owner(commands.Cog):
         pass
 
     @globalban.command()
-    async def add(self, ctx: context.Context, userID: int, *, Grund: str):
-        await self.bot.db.execute('INSERT INTO extra.globalbans (userid, reason) VALUES ($1, $2)', userID, Grund)
+    async def add(self, ctx: context.Context, user_id: int, *, reason: str):
+        await self.bot.db.execute('INSERT INTO extra.globalbans (userid, reason) VALUES ($1, $2)', user_id, reason)
         await ctx.embed('Der User wurde erfolgreich zur Globalban-Liste hinzugefügt.')
 
     @globalban.command()
-    async def remove(self, ctx: context.Context, userID: int):
-        await self.bot.db.execute('DELETE FROM extra.globalbans WHERE userid = $1', userID)
+    async def remove(self, ctx: context.Context, user_id: int):
+        await self.bot.db.execute('DELETE FROM extra.globalbans WHERE userid = $1', user_id)
         await ctx.embed('Der User wurde erfolgreich von der Globalban-Liste entfernt.')
 
     @grp(case_insesitive=True, hidden=True)

@@ -216,8 +216,8 @@ class Timers(commands.Cog):
     async def start(self, ctx: Context, duration: FutureTime, winner: int, channel: discord.TextChannel, *, prize: str):
         lang = await ctx.lang()
         data = {
-            'winner'    : winner,
-            'winType'   : prize,
+            'winner': winner,
+            'winType': prize,
             'channel_id': channel.id
         }
 
