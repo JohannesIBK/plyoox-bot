@@ -34,6 +34,12 @@ class GuildConfig:
             prefixes.append(self._prefix)
         return prefixes
 
+    async def update_config(self):
+        config = self.bot.db.fetchrow("SELECT lang, prefix FROM config.guild WHERE sid = $1")
+        if config:
+            self.prefix = config["prefix"]
+            self.lang = config["lang"]
+
     @prefix.setter
     def prefix(self, prefix):
         self._prefix = prefix
@@ -77,7 +83,7 @@ class BotCache:
                     if data is not None:
                         return data
 
-                    await asyncio.sleep(.20)
+                    await asyncio.sleep(.2)
                 return None
 
             self.fetching.append(sid)
