@@ -2,6 +2,8 @@ import asyncio
 import json
 import logging
 import time
+import os
+import traceback
 
 import aiohttp
 import asyncpg
@@ -11,6 +13,7 @@ from discord.ext import commands
 
 from utils.db.cache import BotCache
 from utils.ext.context import Context
+
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +137,7 @@ class Plyoox(commands.Bot):
             return self._lang[modul.lower()]
 
     async def create_db_pool(self, port):
-        self.db: Pool = await asyncpg.create_pool(database='discord', user='plyoox', password='1', port=port)
+        self.db: Pool = await asyncpg.create_pool(database='discord', user='plyoox', password='1', port=port, host=os.getenv('db') or "localhost")
 
-    # async def on_error(self, event_method, *args, **kwargs):
-    #      logger.error(traceback.format_exc())
+    async def on_error(self, event_method, *args, **kwargs):
+        logger.error(traceback.format_exc())
