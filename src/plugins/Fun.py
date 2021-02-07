@@ -16,7 +16,7 @@ class Arguments(argparse.ArgumentParser):
 
 
 class Fun(commands.Cog):
-    with open('utils/json_files/gif_links.json_files', encoding='utf-8') as gifs:
+    with open('utils/json_files/gif_links.json', encoding='utf-8') as gifs:
         gifData = json.load(gifs)
 
     def __init__(self, bot: main.Plyoox):
@@ -264,9 +264,9 @@ class Fun(commands.Cog):
 
     @cmd(name='8ball')
     @checks.isActive('fun')
-    async def _8ball(self, ctx: context.Context, *, Frage: str):
+    async def _8ball(self, ctx: context.Context, *, question: str):
         lang = await ctx.lang()
-        await ctx.embed(f'> {Frage}\n{random.choice(lang["8ball.answers"])}', allowed_mentions=discord.AllowedMentions.none(), signed=True)
+        await ctx.embed(f'> {question}\n{random.choice(lang["8ball.answers"])}', allowed_mentions=discord.AllowedMentions.none(), signed=True)
 
     @cmd()
     @checks.isActive('fun')
