@@ -33,7 +33,7 @@ class Invites(Base):
     async def reload(self, record=None):
         if record is None:
             record = await self.bot.db.fetchrow(
-                'SELECT sid, invitepatner, invitewhitelist, invitepoints, invitestate FROM automod.automod WHERE sid = $1',
+                'SELECT sid, invitepartner, invitewhitelist, invitepoints, invitestate FROM automod.automod WHERE sid = $1',
                 self.sid)
 
         if record is None:
