@@ -7,6 +7,8 @@ import json
 import logging
 import tornado.log
 
+from utils.db.cache import BotCache
+
 
 handler = RotatingFileHandler(filename='logs/tornado.log', maxBytes=1024 * 10, encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
@@ -72,6 +74,26 @@ class CacheUpdater(BaseHandler, ABC):
     async def get(self):
         if not self.request.remote_ip == "::1":
             return self.set_status(403)
+
+        update = self.get_arguments("modul")
+        guild_id = self.get_arguments("guild")
+        if not update and not guild_id:
+            return self.set_status(400)
+
+        cache: BotCache = self.bot.cache
+        guild_cache = await cache.get(guild_id)
+
+        if guild_cache:
+            if update == "leveling":
+                await guild_cache.leveling.reload()
+            elif update == "modules":
+                await guild_cache.modules.reload()
+            elif update == "automod":
+                await guild_cache.automod.reload()
+            elif update == "config":
+                await guild_cache.update_config()
+            self.set_status(200)
+        self.set_status(500)
 
 
 def app(bot, database):
