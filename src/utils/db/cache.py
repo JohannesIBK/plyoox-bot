@@ -1,8 +1,8 @@
 import asyncio
 
-import leveling
-import modules
-import automod
+from . import leveling
+from . import automod
+from . import modules
 
 
 class GuildConfig:
@@ -85,7 +85,7 @@ class BotCache:
             # one request would take 2 seconds fml
             # please help
             part1, part2, part3, part4, automod_config, settings = await asyncio.gather(*[
-                self.bot.db.fetchrow('SELECT sid, invitestate, invitepoints, invitewhitelist, invitepatner FROM automod.automod WHERE sid = $1', sid),
+                self.bot.db.fetchrow('SELECT sid, invitestate, invitepoints, invitewhitelist, invitepartner FROM automod.automod WHERE sid = $1', sid),
                 self.bot.db.fetchrow('SELECT linksstate, linkspoints, linkswhitelist, linksiswhitelist, linkslinks, mentionseveryone FROM automod.automod WHERE sid = $1', sid),
                 self.bot.db.fetchrow('SELECT mentionsstate, mentionspoints, mentionswhitelist, mentionscount, capspoints FROM automod.automod WHERE sid = $1', sid),
                 self.bot.db.fetchrow('SELECT capswhitelist, blacklistpoints, blacklistwhitelist, blacklistwords, capsstate, blackliststate FROM automod.automod WHERE sid = $1', sid),
