@@ -145,8 +145,6 @@ class Plyoox(commands.Bot):
                 return self._lang["en"][modul.lower()]
 
         guild_lang = cache.lang
-        print(guild_lang)
-
         if utils:
             return {**self._lang[guild_lang][modul.lower()], **self._lang[guild_lang]["utils"]}
         else:
