@@ -72,27 +72,29 @@ class DiscordBotListVoteHandler(BaseHandler, ABC):
 
 class CacheUpdater(BaseHandler, ABC):
     async def get(self):
-        if not self.request.remote_ip == "::1":
+        if not self.request.remote_ip == "127.0.0.1":
             return self.set_status(403)
 
-        update = self.get_arguments("modul")
+        update = self.get_arguments("update")
         guild_id = self.get_arguments("guild")
+
         if not update and not guild_id:
             return self.set_status(400)
 
         cache: BotCache = self.bot.cache
-        guild_cache = await cache.get(guild_id)
+        guild_cache = await cache.get(int(guild_id[0]))
 
         if guild_cache:
-            if update == "leveling":
+            if update[0] == "leveling":
                 await guild_cache.leveling.reload()
-            elif update == "modules":
+            elif update[0] == "modules":
                 await guild_cache.modules.reload()
-            elif update == "automod":
+            elif update[0] == "automod":
                 await guild_cache.automod.reload()
-            elif update == "config":
+            elif update[0] == "config":
                 await guild_cache.update_config()
-            self.set_status(200)
+            return self.set_status(200)
+
         self.set_status(500)
 
 
