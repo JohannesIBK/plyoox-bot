@@ -169,19 +169,17 @@
     "resetlevel.message": "The level of the user `{u}` was successfully reset."
   },
   "help": {
-    "help.embed.title": "Command help",
-    "help.embed.deactivated.title": "Disabled modules",
-    "help.error.nohelp": "No help is available for this command.",
-    "help.error.notacommand": "This command does not exist.",
-    "help.embed.modul.title": "Module Help",
-    "help.embed.command.title": "**__Command help for `{c}`__**",
-    "help.embed.footer.args": "<> required | [] optional",
-    "help.word.alias": "Alias",
-    "help.word.module": "Modul",
-    "help.word.dashboard": "Dashboard",
-    "help.word.support": "Support Server",
-    "help.word.invite": "Invitation",
-    "word.lang.prefix": "prefix"
+    "error.command.notfound": "The command `{c}` was not found.",
+    "error.command.nohelp": "No help is available for this command.",
+    "embed.footer.args": "<> required [] optional",
+    "embed.command.title": "Plyoox Command Help",
+    "embed.module.title": "Plyoox Module Help",
+    "embed.group.subcommands": "Subcommands",
+    "word.aliases": "Aliases",
+    "embed.description.help": "Use `{p}help [Command]` for help about a command\\nand `{p}help [module]` for help about a module.",
+    "embed.description.subhelp": "Use `{p}help [Command] [Subcommand]` for more detailed help about a command.",
+    "embed.description.cmdhelp": "Use `{p}help [Command]` for more detailed help about a command.",
+    "word.times": "\n**__Times:__**\n**`s`** seconds\n**`min`** minutes\n**`h`** hours\n**`d`** days\n**`mon`** months\n**`y`** years"
   },
   "utilities": {
     "someone.embed.title": "Random User",
