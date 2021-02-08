@@ -17,8 +17,14 @@ from utils.ext.context import Context
 
 logger = logging.getLogger(__name__)
 
-with open("utils/languages/de/commands_de.json", 'r') as f:
-    lang = dict(json.load(f))
+
+available_langs = ["de", "en"]
+loaded_langs = {}
+
+for _lang in available_langs:
+    with open(f"utils/languages/{_lang}/commands_{_lang}.json", 'r') as f:
+        lang = dict(json.load(f))
+        loaded_langs.update({_lang: lang})
 
 cogs = [
     "plugins.Owner",
@@ -86,7 +92,7 @@ class Plyoox(commands.Bot):
         self.owner_id = 263347878150406144
         self.commandsCount = {}
         self.cache: BotCache = BotCache(self)
-        self._lang = lang
+        self._lang = loaded_langs
 
     async def on_ready(self):
         self.gamesLoop = asyncio.create_task(set_game(self))
@@ -131,13 +137,29 @@ class Plyoox(commands.Bot):
             self.commandsCount[command_name] += 1
 
     async def lang(self, guild_id, modul, utils=False):
+        cache = await self.cache.get(guild_id)
+        if not cache:
+            if utils:
+                return {**self._lang["en"][modul.lower()], **self._lang["utils"]}
+            else:
+                return self._lang["en"][modul.lower()]
+
+        guild_lang = cache.lang
+        print(guild_lang)
+
         if utils:
-            return {**self._lang[modul.lower()], **self._lang["utils"]}
+            return {**self._lang[guild_lang][modul.lower()], **self._lang[guild_lang]["utils"]}
         else:
-            return self._lang[modul.lower()]
+            return self._lang[guild_lang][modul.lower()]
 
     async def create_db_pool(self, port):
-        self.db: Pool = await asyncpg.create_pool(database='discord', user='plyoox', password='1', port=port, host=os.getenv('db') or "localhost")
+        self.db: Pool = await asyncpg.create_pool(
+            database='discord',
+            user='plyoox',
+            password='1',
+            port=port,
+            host=os.getenv('DB_HOST') or "localhost"
+        )
 
     async def on_error(self, event_method, *args, **kwargs):
         logger.error(traceback.format_exc())

@@ -43,12 +43,9 @@ class Context(commands.Context):
         if isinstance(module, list):
             data = {}
             for _module in module:
-                data |= self.bot._lang[_module.lower()]
+                data |= await self.bot.lang(self.guild.id, _module.lower(), utils)
         else:
-            data = self.bot._lang[module.lower()]
-
-        if utils:
-            data |= self.bot._lang["utils"]
+            data = await self.bot.lang(self.guild.id, module.lower(), utils)
 
         return data
 
@@ -67,11 +64,13 @@ class Context(commands.Context):
 
         return await self.send(embed=embed, **kwargs)
 
-    async def prompt(self, message, *, timeout=60.0, delete_after=True, reacquire=True, author_id=None):
+    async def prompt(self, message, *, timeout=60.0, delete_after=True, reacquire=True,
+                     author_id=None):
         if not self.channel.permissions_for(self.me).add_reactions:
             raise RuntimeError('Der Bot kann keine Reaktionen hinzufügen.')
 
-        fmt = f'{message}\n\nReagiere mit {std.yes_emoji} um zu bestätigen oder {std.no_emoji} um abzubrechen.'
+        fmt = f'{message}\n\nReagiere mit {std.yes_emoji} um zu bestätigen oder {std.no_emoji} ' \
+              f'um abzubrechen. '
 
         author_id = author_id or self.author.id
         msg = await self.send('Ping!', embed=discord.Embed(color=std.normal_color, description=fmt))
