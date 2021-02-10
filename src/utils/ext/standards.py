@@ -1,5 +1,4 @@
 import datetime
-from typing import Union
 
 import discord
 
@@ -73,7 +72,8 @@ help_color = 0x38b3e8
 tag_color = 0x7adeaa
 plyoox_color = 0x24c689
 
-avatar_url = 'https://cdn.discordapp.com/avatars/505433541916622850/ccc8ba894dd4188ecf37de0a53430f22.webp?size=1024'
+avatar_url = 'https://cdn.discordapp.com' \
+             '/avatars/505433541916622850/ccc8ba894dd4188ecf37de0a53430f22.webp?size=1024'
 
 
 def quote(string, shorten=False):
@@ -119,26 +119,72 @@ def getErrorEmbed(errorMessage: str) -> discord.Embed:
     return embed
 
 
-def dmEmbed(lang, *, reason, guildName, punishType, duration: datetime.datetime = None) -> discord.Embed:
+def dmEmbed(lang, *, reason, guildName, punishType,
+            duration: datetime.datetime = None) -> discord.Embed:
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text=lang['log.embed.footer'], icon_url=avatar_url)
 
     if duration:
-        message_start = lang['log.embed.duration'].format(d=str(duration.strftime(lang["date.format.large"]))) + " "
-    else:
-        message_start = lang['log.embed.perma'] + " "
+        div_seconds = int((datetime.datetime.utcnow() - duration).total_seconds())
+
+        def years():
+            return divmod(div_seconds, 31536000)
+
+        def days(_seconds=None):
+            return divmod(seconds if _seconds is not None else div_seconds, 86400)
+
+        def hours(_seconds=None):
+            return divmod(seconds if _seconds is not None else div_seconds, 3600)
+
+        def minutes(_seconds=None):
+            return divmod(seconds if _seconds is not None else div_seconds, 60)
+
+        def seconds(_seconds=None):
+            if _seconds is not None:
+                return divmod(_seconds, 1)
+            return div_seconds
+
+        durations = []
+        y = years()
+        d = days(y[1])
+        h = hours(d[1])
+        m = minutes(h[1])
+        s = seconds(m[1])
+
+        if y[0]:
+            durations.append(f"{y[0]}y")
+        if d[0]:
+            durations.append(f"{d[0]}d")
+        if h[0]:
+            durations.append(f"{h[0]}h")
+        if m[0]:
+            durations.append(f"{m[0]}m")
+        if s[0]:
+            durations.append(f"{s[0]}s")
+
+        duration = " ".join(durations)
 
     reason = reason or ''
     if reason:
-        reason = lang['log.embed.reason'].format(r=reason) + " "
+        reason = lang['log.embed.reason'].format(r=reason)
 
     if punishType in ["ban", "tempban"]:
-        embed.description = message_start + lang["log.embed.ban"].format(n=guildName, r=reason)
+        if duration:
+            embed.description = lang['log.embed.ban.temp'] \
+                .format(n=guildName, r=reason, d=duration)
+        else:
+            embed.description = lang['log.embed.ban.perma'] \
+                .format(n=guildName, r=reason)
     elif punishType == 'kick':
         embed.description = lang["log.embed.kick"].format(n=guildName, r=reason)
     elif punishType in ["tempban", "mute"]:
-        embed.description = message_start + lang['log.embed.mute'].format(n=guildName, r=reason)
+        if duration:
+            embed.description = lang['log.embed.mute.temp'] \
+                .format(n=guildName, r=reason, d=duration)
+        else:
+            embed.description = lang['log.embed.mute.perma'] \
+                .format(n=guildName, r=reason)
 
     return embed
 
@@ -168,7 +214,8 @@ def automodUserEmbed(lang, reason, guildName, type, points=None, duration=None):
     return embed
 
 
-def cmdEmbed(action, reason, lang: dict[str, str], mod=None, user=None, amount=None, duration=None) -> discord.Embed:
+def cmdEmbed(action, reason, lang: dict[str, str], mod=None, user=None,
+             amount=None, duration=None) -> discord.Embed:
     reason = reason or lang['log.noreason']
     embed = discord.Embed(color=discord.Color.orange(), title=lang["word." + action].upper())
     embed.set_footer(text="Plyoox", icon_url=avatar_url)
@@ -182,14 +229,16 @@ def cmdEmbed(action, reason, lang: dict[str, str], mod=None, user=None, amount=N
     if reason is not None:
         embed.add_field(name=arrow + lang["word.reason"], value=quote(reason))
     if duration is not None:
-        embed.add_field(name=arrow + lang["duration"], value=quote(duration.strftime(lang['date.format.large'])))
+        embed.add_field(name=arrow + lang["duration"],
+                        value=quote(duration.strftime(lang['date.format.large'])))
     if amount is not None:
         embed.add_field(name=arrow + lang["amount"], value=quote(amount))
 
     return embed
 
 
-def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime, reason, points=None, extra_user: discord.Member = None):
+def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime,
+               reason, points=None, extra_user: discord.Member = None):
     user = ctx.author or extra_user
     embed = discord.Embed(
         color=plyoox_color,
@@ -208,7 +257,8 @@ def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime, r
         embed.add_field(name=arrow + lang["word.moderator"], value=ctx.author.mention)
 
     if duration is not None:
-        embed.add_field(name=arrow + lang["word.punishuntil"], value=quote(duration.strftime(lang["date.format.large"])))
+        embed.add_field(name=arrow + lang["word.punishuntil"],
+                        value=quote(duration.strftime(lang["date.format.large"])))
 
     if points is not None:
         embed.add_field(name=arrow + lang["word.points"], value=quote(points))
