@@ -28,14 +28,16 @@ from utils.ext.time import FutureTime
 class Timers(commands.Cog):
     def __init__(self, bot: main.Plyoox):
         self.bot = bot
-        self._current_timer: Timer = None
+        self._current_timer: Timer or None = None
         self._have_data = asyncio.Event(loop=bot.loop)
         self._task = bot.loop.create_task(self.dispatch_timers())
 
     async def get_active_timer(self, *, connection=None, days=7):
         con = connection or self.bot.db
 
-        record = await con.fetchrow("SELECT * FROM extra.timers WHERE time < $1 ORDER BY time LIMIT 1", time.time() + days + 86400)
+        record = await con.fetchrow(
+            "SELECT * FROM extra.timers WHERE time < $1 ORDER BY time LIMIT 1",
+            time.time() + days + 86400)
         return Timer.load_timer(record=record) if record else None
 
     async def wait_for_active_timers(self, *, days=7):
@@ -73,17 +75,20 @@ class Timers(commands.Cog):
         await asyncio.sleep(delta)
         self.bot.dispatch(f'{timer.type}_end', timer)
 
-    async def create_timer(self, guild_id: int, *, date: datetime.datetime, object_id: int, type: str, data: dict = None):
+    async def create_timer(self, guild_id: int, *, date: datetime.datetime, object_id: int,
+                           type: str, data: dict = None):
         seconds = int(date.timestamp())
         delta = (date - datetime.datetime.utcnow()).total_seconds()
-        timer = await Timer.create_timer(guild_id, time=seconds, object_id=object_id, type=type, data=data)
+        timer = await Timer.create_timer(guild_id, time=seconds, object_id=object_id,
+                                         type=type, data=data)
 
         if delta <= 60:
             self.bot.loop.create_task(self.short_timer(timer, delta))
             return timer
 
         timer_id = await self.bot.db.execute(
-            "INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+            "INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5) "
+            "RETURNING id",
             guild_id, object_id, seconds, type, json.dumps(data))
 
         timer.id = timer_id
@@ -108,7 +113,8 @@ class Timers(commands.Cog):
         fake_context = context.FakeContext(self.bot, guild)
         ban = await guild.fetch_ban(user)
         await guild.unban(user=user, reason=lang["ban.temp.reason.expired"])
-        mod_embed = std.cmdEmbed("unban", lang["ban.temp.reason.expired"], lang, user=ban.user, mod=fake_context.me)
+        mod_embed = std.cmdEmbed("unban", lang["ban.temp.reason.expired"], lang, user=ban.user,
+                                 mod=fake_context.me)
         await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
 
     @commands.Cog.listener()
@@ -124,7 +130,8 @@ class Timers(commands.Cog):
             return
 
         fake_context = context.FakeContext(self.bot, guild)
-        mod_embed = std.cmdEmbed("unmute", lang["mute.temp.reason.unmute"], lang, user=user, mod=fake_context.me)
+        mod_embed = std.cmdEmbed("unmute", lang["mute.temp.reason.unmute"], lang, user=user,
+                                 mod=fake_context.me)
         await user.remove_roles(config.automod.config.muterole)
         await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
 
@@ -137,8 +144,11 @@ class Timers(commands.Cog):
         if channel is None or member is None:
             return
 
-        message = lang["reminder.event.timermessage"].format(u=member.mention, m=std.quote(timer.data["message"]))
-        await channel.send(message, allowed_mentions=discord.AllowedMentions(everyone=False, users=True, roles=False))
+        message = lang["reminder.event.timermessage"].format(u=member.mention,
+                                                             m=std.quote(timer.data["message"]))
+        await channel.send(message, allowed_mentions=discord.AllowedMentions(everyone=False,
+                                                                             users=True,
+                                                                             roles=False))
 
     @commands.Cog.listener()
     async def on_giveaway_end(self, timer: Timer):
@@ -172,24 +182,32 @@ class Timers(commands.Cog):
             embed = discord.Embed(
                 color=std.normal_color,
                 title=win,
-                description=lang["giveaway.event.nowinners.edited"]
-            )
-            embed.set_footer(text=lang["giveaway.embed.footer"].format(g=str(winner_count), id=str(message.id)))
+                description=lang["giveaway.event.nowinners.edited"])
+            embed.set_footer(text=lang["giveaway.embed.footer"].format(g=str(winner_count),
+                                                                       id=str(message.id)))
         else:
             winner_mention = ' '.join(member.mention for member in winners)
             if len(winners) == 1:
-                await channel.send(lang["giveaway.event.message.single"].format(w=win, m=winner_mention),
+                await channel.send(lang["giveaway.event.message.single"].format(w=win,
+                                                                                m=winner_mention),
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
-                await message.edit(embed=discord.Embed(color=std.normal_color, title=win,
-                                                       description=lang["giveaway.event.edit.single"].format(m=winner_mention)))
+                await message.edit(
+                    embed=discord.Embed(color=std.normal_color, title=win,
+                                        description=lang["giveaway.event.edit.single"]
+                                        .format(m=winner_mention)))
             else:
-                await channel.send(lang["giveaway.event.message.multiple"].format(w=win, m=winner_mention),
+                await channel.send(lang["giveaway.event.message.multiple"].format(w=win,
+                                                                                  m=winner_mention),
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
-                await message.edit(embed=discord.Embed(color=std.normal_color, title=win,
-                                                       description=lang["giveaway.event.edit.multiple"].format(m=winner_mention)))
-            role_id = await self.bot.db.fetchval('SELECT winnerrole FROM config.timers WHERE sid = $1', message.guild.id)
+                await message.edit(
+                    embed=discord.Embed(color=std.normal_color, title=win,
+                                        description=lang["giveaway.event.edit.multiple"]
+                                        .format(m=winner_mention)))
+            role_id = await self.bot.db.fetchval(
+                'SELECT winnerrole FROM config.timers WHERE sid = $1',
+                message.guild.id)
             role = message.guild.get_role(role_id)
             if role is not None:
                 for winner in winners:
@@ -201,7 +219,9 @@ class Timers(commands.Cog):
     @grp(case_insensitive=True)
     async def giveaway(self, ctx: context.Context):
         if not ctx.author.guild_permissions.administrator:
-            manager = await ctx.db.fetchval('SELECT giveawaymanager FROM config.timers WHERE sid = $1', ctx.guild.id)
+            manager = await ctx.db.fetchval(
+                'SELECT giveawaymanager FROM config.timers WHERE sid = $1',
+                ctx.guild.id)
             if manager:
                 user_roles = [role.id for role in ctx.author.roles]
                 if not any(role in user_roles for role in manager):
@@ -213,7 +233,8 @@ class Timers(commands.Cog):
             return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
 
     @giveaway.command()
-    async def start(self, ctx: Context, duration: FutureTime, winner: int, channel: discord.TextChannel, *, prize: str):
+    async def start(self, ctx: Context, duration: FutureTime, winner: int,
+                    channel: discord.TextChannel, *, prize: str):
         lang = await ctx.lang()
         data = {
             'winner': winner,
@@ -232,16 +253,21 @@ class Timers(commands.Cog):
         embed.timestamp = duration.dt
         await msg.edit(embed=embed)
 
-        await Timers.create_timer(self, ctx.guild.id, date=duration.dt, object_id=msg.id, type='giveaway', data=data)
+        await Timers.create_timer(self, ctx.guild.id, date=duration.dt, object_id=msg.id,
+                                  type='giveaway', data=data)
 
     @giveaway.command()
     async def stop(self, ctx: context.Context, ID: int):
         lang = await ctx.lang()
-        data = await ctx.db.fetchrow('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
+        data = await ctx.db.fetchrow(
+            'SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2',
+            ctx.guild.id, ID)
         if data is None:
             await ctx.error(lang["giveaway.error.wrongid"])
 
-        await ctx.db.execute('DELETE FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
+        await ctx.db.execute(
+            'DELETE FROM extra.timers WHERE sid = $1 AND objid = $2',
+            ctx.guild.id, ID)
         await ctx.embed(lang["giveaway.message.stopped"])
         giveaway_data = json.loads(data['data'])
         channel = ctx.guild.get_channel(giveaway_data['channel'])
@@ -255,7 +281,9 @@ class Timers(commands.Cog):
     @giveaway.command()
     async def end(self, ctx: context.Context, ID: int):
         lang = await ctx.lang()
-        data = await ctx.db.fetchrow('SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2', ctx.guild.id, ID)
+        data = await ctx.db.fetchrow(
+            'SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2',
+            ctx.guild.id, ID)
         if data is None:
             await ctx.error(lang["giveaway.error.wrongid"])
 
@@ -273,7 +301,9 @@ class Timers(commands.Cog):
     @commands.cooldown(rate=2, per=30.0, type=commands.BucketType.user)
     async def create(self, ctx: context.Context, duration: FutureTime, *, reason: str):
         lang = await ctx.lang()
-        noreminder = await ctx.db.fetchval('SELECT noreminderrole FROM config.timers WHERE sid = $1', ctx.guild.id)
+        noreminder = await ctx.db.fetchval(
+            'SELECT noreminderrole FROM config.timers WHERE sid = $1',
+            ctx.guild.id)
         if noreminder:
             if noreminder in [role.id for role in ctx.author.roles]:
                 return await ctx.error(lang["reminder.error.forbidden"])
@@ -285,7 +315,11 @@ class Timers(commands.Cog):
         if timer_count >= 25:
             await ctx.error(lang["reminder.error.maxtimer"])
 
-        await Timers.create_timer(self, ctx.guild.id, date=duration.dt, object_id=ctx.author.id, type='timer',
+        await Timers.create_timer(self,
+                                  ctx.guild.id,
+                                  date=duration.dt,
+                                  object_id=ctx.author.id,
+                                  type='timer',
                                   data={'message': reason, 'channel_id': ctx.channel.id})
 
         await ctx.embed(lang["reminder.message.created"], delete_after=10)
