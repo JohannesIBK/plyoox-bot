@@ -6,7 +6,6 @@
     "clear.error.amount": "The number of messages must only be between 1 and 2000.",
     "clear.message.deleted": "`{a}` messages were deleted.",
     "remove.message.reactions": "Reactions were deleted `{a}.",
-
     "log.embed.footer": "Plyoox Moderation",
     "log.embed.reason": " because of `{r}`",
     "log.noreason": "No reason given.",
@@ -15,7 +14,6 @@
     "log.embed.kick": "You were kicked from the server `{n}`{r}.",
     "log.embed.mute.perm": "You were permanently muted from the server `{n}`{r}.",
     "log.embed.mute.temp": "You were muted for `{d}` from the server `{n}`{r}.",
-
     "remove.error.minlength": "The string must be longer than 3 characters.",
     "softban.reason": "Softban expired",
     "multi.error.nomuterole": "The server has no mute role.",
@@ -263,6 +261,10 @@
     "reminder.event.timermessage": "Hey {u}, here's your timer:\n{m}"
   },
   "automod": {
+    "kick.embed.description": "The user **{u}** was kicked for **{r}** in {c.mention}.",
+    "ban.embed.description": "The user **{u}** was banned for **{r}** in {c.mention}.",
+    "mute.embed.description": "The user **{u}** was muted for **{r}** in {c.mention}.",
+    "log.embed.description": "The user **{u}** was warned for **{r}** in {c.mention}.",
     "word.automod": "Automod",
     "word.points": "points",
     "word.punishuntil": "Punished until",
@@ -270,6 +272,7 @@
     "word.channel": "channel",
     "word.kick": "kick",
     "word.ban": "ban",
+    "word.log": "log",
     "word.tempban": "Temporary ban",
     "word.tempmute": "Temporary Mute",
     "logs.user.start": "Du wurdest wegen {r}",
@@ -283,7 +286,8 @@
     "reason.invite": "Discord invitation",
     "reason.link": "Link",
     "reason.caps": "Too many capital letters",
-    "reason.mentions": "Too many mentions"
+    "reason.mentions": "Too many mentions",
+    "log.embed.footer": "Plyoox Automod"
   },
   "utils": {
     "date.format.small": "%m. %d. %Y",

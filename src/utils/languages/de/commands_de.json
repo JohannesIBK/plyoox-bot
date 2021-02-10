@@ -6,7 +6,6 @@
     "clear.error.amount": "Die Anzahl der Nachrichten darf nur zwischen 1 und 2000 liegen.",
     "clear.message.deleted": "Es wurden `{a}` Nachrichten gelöscht.",
     "remove.message.reactions": "Es wurden `{a} Reactions gelöscht.`",
-
     "log.embed.footer": "Plyoox Moderation",
     "log.embed.reason": "wegen `{r}` ",
     "log.noreason": "Kein Grund gegeben.",
@@ -15,7 +14,6 @@
     "log.embed.kick": "Du wurdest {r}vom Server `{n}` gekickt.",
     "log.embed.mute.perm": "Du wurdest permanent vom Server `{n}` {r}gemutet.",
     "log.embed.mute.temp": "Du wurdest für `{d}` vom Server `{n}` {r}gemutet.",
-
     "remove.error.minlength": "Die Zeichenkette muss länger als 3 Zeichen sein.",
     "softban.reason": "Softban abgelaufen",
     "multi.error.nomuterole": "Der Server hat keine Muterolle.",
@@ -267,6 +265,7 @@
     "kick.embed.description": "Der User **{u}** wurde für **{r}** in {c.mention} gekickt.",
     "ban.embed.description": "Der User **{u}** wurde für **{r}** in {c.mention} gebannt.",
     "mute.embed.description": "Der User **{u}** wurde für **{r}** in {c.mention} gemutet.",
+    "log.embed.description": "Der User **{u}** wurde für **{r}** in {c.mention} gewarnt.",
     "word.automod": "Automod",
     "word.points": "Punkte",
     "word.punishuntil": "Bestraft bis",
@@ -275,6 +274,7 @@
     "word.kick": "Kick",
     "word.ban": "Bann",
     "word.reason": "Grund",
+    "word.log": "Log",
     "word.tempban": "Temporärer Bann",
     "word.tempmute": "Temporärer Mute",
     "logs.user.start": "Du wurdest wegen {r}",
@@ -288,7 +288,8 @@
     "reason.invite": "Discord-Einladung",
     "reason.link": "Link",
     "reason.caps": "Großbuchstaben-Spam",
-    "reason.mentions": "Erwähnungen-Spam"
+    "reason.mentions": "Erwähnungen-Spam",
+    "log.embed.footer": "Plyoox Automod"
   },
   "utils": {
     "date.format.small": "%d. %m. %Y",
