@@ -2,9 +2,11 @@ import discord
 from discord.ext import commands
 
 import main
+from utils.ext import checks
+from utils.ext import context
+from utils.ext.cmds import cmd
+from utils.ext.cmds import grp
 from utils.rules import rules
-from utils.ext import checks, context
-from utils.ext.cmds import grp, cmd
 
 
 class Administration(commands.Cog):
@@ -25,7 +27,9 @@ class Administration(commands.Cog):
         if len(prefix) > 3:
             return await ctx.error(lang["prefix.error.maxlength"])
 
-        await ctx.db.execute("UPDATE config.guild SET prefix = $1 WHERE sid = $2", prefix, ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.guild SET prefix = $1 WHERE sid = $2",
+            prefix, ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         cache.prefix = prefix
         await ctx.embed(lang["prefix.message"].format(p=prefix))
@@ -34,13 +38,15 @@ class Administration(commands.Cog):
     @checks.isAdmin()
     async def activate(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
-            return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
+            return await ctx.send_help()
 
     @activate.command()
     @commands.bot_has_permissions(manage_roles=True)
     async def leveling(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET leveling = true WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET leveling = true WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["activate.leveling.message"])
@@ -48,16 +54,21 @@ class Administration(commands.Cog):
     @activate.command()
     async def fun(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET fun = true WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET fun = true WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["activate.fun.message"])
 
     @activate.command()
-    @commands.bot_has_permissions(ban_members=True, kick_members=True, manage_roles=True, manage_messages=True)
+    @commands.bot_has_permissions(ban_members=True, kick_members=True,
+                                  manage_roles=True, manage_messages=True)
     async def automod(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET automod = true WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET automod = true WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["activate.automod.message"])
@@ -66,7 +77,9 @@ class Administration(commands.Cog):
     @commands.bot_has_permissions()
     async def welcomer(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET welcomer = true WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET welcomer = true WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["activate.welcomer.message"])
@@ -75,7 +88,9 @@ class Administration(commands.Cog):
     @commands.bot_has_permissions(ban_members=True)
     async def globalbans(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET globalbans = true WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET globalbans = true WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["activate.globalbans.message"])
@@ -84,7 +99,9 @@ class Administration(commands.Cog):
     @commands.bot_has_permissions(ban_members=True)
     async def logging(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET logging = true WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET logging = true WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["activate.logging.message"])
@@ -93,7 +110,9 @@ class Administration(commands.Cog):
     @commands.bot_has_permissions(ban_members=True)
     async def timer(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET timers = true WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET timers = true WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["activate.timer.message"])
@@ -102,12 +121,14 @@ class Administration(commands.Cog):
     @checks.isAdmin()
     async def deactivate(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
-            return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
+            return await ctx.send_help()
 
     @deactivate.command(name='leveling')
     async def _leveling(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET leveling = false WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET leveling = false WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["deactivate.leveling.message"])
@@ -115,7 +136,9 @@ class Administration(commands.Cog):
     @deactivate.command(name='fun')
     async def _fun(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET fun = false WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET fun = false WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["deactivate.fun.message"])
@@ -123,7 +146,9 @@ class Administration(commands.Cog):
     @deactivate.command(name="automod")
     async def _automod(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET automod = false WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET automod = false WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["deactivate.automod.message"])
@@ -131,7 +156,9 @@ class Administration(commands.Cog):
     @deactivate.command(name='welcomer')
     async def _welcomer(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET welcomer = false WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET welcomer = false WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["deactivate.welcomer.message"])
@@ -139,7 +166,9 @@ class Administration(commands.Cog):
     @deactivate.command(name='globalbans')
     async def _globalbans(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET globalbans = false WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET globalbans = false WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["deactivate.globalbans.message"])
@@ -147,7 +176,9 @@ class Administration(commands.Cog):
     @deactivate.command(name='logging')
     async def _logging(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET logging = false WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET logging = false WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["deactivate.logging.message"])
@@ -155,7 +186,9 @@ class Administration(commands.Cog):
     @deactivate.command(name='timer')
     async def _timer(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.db.execute("UPDATE config.modules SET logging = false WHERE sid = $1", ctx.guild.id)
+        await ctx.db.execute(
+            "UPDATE config.modules SET logging = false WHERE sid = $1",
+            ctx.guild.id)
         cache = await self.bot.cache.get(ctx.guild.id)
         await cache.modules.reload()
         await ctx.embed(lang["deactivate.timer.message"])
@@ -175,36 +208,52 @@ class Administration(commands.Cog):
                         value="Im folgenden Text werden die Regeln des Discords aufgelistet.\n"
                               "**Beim Betreten des Servers stimmt man automatisch den Regeln zu.**")
         embed.add_field(name="__§1.1 | Discord-Guidelines__",
-                        value="**»** Die **[Discord Nutzungsbedingungen](https://discordapp.com/terms)** und die **[Discord Community-Richtlinien]"
-                              "(https://discordapp.com/guidelines)** müssen befolgt werden. Bei einem Verstoß gegen diese, wird der Account dem"
+                        value="**»** Die **[Discord Nutzungsbedingungen]("
+                              "https://discordapp.com/terms)** und die **[Discord "
+                              "Community-Richtlinien] "
+                              "(https://discordapp.com/guidelines)** müssen befolgt werden. Bei "
+                              "einem Verstoß gegen diese, wird der Account dem "
                               "Discord Trust and Safety Team gemeldet.")
         embed.add_field(name="__§2.1 | Verhalten auf dem Discord__",
-                        value="**»** Seid gegenüber jeder Person respektvoll. Behandelt jeden so, wie ihr selbst behandelt werden wollt.")
+                        value="**»** Seid gegenüber jeder Person respektvoll. Behandelt jeden so, "
+                              "wie ihr selbst behandelt werden wollt.")
         embed.add_field(name="__§2.2 | Verhalten in den Chats__",
-                        value="**»** Jeglicher Art von Spam (Mention, Caps, Emoji, …) ist verboten.\n**»** Jegliche Arten von Beleidigungen "
-                              "sind verboten.\n**»** NSFW-Content ist verboten.\n**»** Rassistische, sexistische, radikale, diskriminierende und "
+                        value="**»** Jeglicher Art von Spam (Mention, Caps, Emoji, …) ist "
+                              "verboten.\n**»** Jegliche Arten von Beleidigungen "
+                              "sind verboten.\n**»** NSFW-Content ist verboten.\n**»** "
+                              "Rassistische, sexistische, radikale, diskriminierende und "
                               "ethisch inkorrekte Aussagen, Bilder und Videos sind verboten.")
         embed.add_field(name="__§3.1 | Verbreitung von Links, Bildern und Dateien__",
-                        value="**»** Das Verbreiten von schädlichen Links, Bildern, Texten, Dateien oder Ähnlichem ist in jeglicher Form verboten."
-                              "\n**»** Jegliche Programme, egal ob schädlich oder nicht, sind unerwünscht und können gelöscht werden.")
+                        value="**»** Das Verbreiten von schädlichen Links, Bildern, Texten, "
+                              "Dateien oder Ähnlichem ist in jeglicher Form verboten. "
+                              "\n**»** Jegliche Programme, egal ob schädlich oder nicht, "
+                              "sind unerwünscht und können gelöscht werden.")
         embed.add_field(name="__§3.2 | Verbreitung von Werbung__",
-                        value="**»** Jegliche Art von Werbung, ob für einen Eigennutzen oder Nutzen für einen anderen, ist auf dem Discord verboten. "
-                              "Dazu zählt die Verbreitung in Chats, Avataren, Namen und sonstigen Medien.")
+                        value="**»** Jegliche Art von Werbung, ob für einen Eigennutzen oder "
+                              "Nutzen für einen anderen, ist auf dem Discord verboten. "
+                              "Dazu zählt die Verbreitung in Chats, Avataren, Namen und sonstigen "
+                              "Medien.")
         embed.add_field(name="__§3.3 | Verbreitung von privaten Daten__",
-                        value="**»** Private Daten sollen privat bleiben. Telefonnummern, Adressen, E-Mails und ähnliches sind privat zu halten und"
+                        value="**»** Private Daten sollen privat bleiben. Telefonnummern, "
+                              "Adressen, E-Mails und ähnliches sind privat zu halten und "
                               " nicht öffentlich zu teilen.")
         embed.add_field(name="__§3.4 | Handel und Geschäfte__",
-                        value="**»** Der Handel mit jeglichen Dingen ist auf dem Discord untersagt. Geschäfte und Handel sind privat zu regeln. ")
+                        value="**»** Der Handel mit jeglichen Dingen ist auf dem Discord "
+                              "untersagt. Geschäfte und Handel sind privat zu regeln. ")
         embed.add_field(name="__§4.1 |  Nickname, Profilbild, Spieleanzeige__",
-                        value="**»** Nicknamen, Spieleanzeigen und Profilbilder dürfen weder beleidigend, rassistisch, sexistisch, radikal, "
+                        value="**»** Nicknamen, Spieleanzeigen und Profilbilder dürfen weder "
+                              "beleidigend, rassistisch, sexistisch, radikal, "
                               "diskriminierend oder ethisch inkorrekt sein.")
         embed.add_field(name="__§5.1 | Sonstiges - Ausnahmen__",
-                        value="**»** Falls eine Änderung der Regeln für einen bestimmten Channel existiert, kann man dies in der Channelbeschreibung "
+                        value="**»** Falls eine Änderung der Regeln für einen bestimmten Channel "
+                              "existiert, kann man dies in der Channelbeschreibung "
                               "finden.")
         embed.add_field(name="__§5.2 | Sonstiges - Selbstverständlichkeit__",
-                        value="**»** Selbstverständliche Regeln müssen eingehalten werden, auch ohne, dass sie in diesem Regelwerk erwähnt werden")
+                        value="**»** Selbstverständliche Regeln müssen eingehalten werden, "
+                              "auch ohne, dass sie in diesem Regelwerk erwähnt werden")
         embed.add_field(name="__§5.3 | Sonstiges - Moderatoren__",
-                        value="**»** Moderatoren haben immer Recht. Kein Moderator muss sein Handeln vor einem User rechtfertigen. ")
+                        value="**»** Moderatoren haben immer Recht. Kein Moderator muss sein "
+                              "Handeln vor einem User rechtfertigen. ")
         embed.set_footer(text="by JohannesIBK")
         await ctx.send(embed=embed)
 
@@ -216,7 +265,9 @@ class Administration(commands.Cog):
         lang = await ctx.lang()
         guild = ctx.guild
 
-        mute_role_id: int = await ctx.db.fetchval('SELECT muterole FROM automod.config WHERE sid = $1', guild.id)
+        mute_role_id: int = await ctx.db.fetchval(
+            "SELECT muterole FROM automod.config WHERE sid = $1",
+            guild.id)
         mute_role = guild.get_role(mute_role_id)
         if mute_role is None:
             return await ctx.error(lang["setupmute.error.nomuterole"])
@@ -276,7 +327,8 @@ class Administration(commands.Cog):
                 words, ctx.guild.id)
         else:
             await ctx.db.execute(
-                'UPDATE automod.automod SET blacklistwords = array_cat(blacklistwords, $1) WHERE sid = $2',
+                'UPDATE automod.automod SET blacklistwords = array_cat(blacklistwords, $1) '
+                'WHERE sid = $2',
                 words, ctx.guild.id)
 
         await ctx.embed(lang["copyblacklist.message"])
