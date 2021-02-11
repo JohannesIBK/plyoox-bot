@@ -1,6 +1,5 @@
-import datetime
-
 import argparse
+import datetime
 import io
 import re
 import shlex
@@ -10,21 +9,29 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.automod import automod, add_points
-from utils.ext import checks, logs, standards as std
-from utils.ext.cmds import cmd, grp
+from utils.automod import add_points
+from utils.automod import automod
+from utils.ext import checks
+from utils.ext import logs
+from utils.ext import standards as std
+from utils.ext.cmds import cmd
+from utils.ext.cmds import grp
 from utils.ext.context import Context
-from utils.ext.converters import ActionReason, BannedMember, AdvancedMember
+from utils.ext.converters import ActionReason
+from utils.ext.converters import AdvancedMember
+from utils.ext.converters import BannedMember
 from utils.ext.errors import FakeArgument
 from utils.ext.time import FutureTime
 
-linkRegex = re.compile(r'((https?://(www\.)?|www\.)[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})', re.IGNORECASE)
+
+linkRegex = re.compile(
+    r'((https?://(www\.)?|www\.)[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6})', re.IGNORECASE)
 
 
 def can_execute_action(ctx, user, target):
     return user.id == ctx.bot.owner_id or \
-        user == ctx.guild.owner or \
-        user.top_role > target.top_role
+           user == ctx.guild.owner or \
+           user.top_role > target.top_role
 
 
 class Arguments(argparse.ArgumentParser):
@@ -48,7 +55,8 @@ class Moderation(commands.Cog):
         await automod(ctx)
 
     @staticmethod
-    async def can_punish_user(ctx: Context, user: Union[discord.Member, discord.User, AdvancedMember]):
+    async def can_punish_user(ctx: Context,
+                              user: Union[discord.Member, discord.User, AdvancedMember]):
         if isinstance(user, discord.User):
             return True
 
@@ -140,7 +148,8 @@ class Moderation(commands.Cog):
     @cmd(aliases=["tmute"])
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def tempmute(self, ctx: Context, user: discord.Member, time: FutureTime, *, reason: ActionReason = None):
+    async def tempmute(self, ctx: Context, user: discord.Member, time: FutureTime, *,
+                       reason: ActionReason = None):
         lang = await ctx.lang(utils=True)
         config = await ctx.cache.get(ctx.guild.id)
 
@@ -154,11 +163,14 @@ class Moderation(commands.Cog):
         await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id, type='tempmute')
         await user.add_roles(config.automod.config.muterole)
 
-        await ctx.embed(lang["mute.temp.message"].format(u=str(user), r=reason, d=time.delta), delete_after=5)
+        await ctx.embed(lang["mute.temp.message"].format(u=str(user), r=reason, d=time.delta),
+                        delete_after=5)
         await ctx.message.delete(delay=5)
 
-        mod_embed = std.cmdEmbed("tempmute", reason, lang, mod=ctx.author, user=user, duration=time.dt)
-        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='mute', duration=time.dt)
+        mod_embed = std.cmdEmbed("tempmute", reason, lang, mod=ctx.author, user=user,
+                                 duration=time.dt)
+        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='mute',
+                                 duration=time.dt)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
@@ -171,7 +183,9 @@ class Moderation(commands.Cog):
         if config is None or config.automod.config.muterole is None:
             return await ctx.error(lang["multi.error.nomuterole"])
 
-        mute = await ctx.db.fetchrow("SELECT objid FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 'tempmute'", ctx.guild.id, user.id)
+        mute = await ctx.db.fetchrow(
+            "SELECT objid FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 'tempmute'",
+            ctx.guild.id, user.id)
         if config.automod.config.muterole not in user.roles and mute is None:
             return ctx.error(lang["unmute.error.notmuted"])
 
@@ -179,7 +193,9 @@ class Moderation(commands.Cog):
             await user.remove_roles(config.automod.config.muterole, reason=lang["word.unmute"])
 
         if mute is not None:
-            await ctx.db.execute("DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 'tempmute'", ctx.guild.id, user.id)
+            await ctx.db.execute(
+                "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 'tempmute'",
+                ctx.guild.id, user.id)
 
         await ctx.embed(lang["unmute.message"].format(u=str(user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
@@ -190,7 +206,8 @@ class Moderation(commands.Cog):
     @cmd(aliases=["tban"])
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
-    async def tempban(self, ctx: Context, user: AdvancedMember, time: FutureTime, *, reason: ActionReason = None):
+    async def tempban(self, ctx: Context, user: AdvancedMember, time: FutureTime, *,
+                      reason: ActionReason = None):
         lang = await ctx.lang(utils=True)
 
         if not self.can_punish_user(ctx, user):
@@ -200,11 +217,14 @@ class Moderation(commands.Cog):
         await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id, type='tempban')
         await ctx.guild.ban(user=user, reason=reason, delete_message_days=1)
 
-        await ctx.embed(lang["ban.temp.message"].format(u=str(user), r=reason, d=time.delta), delete_after=5)
+        await ctx.embed(lang["ban.temp.message"].format(u=str(user), r=reason, d=time.delta),
+                        delete_after=5)
         await ctx.message.delete(delay=5)
 
-        mod_embed = std.cmdEmbed("tempban", reason, lang, mod=ctx.author, user=user, duration=time.dt)
-        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='ban', duration=time.dt)
+        mod_embed = std.cmdEmbed("tempban", reason, lang, mod=ctx.author, user=user,
+                                 duration=time.dt)
+        user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='ban',
+                                 duration=time.dt)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
@@ -223,7 +243,8 @@ class Moderation(commands.Cog):
     @cmd()
     @checks.isMod()
     @commands.bot_has_permissions(ban_members=True)
-    async def multiban(self, ctx: Context, users: commands.Greedy[AdvancedMember], *, reason: ActionReason = None):
+    async def multiban(self, ctx: Context, users: commands.Greedy[AdvancedMember], *,
+                       reason: ActionReason = None):
         lang = await ctx.lang()
         total_members = len(users)
         if total_members == 0:
@@ -251,7 +272,8 @@ class Moderation(commands.Cog):
 
     @cmd()
     @checks.isMod(helper=True)
-    async def warn(self, ctx: Context, user: discord.Member, points: int, *, reason: ActionReason = None):
+    async def warn(self, ctx: Context, user: discord.Member, points: int, *,
+                   reason: ActionReason = None):
         lang = await ctx.lang(utils=True)
 
         if not self.can_punish_user(ctx, user):
@@ -261,7 +283,8 @@ class Moderation(commands.Cog):
             return await ctx.error(lang["warn.error.points"])
 
         await add_points(ctx, points, reason, user=user)
-        await ctx.embed(lang["warn.message"].format(u=str(user), r=reason, p=str(points)), delete_after=5)
+        await ctx.embed(lang["warn.message"].format(u=str(user), r=reason, p=str(points)),
+                        delete_after=5)
         await ctx.message.delete(delay=5)
 
     @cmd()
@@ -275,11 +298,15 @@ class Moderation(commands.Cog):
         if not await self.can_punish_user(ctx, user):
             return await ctx.error(lang["multi.error.notallowed"])
 
-        points = await self.bot.db.fetchval('SELECT sum(points) FROM automod.users WHERE uid = $1 AND sid = $2', user.id, ctx.guild.id)
+        points = await self.bot.db.fetchval(
+            'SELECT sum(points) FROM automod.users WHERE uid = $1 AND sid = $2', user.id,
+            ctx.guild.id)
         if points is None:
             return await ctx.error(lang["points.error.nopoints"])
 
-        await ctx.embed(lang["points.message"].format(u=str(user), p=str(points), m=str(config.automod.config.maxpoints)), delete_after=5)
+        await ctx.embed(lang["points.message"].format(u=str(user), p=str(points),
+                                                      m=str(config.automod.config.maxpoints)),
+                        delete_after=5)
         await ctx.message.delete(delay=5)
 
     @cmd()
@@ -287,7 +314,8 @@ class Moderation(commands.Cog):
     async def resetPoints(self, ctx: Context, user: discord.Member, reason: ActionReason = None):
         lang = await ctx.lang(utils=True)
 
-        await ctx.bot.db.execute('DELETE FROM automod.users WHERE sid = $1 AND uid = $2', ctx.guild.id, user.id)
+        await ctx.bot.db.execute('DELETE FROM automod.users WHERE sid = $1 AND uid = $2',
+                                 ctx.guild.id, user.id)
         await ctx.embed(lang["pointsreset.message"].format(u=str(user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
 
@@ -315,24 +343,33 @@ class Moderation(commands.Cog):
         lang = await ctx.lang(utils=True)
 
         if not isinstance(user, discord.Member):
-            ban_data\
-                = await ctx.bot.db.fetchrow("SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempban'", user.user.id, ctx.guild.id)
+            ban_data = await ctx.bot.db.fetchrow(
+                "SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempban'",
+                user.user.id, ctx.guild.id)
             if ban_data is None:
                 return await ctx.embed(lang["check.ban.perma"].format(r=user.reason))
             else:
-                timestamp = datetime.datetime.fromtimestamp(ban_data['time']).strftime(lang["date.format.large"])
+                timestamp = datetime.datetime.fromtimestamp(ban_data['time']).strftime(
+                    lang["date.format.large"])
                 await ctx.embed(lang["check.ban.temp"].format(d=timestamp, r=user.reason))
         else:
             embed = discord.Embed(color=std.normal_color)
-            mute_data = await ctx.bot.db.fetchrow("SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempmute'", user.id, ctx.guild.id)
-            punishments = await ctx.bot.db.fetch("SELECT * FROM automod.users WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
+            mute_data = await ctx.bot.db.fetchrow(
+                "SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempmute'",
+                user.id, ctx.guild.id)
+            punishments = await ctx.bot.db.fetch(
+                "SELECT * FROM automod.users WHERE uid = $1 AND sid = $2",
+                user.id, ctx.guild.id)
 
             if mute_data:
-                timestamp = datetime.datetime.utcfromtimestamp(mute_data['time']).strftime(lang["date.format.large"])
-                embed.description = lang["check.mute.temp"].format(d=timestamp, r=mute_data.get("reason"))
+                timestamp = datetime.datetime.utcfromtimestamp(mute_data['time']).strftime(
+                    lang["date.format.large"])
+                embed.description = lang["check.mute.temp"].format(d=timestamp,
+                                                                   r=mute_data.get("reason"))
             elif punishments:
                 punishment_list = [f'{pm["reason"]} [{pm["points"]}]' for pm in punishments]
-                embed.add_field(name=lang["check.punish"].format(p=str(len(punishment_list))), value='\n'.join(punishment_list))
+                embed.add_field(name=lang["check.punish"].format(p=str(len(punishment_list))),
+                                value='\n'.join(punishment_list))
             else:
                 return await ctx.embed(lang["check.nopunish"])
             await ctx.send(embed=embed)
@@ -343,13 +380,14 @@ class Moderation(commands.Cog):
     async def remove(self, ctx: Context, amount: int, *, reason: str):
         if ctx.invoked_subcommand is None:
             if amount is None:
-                return await ctx.invoke(self.bot.get_command('help'), "remove")
-            else:
-                lang = await ctx.lang(utils=True)
-                await self.do_removal(ctx, amount, lambda m: True, lang, reason)
+                return await ctx.send_help()
+
+            lang = await ctx.lang(utils=True)
+            await self.do_removal(ctx, amount, lambda m: True, lang, reason)
 
     @staticmethod
-    async def do_removal(ctx: Context, limit: int, predicate, lang, reason=None, *, before=None, after=None):
+    async def do_removal(ctx: Context, limit: int, predicate, lang, reason=None, *, before=None,
+                         after=None):
         if limit > 2000 or limit < 1:
             return await ctx.error(lang['clear.error.amount'])
 
@@ -365,7 +403,8 @@ class Moderation(commands.Cog):
         deleted = len(deleted)
 
         await ctx.embed(lang['clear.message.deleted'].format(a=deleted), delete_after=5)
-        await logs.createCmdLog(ctx, std.cmdEmbed("clear", reason, lang, mod=ctx.author, amount=deleted))
+        await logs.createCmdLog(ctx,
+                                std.cmdEmbed("clear", reason, lang, mod=ctx.author, amount=deleted))
 
     @remove.command()
     async def embeds(self, ctx, amount: int, *, reason: ActionReason = None):
@@ -380,7 +419,8 @@ class Moderation(commands.Cog):
     @remove.command()
     async def images(self, ctx, amount: int, *, reason: ActionReason = None):
         lang = await ctx.lang(utils=True)
-        await self.do_removal(ctx, amount, lambda m: len(m.embeds) or len(m.attachments), lang, reason)
+        await self.do_removal(ctx, amount, lambda m: len(m.embeds) or len(m.attachments), lang,
+                              reason)
 
     @remove.command(name='all')
     async def _remove_all(self, ctx, amount: int, *, reason: ActionReason = None):
@@ -405,7 +445,8 @@ class Moderation(commands.Cog):
         lang = await ctx.lang(utils=True)
 
         def predicate(m):
-            return (m.webhook_id is None and m.author.bot) or (prefix and m.content.startswith(prefix))
+            return (m.webhook_id is None and m.author.bot) or (
+                        prefix and m.content.startswith(prefix))
 
         await self.do_removal(ctx, amount, predicate, lang, reason)
 
@@ -542,7 +583,8 @@ class Moderation(commands.Cog):
             args.search = 100
 
         args.search = max(0, min(2000, args.search))
-        await self.do_removal(ctx, args.search, predicate, lang, before=args.before, after=args.after)
+        await self.do_removal(ctx, args.search, predicate, lang, before=args.before,
+                              after=args.after)
 
     @cmd(aliases=['banmatch'])
     @checks.isAdmin()
@@ -601,7 +643,8 @@ class Moderation(commands.Cog):
             if args.files:
                 predicates.append(args.files)
 
-            async for message in channel.history(limit=min(max(1, args.search), 2000), before=before, after=after):
+            async for message in channel.history(limit=min(max(1, args.search), 2000),
+                                                 before=before, after=after):
                 if all(p(message) for p in predicates):
                     members.append(message.author)
         else:
@@ -670,7 +713,8 @@ class Moderation(commands.Cog):
         if args.show:
             members = sorted(members, key=lambda m: m.joined_at or now)
             fmt = "\n".join(lang["massban.memberlist.message"]
-                            .format(id=m.id, j=m.joined_at, c=m.created_at, m=str(m)) for m in members)
+                            .format(id=m.id, j=m.joined_at, c=m.created_at, m=str(m)) for m in
+                            members)
             content = f'{lang["massban.word.usercount"]}: {len(members)}\n{fmt}'
             file = discord.File(io.BytesIO(content.encode('utf-8')), filename='members.txt')
             return await ctx.send(file=file)
@@ -697,7 +741,8 @@ class Moderation(commands.Cog):
 
         embed = std.cmdEmbed('massban', reason, lang, mod=ctx.author, amount=len(members))
         embed.add_field(name=lang["massban.embed.users.name"],
-                        value=lang["massban.embed.users.value"].format(c=str(count), m=str(len(members))))
+                        value=lang["massban.embed.users.value"].format(c=str(count),
+                                                                       m=str(len(members))))
 
         await logs.createCmdLog(ctx, embed)
 
