@@ -79,8 +79,12 @@ class Timers(commands.Cog):
                            type: str, data: dict = None):
         seconds = int(date.timestamp())
         delta = (date - datetime.datetime.utcnow()).total_seconds()
-        timer = await Timer.create_timer(guild_id, time=seconds, object_id=object_id,
-                                         type=type, data=data)
+        timer = await Timer.create_timer(
+            guild_id,
+            time=seconds,
+            object_id=object_id,
+            type=type,
+            data=data)
 
         if delta <= 60:
             self.bot.loop.create_task(self.short_timer(timer, delta))
@@ -113,8 +117,12 @@ class Timers(commands.Cog):
         fake_context = context.FakeContext(self.bot, guild)
         ban = await guild.fetch_ban(user)
         await guild.unban(user=user, reason=lang["ban.temp.reason.expired"])
-        mod_embed = std.cmdEmbed("unban", lang["ban.temp.reason.expired"], lang, user=ban.user,
-                                 mod=fake_context.me)
+        mod_embed = std.cmdEmbed(
+            "unban",
+            lang["ban.temp.reason.expired"],
+            lang,
+            user=ban.user,
+            mod=fake_context.me)
         await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
 
     @commands.Cog.listener()
@@ -130,8 +138,12 @@ class Timers(commands.Cog):
             return
 
         fake_context = context.FakeContext(self.bot, guild)
-        mod_embed = std.cmdEmbed("unmute", lang["mute.temp.reason.unmute"], lang, user=user,
-                                 mod=fake_context.me)
+        mod_embed = std.cmdEmbed(
+            "unmute",
+            lang["mute.temp.reason.unmute"],
+            lang,
+            user=user,
+            mod=fake_context.me)
         await user.remove_roles(config.automod.config.muterole)
         await logs.createLog(fake_context, mEmbed=mod_embed, automod=True)
 
@@ -146,9 +158,12 @@ class Timers(commands.Cog):
 
         message = lang["reminder.event.timermessage"].format(u=member.mention,
                                                              m=std.quote(timer.data["message"]))
-        await channel.send(message, allowed_mentions=discord.AllowedMentions(everyone=False,
-                                                                             users=True,
-                                                                             roles=False))
+        await channel.send(
+            message,
+            allowed_mentions=discord.AllowedMentions(
+                everyone=False,
+                users=True,
+                roles=False))
 
     @commands.Cog.listener()
     async def on_giveaway_end(self, timer: Timer):
@@ -218,6 +233,9 @@ class Timers(commands.Cog):
 
     @grp(case_insensitive=True)
     async def giveaway(self, ctx: context.Context):
+        if ctx.invoked_subcommand is None:
+            return await ctx.send_help(ctx.command)
+
         if not ctx.author.guild_permissions.administrator:
             manager = await ctx.db.fetchval(
                 'SELECT giveawaymanager FROM config.timers WHERE sid = $1',
@@ -229,21 +247,20 @@ class Timers(commands.Cog):
             else:
                 raise commands.MissingPermissions(['giveawaymanager'])
 
-        if ctx.invoked_subcommand is None:
-            return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
-
     @giveaway.command()
     async def start(self, ctx: Context, duration: FutureTime, winner: int,
                     channel: discord.TextChannel, *, prize: str):
         lang = await ctx.lang()
         data = {
-            'winner': winner,
-            'winType': prize,
+            'winner'    : winner,
+            'winType'   : prize,
             'channel_id': channel.id
         }
 
-        embed = discord.Embed(color=std.normal_color, title=lang["giveaway.embed.title"],
-                              description=lang["giveaway.embed.startdescription"])
+        embed = discord.Embed(
+            color=std.normal_color,
+            title=lang["giveaway.embed.title"],
+            description=lang["giveaway.embed.startdescription"])
         msg = await channel.send(embed=embed)
         await msg.add_reaction('🎉')
         await ctx.send(embed=std.getEmbed(lang["giveaway.message.started"]))
@@ -253,8 +270,13 @@ class Timers(commands.Cog):
         embed.timestamp = duration.dt
         await msg.edit(embed=embed)
 
-        await Timers.create_timer(self, ctx.guild.id, date=duration.dt, object_id=msg.id,
-                                  type='giveaway', data=data)
+        await Timers.create_timer(
+            self,
+            ctx.guild.id,
+            date=duration.dt,
+            object_id=msg.id,
+            type='giveaway',
+            data=data)
 
     @giveaway.command()
     async def stop(self, ctx: context.Context, ID: int):
@@ -262,6 +284,7 @@ class Timers(commands.Cog):
         data = await ctx.db.fetchrow(
             'SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2',
             ctx.guild.id, ID)
+
         if data is None:
             await ctx.error(lang["giveaway.error.wrongid"])
 
@@ -284,6 +307,7 @@ class Timers(commands.Cog):
         data = await ctx.db.fetchrow(
             'SELECT objid, data FROM extra.timers WHERE sid = $1 AND objid = $2',
             ctx.guild.id, ID)
+
         if data is None:
             await ctx.error(lang["giveaway.error.wrongid"])
 
@@ -295,7 +319,7 @@ class Timers(commands.Cog):
     @checks.isActive('timers')
     async def reminder(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
-            return await ctx.invoke(self.bot.get_command('help'), ctx.command.name)
+            await ctx.send_help(ctx.command)
 
     @reminder.command(cooldown_after_parsing=True)
     @commands.cooldown(rate=2, per=30.0, type=commands.BucketType.user)
@@ -315,12 +339,13 @@ class Timers(commands.Cog):
         if timer_count >= 25:
             await ctx.error(lang["reminder.error.maxtimer"])
 
-        await Timers.create_timer(self,
-                                  ctx.guild.id,
-                                  date=duration.dt,
-                                  object_id=ctx.author.id,
-                                  type='timer',
-                                  data={'message': reason, 'channel_id': ctx.channel.id})
+        await Timers.create_timer(
+            self,
+            ctx.guild.id,
+            date=duration.dt,
+            object_id=ctx.author.id,
+            type='timer',
+            data={'message': reason, 'channel_id': ctx.channel.id})
 
         await ctx.embed(lang["reminder.message.created"], delete_after=10)
         await ctx.message.delete(delay=10)
