@@ -6,7 +6,9 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import checks, standards as std, context
+from utils.ext import checks
+from utils.ext import context
+from utils.ext import standards as std
 from utils.ext.cmds import cmd
 from utils.ext.formatter import formatMessage
 
@@ -74,7 +76,9 @@ class Leveling(commands.Cog):
             return
 
         new_xp = random.randint(15, 25)
-        await self.bot.db.execute("UPDATE extra.levels SET xp = xp + $1, time = $2 WHERE id = $3", new_xp, time.time(), user_data['id'])
+        await self.bot.db.execute(
+            "UPDATE extra.levels SET xp = xp + $1, time = $2 WHERE id = $3",
+            new_xp, time.time(), user_data['id'])
 
         before_lvl = self._get_level_from_xp(user_data['xp'])
         current_lvl = self._get_level_from_xp(user_data['xp'] + new_xp)
@@ -93,7 +97,8 @@ class Leveling(commands.Cog):
                 remove_roles = list(filter(lambda role: role[1] != current_lvl, roles)) or None
                 await author.add_roles(add_role)
                 if remove_roles:
-                    await author.remove_roles(*[guild.get_role(role[0]) for role in remove_roles if guild.get_role(role[0])])
+                    await author.remove_roles(*[guild.get_role(role[0]) for role in remove_roles if
+                                                guild.get_role(role[0])])
             else:
                 add_lvl_roles = []
                 for role in roles:
@@ -124,8 +129,8 @@ class Leveling(commands.Cog):
             return await ctx.error(lang["level.error.bot"])
 
         user_data = await ctx.db.fetchrow(
-            "WITH users AS (SELECT xp, uid, row_number() OVER (ORDER BY xp DESC) AS count FROM extra.levels "
-            "WHERE sid = $1) SELECT * FROM users WHERE uid = $2",
+            "WITH users AS (SELECT xp, uid, row_number() OVER (ORDER BY xp DESC) "
+            "AS count FROM extra.levels WHERE sid = $1) SELECT * FROM users WHERE uid = $2",
             ctx.guild.id, user.id)
         if not user_data:
             return await ctx.error(lang["level.error.noentry"])
@@ -142,8 +147,10 @@ class Leveling(commands.Cog):
         embed.set_author(name=user.name, icon_url=user.avatar_url)
         embed.set_thumbnail(url=user.avatar_url)
         embed.add_field(name=std.arrow + lang["level.embed.level.name"], value=f'```{lvl}```')
-        embed.add_field(name=std.arrow + lang["level.embed.xp.name"], value=f"```{current_xp}/{lvl_xp}```")
-        embed.add_field(name=std.arrow + lang["level.embed.rank.name"], value=f'```#{user_data["count"]}```')
+        embed.add_field(name=std.arrow + lang["level.embed.xp.name"],
+                        value=f"```{current_xp}/{lvl_xp}```")
+        embed.add_field(name=std.arrow + lang["level.embed.rank.name"],
+                        value=f'```#{user_data["count"]}```')
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
@@ -152,7 +159,10 @@ class Leveling(commands.Cog):
     async def levelRoles(self, ctx: context.Context):
         lang = await ctx.lang()
 
-        data = await self.bot.db.fetchval("SELECT roles FROM config.leveling WHERE sid = $1", ctx.guild.id)
+        data = await self.bot.db.fetchval(
+            "SELECT roles FROM config.leveling WHERE sid = $1",
+            ctx.guild.id)
+
         if data is None:
             return await ctx.error(lang["levelroles.error.noroles"])
 
@@ -175,8 +185,11 @@ class Leveling(commands.Cog):
     async def top(self, ctx: context.Context):
         lang = await ctx.lang()
 
-        users = await ctx.db.fetch('SELECT * FROM extra.levels WHERE sid = $1 ORDER BY xp DESC LIMIT 15', ctx.guild.id)
-        embed = discord.Embed(color=std.normal_color, title=lang["top.embed.title"].format(g=ctx.guild.name))
+        users = await ctx.db.fetch(
+            'SELECT * FROM extra.levels WHERE sid = $1 ORDER BY xp DESC LIMIT 15',
+            ctx.guild.id)
+        embed = discord.Embed(color=std.normal_color,
+                              title=lang["top.embed.title"].format(g=ctx.guild.name))
         count = 0
 
         for userData in users:
@@ -198,7 +211,8 @@ class Leveling(commands.Cog):
             if count == 11:
                 break
 
-            embed.add_field(name=f"{count}. {member.display_name}", value=std.quote(lang["top.embed.user.value"].format(l=lvl, c=current_xp, x=lvl_xp)))
+            embed.add_field(name=f"{count}. {member.display_name}", value=std.quote(
+                lang["top.embed.user.value"].format(l=lvl, c=current_xp, x=lvl_xp)))
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
@@ -210,7 +224,9 @@ class Leveling(commands.Cog):
 
         if user.bot:
             return await ctx.error(lang["resetlevel.error.bot"])
-        await ctx.db.execute("DELETE FROM extra.levels WHERE uid = $1 AND sid = $2", user.id, ctx.guild.id)
+        await ctx.db.execute(
+            "DELETE FROM extra.levels WHERE uid = $1 AND sid = $2",
+            user.id, ctx.guild.id)
         await ctx.message.delete(delay=5)
         await ctx.embed(lang["resetlevel.message"].format(u=str(user)), delete_after=5)
 
