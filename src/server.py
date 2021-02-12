@@ -13,7 +13,7 @@ from utils.db.cache import BotCache
 handler = RotatingFileHandler(filename='logs/tornado.log', maxBytes=1024 * 10, encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger = logging.getLogger("tornado.application")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 logger.addHandler(handler)
 tornado.log.enable_pretty_logging(logger=logger)
 
