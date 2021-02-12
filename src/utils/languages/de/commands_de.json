@@ -277,13 +277,15 @@
     "word.log": "Log",
     "word.tempban": "Temporärer Bann",
     "word.tempmute": "Temporärer Mute",
-    "logs.user.start": "Du wurdest wegen {r}",
-    "log.word.mute": "gemutet",
-    "log.word.ban": "gebannt",
-    "log.word.warn": "gewarnt",
-    "log.duration": "bis zum {d}",
-    "log.guildname": "auf dem {n}",
-    "log.points": "Du hast nun {p} Punkte.",
+
+    "word.log.ban": "gebannt",
+    "word.log.mute": "gemutet",
+
+    "log.message.perm": "Du wurdest permanent vom Server `{n}` {t}, da du die maximale Anzahl von Warn-Punkten erreicht hast.",
+    "log.message.temp": "Du wurdest für `{d}` vom Server `{n}` {t}, da du die maximale Anzahl von Warn-Punkten erreicht hast.",
+    "log.message.log": "Du wurdest auf dem Server `{n}` wegen `{r}` gewarnt. Du hast nun `{p}` Warn-Punkte.",
+    "log.message.kick": "Du wurdest vom Server `{n}` wegen `{r}` gekickt.",
+
     "reason.blacklistedword": "Verbotenes Wort",
     "reason.invite": "Discord-Einladung",
     "reason.link": "Link",

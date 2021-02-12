@@ -119,6 +119,47 @@ def getErrorEmbed(errorMessage: str) -> discord.Embed:
     return embed
 
 
+def toTimedString(timestamp):
+    div_seconds = int((datetime.datetime.utcnow() - timestamp).total_seconds())
+
+    def years():
+        return divmod(div_seconds, 31536000)
+
+    def days(_seconds=None):
+        return divmod(seconds if _seconds is not None else div_seconds, 86400)
+
+    def hours(_seconds=None):
+        return divmod(seconds if _seconds is not None else div_seconds, 3600)
+
+    def minutes(_seconds=None):
+        return divmod(seconds if _seconds is not None else div_seconds, 60)
+
+    def seconds(_seconds=None):
+        if _seconds is not None:
+            return divmod(_seconds, 1)
+        return div_seconds
+
+    durations = []
+    y = years()
+    d = days(y[1])
+    h = hours(d[1])
+    m = minutes(h[1])
+    s = seconds(m[1])
+
+    if y[0]:
+        durations.append(f"{y[0]}y")
+    if d[0]:
+        durations.append(f"{d[0]}d")
+    if h[0]:
+        durations.append(f"{h[0]}h")
+    if m[0]:
+        durations.append(f"{m[0]}m")
+    if s[0]:
+        durations.append(f"{s[0]}s")
+
+    return " ".join(durations)
+
+
 def dmEmbed(lang, *, reason, guildName, punishType,
             duration: datetime.datetime = None) -> discord.Embed:
     embed = discord.Embed(color=normal_color)
@@ -126,44 +167,7 @@ def dmEmbed(lang, *, reason, guildName, punishType,
     embed.set_footer(text=lang['log.embed.footer'], icon_url=avatar_url)
 
     if duration:
-        div_seconds = int((datetime.datetime.utcnow() - duration).total_seconds())
-
-        def years():
-            return divmod(div_seconds, 31536000)
-
-        def days(_seconds=None):
-            return divmod(seconds if _seconds is not None else div_seconds, 86400)
-
-        def hours(_seconds=None):
-            return divmod(seconds if _seconds is not None else div_seconds, 3600)
-
-        def minutes(_seconds=None):
-            return divmod(seconds if _seconds is not None else div_seconds, 60)
-
-        def seconds(_seconds=None):
-            if _seconds is not None:
-                return divmod(_seconds, 1)
-            return div_seconds
-
-        durations = []
-        y = years()
-        d = days(y[1])
-        h = hours(d[1])
-        m = minutes(h[1])
-        s = seconds(m[1])
-
-        if y[0]:
-            durations.append(f"{y[0]}y")
-        if d[0]:
-            durations.append(f"{d[0]}d")
-        if h[0]:
-            durations.append(f"{h[0]}h")
-        if m[0]:
-            durations.append(f"{m[0]}m")
-        if s[0]:
-            durations.append(f"{s[0]}s")
-
-        duration = " ".join(durations)
+        duration = toTimedString(duration)
 
     reason = reason or ''
     if reason:
@@ -189,28 +193,30 @@ def dmEmbed(lang, *, reason, guildName, punishType,
     return embed
 
 
-def automodUserEmbed(lang, reason, guildName, type, points=None, duration=None):
+def automodUserEmbed(lang, reason, guildName, type: str, points=None, duration=None):
     embed = discord.Embed(color=normal_color)
     embed.timestamp = datetime.datetime.utcnow()
     embed.set_footer(text=lang['log.embed.footer'], icon_url=avatar_url)
 
-    msg = lang["logs.user.start"].format(r=reason) + " "
-
     if duration is not None:
-        msg += lang["log.duration"].format(d=duration.strftime(lang["date.format.large"])) + " "
+        duration += lang["log.duration"].format(
+            d=duration.strftime(lang["date.format.large"])) + " "
 
-    msg += lang["log.guildname"].format(n=guildName) + " "
+    if type.replace("temp", "") in ["ban", "mute"]:
+        if type.startswith("temp"):
+            message = lang["log.message.temp"].format(d=toTimedString(duration))
+        else:
+            message = lang["log.message.perma"]
 
-    if type == "tempmute":
-        msg += lang["log.word.mute"] + "."
-    elif type in ["ban", "tempban"]:
-        msg += lang["log.word.ban"] + "."
+        message = message.format(t=lang["word." + type.replace("temp", "")])
     else:
-        msg += lang["log.word.warn"] + ". "
-        if points is not None:
-            msg += lang["log.points"].format(p=points) + "."
+        message = lang["log.message." + type]
 
-    embed.description = msg
+    if type == "log":
+        message = message.format(p=points)
+    message = message.format(n=guildName, r=reason)
+
+    embed.description = message
     return embed
 
 
