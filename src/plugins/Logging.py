@@ -190,7 +190,7 @@ class Logging(commands.Cog):
         embed = discord.Embed(color=discord.Color.red())
         embed.set_author(name=lang["delete.embed.title"], icon_url=cached_message.author.avatar_url)
         embed.description = lang["delete.embed.description"].format(
-            c=cached_message.channel.mention, u=cached_message.author)
+            c=cached_message.channel, u=cached_message.author)
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text=f'ID: {cached_message.author.id}')
 
