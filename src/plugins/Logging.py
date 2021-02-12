@@ -244,7 +244,7 @@ class Logging(commands.Cog):
                     f'{payload.message_id}'
         embed.description = lang["edit.embed.description"].format(
             l=jump_link,
-            c=guild.get_channel(int(payload.data["channel_id"])).mention,
+            c=guild.get_channel(int(payload.data["channel_id"])),
             u=user
         )
 
