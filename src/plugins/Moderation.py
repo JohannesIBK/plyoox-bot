@@ -374,10 +374,10 @@ class Moderation(commands.Cog):
                 return await ctx.embed(lang["check.nopunish"])
             await ctx.send(embed=embed)
 
-    @grp(invoke_without_command=True, aliases=["clear", "purge"])
+    @grp(invoke_without_command=True, aliases=["remove", "purge", "p"])
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def remove(self, ctx: Context, amount: int, *, reason: str):
+    async def clear(self, ctx: Context, amount: int, *, reason: str):
         if ctx.invoked_subcommand is None:
             if amount is None:
                 return await ctx.send_help()
