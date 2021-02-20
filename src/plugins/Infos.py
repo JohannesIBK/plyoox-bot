@@ -254,7 +254,7 @@ class Infos(commands.Cog):
         lang = await ctx.lang()
         await ctx.embed(lang["role.message"].format(m=role.mention, l=len(role.members)), signed=True)
 
-    @cmd()
+    @cmd(aliases=["av"])
     async def avatar(self, ctx: context.Context, user: discord.Member = None):
         if user is None:
             user = ctx.author
