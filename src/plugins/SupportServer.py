@@ -1,190 +1,120 @@
 import datetime
-import json
 
 import discord
 from discord.ext import commands
 
-from utils.ext import standards as std, context
-from utils.ext.cmds import grp
+import main
+from utils.ext.cmds import cmd
+from utils.ext.context import Context
 
-ACCEPTED_SUGGESTION_CHANNEL = 739109521452040193
-DENIED_SUGGESTION_CHANNEL = 739109592541298779
-WAITING_SUGGESTION_CHANNEL = 739110352913956925
-IMPLEMENTED_SUGGESTION_CHANNEL = 739110320827531294
-DEVELOPED_SUGGESTION_CHANNEL = 739142451771474031
+
+ACCEPTED_CHANNEL = 813065438673371176
+
+TRELLO_API = "https://api.trello.com/1"
+
+
+with open("utils/keys/trello.env", "r") as tokenFile:
+    tokens = tokenFile.readlines()
+    key = tokens[0].replace("\n", "")
+    token = tokens[1].replace("\n", "")
 
 
 class PlyooxSupport(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: main.Plyoox):
         self.bot = bot
 
-    @grp(aliases=['sg'], hidden=True)
-    @commands.is_owner()
-    async def suggestion(self, ctx: context.Context):
-        pass
+    @cmd()
+    async def confirmbug(self, ctx: Context, message: discord.Message):
+        data = {
+            "key": key,
+            "token": token,
+            "idList": "6031915acbc6047b7610d1f6",
+            "name": f"Bug #{message.id}",
+            "desc": message.content + f"\n\nBy **{message.author}**",
+        }
 
-    @suggestion.command()
-    async def accept(self, ctx: context.Context, ID: int, *, message=None):
-        with open('utils/json_files/simpleStorage.json_files', 'r+') as file:
-            data = json.load(file)
-            file.seek(0)
-            data['suggestion'] += 1
-            json.dump(data, file)
-            file.truncate()
+        async with self.bot.session.post(TRELLO_API + "/cards", data=data) as res:
+            if res.status == 200:
+                res_data = await res.json()
+                card_id = res_data["id"]
+                card_url = res_data["url"]
 
-        msg = await ctx.channel.fetch_message(ID)
-        if not msg.content:
-            raise commands.BadArgument('Nachricht hat keinen Content')
-        acceptedChannel = ctx.guild.get_channel(ACCEPTED_SUGGESTION_CHANNEL)
-        embed = discord.Embed(color=discord.Color.green(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
-        embed.set_footer(text=f'#{data["suggestion"]} | {msg.author}')
-        if message:
-            embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=message)
-        embed.description = msg.content
-        if msg.attachments:
-            attachment = await msg.attachments[0].to_file()
-            await acceptedChannel.send(embed=embed, file=attachment)
-        else:
-            await acceptedChannel.send(embed=embed)
-        await msg.delete()
-        await ctx.message.delete()
+                if message.attachments:
+                    counter = 1
+                    for attachment in message.attachments:
+                        attachment_data = {
+                            "key"   : key,
+                            "token" : token,
+                            "id"    : card_id,
+                            "name"  : f"Attachment #{counter}",
+                            "file"  : await attachment.read()
+                        }
 
-    @suggestion.command()
-    async def deny(self, ctx: context.Context, ID: int, *, message=None):
-        with open('utils/json_files/simpleStorage.json_files', 'r+') as file:
-            data = json.load(file)
-            file.seek(0)
-            data['suggestion'] += 1
-            json.dump(data, file)
-            file.truncate()
+                        async with self.bot.session.post(
+                                TRELLO_API + f"/cards/{card_id}/attachments",
+                                data=attachment_data):
+                            counter += 1
 
-        msg = await ctx.channel.fetch_message(ID)
-        if not msg.content:
-            raise commands.BadArgument('Nachricht hat keinen Content')
-        deniedChannel = ctx.guild.get_channel(DENIED_SUGGESTION_CHANNEL)
-        embed = discord.Embed(color=discord.Color.red(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
-        embed.description = msg.content
-        embed.set_footer(text='#' + str(data['suggestion']))
-        if message:
-            embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=message)
-        if msg.attachments:
-            attachment = await msg.attachments[0].to_file()
-            await deniedChannel.send(embed=embed, file=attachment)
-        else:
-            await deniedChannel.send(embed=embed)
-        await msg.delete()
-        await ctx.message.delete()
-
-    @suggestion.command()
-    async def wait(self, ctx: context.Context, ID: int, *, message=None):
-        with open('utils/json_files/simpleStorage.json_files', 'r+') as file:
-            data = json.load(file)
-            file.seek(0)
-            data['suggestion'] += 1
-            json.dump(data, file)
-            file.truncate()
-
-        msg = await ctx.channel.fetch_message(ID)
-        if not msg.content:
-            raise commands.BadArgument('Nachricht hat keinen Content')
-        waitingChannel = ctx.guild.get_channel(WAITING_SUGGESTION_CHANNEL)
-        embed = discord.Embed(color=discord.Color.gold(), title='Vorschlag', timestamp=datetime.datetime.utcnow())
-        embed.description = msg.content
-        embed.set_footer(text=f'#{data["suggestion"]} | {msg.author}')
-        if message:
-            embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=message)
-        if msg.attachments:
-            attachment = await msg.attachments[0].to_file()
-            await waitingChannel.send(embed=embed, file=attachment)
-        else:
-            await waitingChannel.send(embed=embed)
-        await msg.delete()
-        await ctx.message.delete()
-
-    @suggestion.command()
-    async def publish(self, ctx: context.Context, ID: int):
-        msg = await ctx.channel.fetch_message(ID)
-        embed = msg.embeds[0]
-        embed.color = discord.Color.blue()
-        implementedChannel = ctx.guild.get_channel(IMPLEMENTED_SUGGESTION_CHANNEL)
-        if msg.attachments:
-            attachment = await msg.attachments[0].to_file()
-            await implementedChannel.send(embed=embed, file=attachment)
-        else:
-            await implementedChannel.send(embed=embed)
-        await msg.delete()
-        await ctx.message.delete()
-
-    @suggestion.command()
-    async def publishall(self, ctx: context.Context):
-        channel = ctx.guild.get_channel(DEVELOPED_SUGGESTION_CHANNEL)
-        implementedChannel = ctx.guild.get_channel(IMPLEMENTED_SUGGESTION_CHANNEL)
-        messages = await channel.history(limit=500).flatten()
-
-        for msg in messages[::-1]:
-            if not msg.embeds:
-                continue
-            embed = msg.embeds[0]
-            embed.color = discord.Color.blue()
-            if msg.attachments:
-                attachment = await msg.attachments[0].to_file()
-                await implementedChannel.send(embed=embed, file=attachment)
+                embed = discord.Embed(
+                    title="Bug",
+                    colour=discord.Color.dark_green())
+                embed.timestamp = datetime.datetime.utcnow()
+                embed.set_author(name=message.author.name, icon_url=message.author.avatar)
+                embed.add_field(name="Bug", value=message.content, inline=False)
+                embed.add_field(name="Trello (Status)", value=card_url, inline=False)
+                embed.set_footer(text=f"ID: {message.id}")
+                await ctx.guild.get_channel(ACCEPTED_CHANNEL).send(embed=embed)
             else:
-                await implementedChannel.send(embed=embed)
-            await msg.delete()
-        await ctx.message.delete()
+                await ctx.error(f"Ein Fehler ist aufgetreten: API Response Code: {res.status}")
 
-    @suggestion.command()
-    async def developed(self, ctx: context.Context, ID: int):
-        msg = await ctx.channel.fetch_message(ID)
-        embed = msg.embeds[0]
-        embed.color = discord.Color.dark_teal()
-        developedChannel = ctx.guild.get_channel(DEVELOPED_SUGGESTION_CHANNEL)
-        if msg.attachments:
-            attachment = await msg.attachments[0].to_file()
-            await developedChannel.send(embed=embed, file=attachment)
-        else:
-            await developedChannel.send(embed=embed)
-        await msg.delete()
-        await ctx.message.delete()
+    @cmd()
+    async def confirmsuggestion(self, ctx: Context, message: discord.Message):
+        data = {
+            "key"   : key,
+            "token" : token,
+            "idList": "60319141c6c12b3507564e40",
+            "name"  : f"Vorschlag #{message.id}",
+            "desc"  : message.content + f"\n\nBy **{message.author}**",
+        }
 
-    @suggestion.command()
-    async def move(self, ctx: context.Context, ID: int, toChannel: discord.TextChannel):
-        msg = await ctx.channel.fetch_message(ID)
-        embed = msg.embeds[0]
+        async with self.bot.session.post(TRELLO_API + "/cards", data=data) as res:
+            if res.status == 200:
+                res_data = await res.json()
+                card_id = res_data["id"]
+                card_url = res_data["url"]
 
-        if toChannel.id == ACCEPTED_SUGGESTION_CHANNEL:
-            embed.color = discord.Color.green()
-        if toChannel.id == WAITING_SUGGESTION_CHANNEL:
-            embed.color = discord.Color.gold()
-        if toChannel.id == DENIED_SUGGESTION_CHANNEL:
-            embed.color = discord.Color.red()
+                if message.attachments:
+                    counter = 1
+                    for attachment in message.attachments:
+                        attachment_data = {
+                            "key"  : key,
+                            "token": token,
+                            "id"   : card_id,
+                            "name" : f"Attachment #{counter}",
+                            "file" : await attachment.read()
+                        }
 
-        if msg.attachments:
-            attachment = await msg.attachments[0].to_file()
-            await toChannel.send(embed=embed, file=attachment)
-        else:
-            await toChannel.send(embed=embed)
-        await ctx.message.delete()
-        await msg.delete()
+                        async with self.bot.session.post(
+                                TRELLO_API + f"/cards/{card_id}/attachments",
+                                data=attachment_data):
+                            counter += 1
 
-    @suggestion.command()
-    async def append(self, ctx: context.Context, ID: int, suggestionID: int, channel: discord.TextChannel):
-        msg = await channel.fetch_message(ID)
-        suggestionMsg = await ctx.channel.fetch_message(suggestionID)
-        embed = msg.embeds[0]
-        embed.add_field(name=str(suggestionMsg.author), value=suggestionMsg.content)
-        await msg.edit(embed=embed)
-        await suggestionMsg.delete()
-        await ctx.message.delete()
-
-    @suggestion.command()
-    async def dev(self, ctx: context.Context, ID: int, *, text):
-        msg = await ctx.channel.fetch_message(ID)
-        embed = msg.embeds[0]
-        embed.add_field(name=f'{std.botdev_emoji} Anmerkung', value=text)
-        await msg.edit(embed=embed)
-        await ctx.message.delete()
+                embed = discord.Embed(
+                    title="Vorschlag",
+                    colour=discord.Color.dark_green())
+                embed.timestamp = datetime.datetime.utcnow()
+                embed.set_author(name=message.author.name, icon_url=message.author.avatar)
+                embed.add_field(name="Vorschlag", value=message.content, inline=False)
+                embed.add_field(name="Anhänge",
+                                value=str(len(message.attachments) or "Keine Anhänge"),
+                                inline=False)
+                embed.add_field(name="Trello (Status)", value=card_url, inline=False)
+                embed.set_footer(text=f"ID: {message.id}")
+                await ctx.guild.get_channel(ACCEPTED_CHANNEL).send(embed=embed)
+                await message.delete(delay=10)
+                await ctx.message.delete(delay=10)
+            else:
+                await ctx.error(f"Ein Fehler ist aufgetreten.\nAPI Response Code: {res.status}")
 
 
 def setup(bot):
