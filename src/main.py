@@ -51,13 +51,6 @@ intents.reactions = True
 intents.guilds = True
 intents.members = True
 
-intents.invites = False
-intents.typing = False
-intents.dm_messages = False
-intents.emojis = False
-intents.voice_states = False
-intents.integrations = False
-
 
 async def get_prefix(bot, msg: discord.Message):
     config = await bot.cache.get(msg.guild.id)
@@ -110,6 +103,7 @@ class Plyoox(commands.Bot):
         logger.info(time.strftime("Started at %d.%m.%Y %H:%M:%S"))
         logger.info(f"Boot-Time: {round(time.time() - self.startTime, 2)}s")
         logger.info(f'{len(cogs)} Plugins loaded.')
+
         print(f"Boot-Time: {round(time.time() - self.startTime, 2)}s")
         print(f'Server: {len(self.guilds)} [{self.shard_count}]')
         print(f'{len(cogs)} Plugins loaded.')
