@@ -36,9 +36,11 @@ def setup_logging():
         logging.getLogger('discord').setLevel(logging.INFO)
         logging.getLogger('discord.http').setLevel(logging.WARNING)
         logging.getLogger('discord.state').addFilter(RemoveNoise())
+        logging.getLogger("tornado.access").setLevel(logging.FATAL)
 
         log.setLevel(logging.INFO)
-        handler = RotatingFileHandler(filename='logs/discord.log', encoding='utf-8', mode='w', maxBytes=max_bytes, backupCount=5)
+        handler = RotatingFileHandler(filename='logs/discord.log', encoding='utf-8', mode='w',
+                                      maxBytes=max_bytes, backupCount=5)
         dt_fmt = '%Y-%m-%d %H:%M:%S'
         fmt = logging.Formatter('[{asctime}] [{levelname:<7}] {name}: {message}', dt_fmt, style='{')
         handler.setFormatter(fmt)
