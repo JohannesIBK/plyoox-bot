@@ -1,5 +1,9 @@
+import discord
+
+
 class Leveling:
-    __slots__ = ('sid', 'channelID', 'message', 'noxpchannelIDs', 'noxproleID', 'remove', 'bot', 'roles')
+    __slots__ = (
+        'sid', 'channelID', 'message', 'noxpchannelIDs', 'noxproleID', 'remove', 'bot', 'roles')
 
     sid: int
     channelID: int
@@ -28,16 +32,16 @@ class Leveling:
             self.roles = record.get('roles') or []
 
     @property
-    def channel(self):
+    def channel(self) -> discord.TextChannel:
         guild = self.bot.get_guild(self.sid)
         return guild and guild.get_channel(self.channelID)
 
     async def reload(self):
-        record = await self.bot.db.fetchrow('SELECT * FROM config.leveling WHERE sid = $1', self.sid)
+        record = await self.bot.db.fetchrow('SELECT * FROM config.leveling WHERE sid = $1',
+                                            self.sid)
         self.remove = record['remove']
         self.message = record['message']
         self.channelID = record['channel']
         self.noxproleID = record['noxprole']
         self.roles = record['roles'] or []
         self.noxpchannelIDs = record['noxpchannels'] or []
-
