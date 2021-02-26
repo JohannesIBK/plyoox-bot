@@ -35,7 +35,8 @@ class Fun(commands.Cog):
         color = discord.Colour.from_rgb(rgbs[0], rgbs[1], rgbs[2])
         color_hex = "#%02x%02x%02x" % (rgbs[0], rgbs[1], rgbs[2])
         await ctx.send(embed=discord.Embed(color=color,
-                                           description=lang["color.message"].format(r=rgbs, h=color_hex)))
+                                           description=lang["color.message"].format(
+                                               r=rgbs, h=color_hex)))
 
     @cmd()
     @checks.isActive('fun')
@@ -63,10 +64,12 @@ class Fun(commands.Cog):
         while pos_x * pos_y < columns * rows and pos_y < rows:
 
             adj_sum = 0
-            for (adj_y, adj_x) in [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1)]:
+            for (adj_y, adj_x) in [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, 1), (1, -1),
+                                   (-1, -1)]:
 
                 try:
-                    if grid[adj_y + pos_y][adj_x + pos_x] == 'B' and adj_y + pos_y > -1 and adj_x + pos_x > -1:
+                    if grid[adj_y + pos_y][adj_x + pos_x] == 'B' and adj_y + pos_y > -1 and\
+                            adj_x + pos_x > -1:
                         adj_sum = adj_sum + 1
                 except Exception:
                     pass
@@ -137,7 +140,8 @@ class Fun(commands.Cog):
 
         questions_list = questions.split('|')
         choosen = random.choice(questions_list)
-        await ctx.embed(lang["thisorthat.message"].format(c=choosen.strip()), allowed_mentions=discord.AllowedMentions.none(), signed=True)
+        await ctx.embed(lang["thisorthat.message"].format(c=choosen.strip()),
+                        allowed_mentions=discord.AllowedMentions.none(), signed=True)
 
     @cmd()
     @checks.isActive('fun')
@@ -234,7 +238,8 @@ class Fun(commands.Cog):
         gifs: list[str] = self.gifData['highfive']
         gif = random.choice(gifs)
 
-        embed = discord.Embed(color=std.normal_color, description=lang["highfive.message"].format(u1=ctx.author.mention, u2=user.mention))
+        embed = discord.Embed(color=std.normal_color, description=lang["highfive.message"].format(
+            u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -266,7 +271,8 @@ class Fun(commands.Cog):
     @checks.isActive('fun')
     async def _8ball(self, ctx: context.Context, *, question: str):
         lang = await ctx.lang()
-        await ctx.embed(f'> {question}\n{random.choice(lang["8ball.answers"])}', allowed_mentions=discord.AllowedMentions.none(), signed=True)
+        await ctx.embed(f'> {question}\n{random.choice(lang["8ball.answers"])}',
+                        allowed_mentions=discord.AllowedMentions.none(), signed=True)
 
     @cmd()
     @checks.isActive('fun')

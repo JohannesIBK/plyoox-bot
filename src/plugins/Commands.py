@@ -29,7 +29,8 @@ class Commands(commands.Cog):
         msg = None
 
         command = await self.bot.db.fetchrow(
-            "SELECT c.*, m.commands FROM extra.commands c LEFT JOIN config.modules m ON c.sid = m.sid WHERE c.sid = $1 AND c.name = $2",
+            "SELECT c.*, m.commands FROM extra.commands c LEFT JOIN config.modules m "
+            "ON c.sid = m.sid WHERE c.sid = $1 AND c.name = $2",
             ctx.guild.id, command_name)
         if command is None or not command['commands']:
             return
@@ -38,17 +39,21 @@ class Commands(commands.Cog):
             current = ctx.message.created_at.replace(tzinfo=datetime.timezone.utc).timestamp()
             if ctx.guild.id in self.cooldowns:
                 if command['name'] in self.cooldowns[ctx.guild.id]:
-                    bucket = self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message)
+                    bucket = self.cooldowns[ctx.guild.id][command['name']].get_bucket(
+                        message=ctx.message)
                     if bucket.update_rate_limit(current=current):
                         return await ctx.error(lang["error.cooldown"])
                 else:
-                    self.cooldowns[ctx.guild.id][command['name']] = commands.CooldownMapping.from_cooldown(
-                        1, command['cooldown'], commands.BucketType.member)
-                    self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message).update_rate_limit(current=current)
+                    self.cooldowns[ctx.guild.id][command['name']] = commands.CooldownMapping\
+                        .from_cooldown(1, command['cooldown'], commands.BucketType.member)
+                    self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message)\
+                        .update_rate_limit(current=current)
             else:
-                self.cooldowns.update({ctx.guild.id: {command['name']: commands.CooldownMapping.from_cooldown(
+                self.cooldowns.update({ctx.guild.id: {command['name']: commands.CooldownMapping
+                    .from_cooldown(
                     1, command['cooldown'], commands.BucketType.member)}})
-                self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message).update_rate_limit(current=current)
+                self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message)\
+                    .update_rate_limit(current=current)
 
         if command['ignoredroles']:
             user_roles = [role.id for role in ctx.author.roles]
@@ -75,10 +80,14 @@ class Commands(commands.Cog):
             if command['embed']:
                 embed = discord.Embed(color=std.plyoox_color, description=command['content'])
                 msg = await ctx.send(embed=embed,
-                                     allowed_mentions=discord.AllowedMentions(everyone=mentions[0], roles=mentions[1], users=mentions[2]))
+                                     allowed_mentions=discord.AllowedMentions(everyone=mentions[0],
+                                                                              roles=mentions[1],
+                                                                              users=mentions[2]))
             else:
                 msg = await ctx.send(command['content'],
-                                     allowed_mentions=discord.AllowedMentions(everyone=mentions[0], roles=mentions[1], users=mentions[2]))
+                                     allowed_mentions=discord.AllowedMentions(everyone=mentions[0],
+                                                                              roles=mentions[1],
+                                                                              users=mentions[2]))
 
         if command['delete'] is not None and msg is not None:
             await asyncio.sleep(command['delete'])

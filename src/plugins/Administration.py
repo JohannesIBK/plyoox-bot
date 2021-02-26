@@ -38,7 +38,7 @@ class Administration(commands.Cog):
     @checks.isAdmin()
     async def activate(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
-            return await ctx.send_help()
+            return await ctx.send_help(ctx.command)
 
     @activate.command()
     @commands.bot_has_permissions(manage_roles=True)
@@ -121,7 +121,7 @@ class Administration(commands.Cog):
     @checks.isAdmin()
     async def deactivate(self, ctx: context.Context):
         if ctx.invoked_subcommand is None:
-            return await ctx.send_help()
+            return await ctx.send_help(ctx.command)
 
     @deactivate.command(name='leveling')
     async def _leveling(self, ctx: context.Context):

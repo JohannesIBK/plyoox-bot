@@ -336,7 +336,6 @@ class Moderation(commands.Cog):
         await ctx.embed(lang["slowmode.message"].format(s=str(seconds)), delete_after=5)
         await ctx.message.delete(delay=5)
 
-    # pylint: disable=unsubscriptable-object
     @cmd()
     @checks.isMod(helper=True)
     async def check(self, ctx: Context, user: Union[BannedMember, discord.Member]):
@@ -380,7 +379,7 @@ class Moderation(commands.Cog):
     async def clear(self, ctx: Context, amount: int, *, reason: str):
         if ctx.invoked_subcommand is None:
             if amount is None:
-                return await ctx.send_help()
+                return await ctx.send_help(ctx.command)
 
             lang = await ctx.lang(utils=True)
             await self.do_removal(ctx, amount, lambda m: True, lang, reason)

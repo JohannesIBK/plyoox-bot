@@ -1,6 +1,6 @@
-from typing import Mapping, Optional
-
 import json
+from typing import Mapping
+from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -32,7 +32,8 @@ class HelpCommand(commands.HelpCommand):
         prefix = self.clean_prefix if prefix else ""
         signature = "" or command.signature
         if signature:
-            signature = " " + signature.replace("<", "< **`").replace(">", "`** >").replace("[", "[ `").replace("]", "` ]")
+            signature = " " + signature.replace("<", "< **`").replace(">", "`** >")\
+                .replace("[", "[ `").replace("]", "` ]")
 
         return prefix + command.qualified_name + signature
 
@@ -44,16 +45,16 @@ class HelpCommand(commands.HelpCommand):
         lang = await ctx.lang(module="help")
         config = await ctx.cache.get(ctx.guild.id)
 
-        embed = discord.Embed(color=std.help_color, description=lang["embed.description.cmdhelp"].format(p=self.clean_prefix))
+        embed = discord.Embed(color=std.help_color,
+                              description=lang["embed.description.cmdhelp"].format(
+                                  p=self.clean_prefix))
 
         for command in cog.get_commands():
             if command.hidden:
                 continue
-            embed.add_field(
-                name=command.qualified_name + " " + command.signature,
-                value=languages[config.lang][command.qualified_name.lower()][0],
-                inline=False
-            )
+            embed.add_field(name=command.qualified_name + " " + command.signature,
+                            value=languages[config.lang][command.qualified_name.lower()][0],
+                            inline=False)
 
         embed.set_footer(text=lang["embed.footer.args"])
 
@@ -67,12 +68,15 @@ class HelpCommand(commands.HelpCommand):
         if command.hidden:
             return await self.send_error_message(lang["error.command.nohelp"])
 
-        embed = discord.Embed(title=self.get_command_signature(command, False), color=std.help_color)
+        embed = discord.Embed(title=self.get_command_signature(command, False),
+                              color=std.help_color)
         embed.set_footer(text=lang["embed.footer.args"])
 
         if len(command.qualified_name.split()) > 1:
             try:
-                raw_description = languages[config.lang][command.qualified_name.lower().split()[0]][1][command.qualified_name.lower().split()[1]]
+                raw_description = \
+                    languages[config.lang][command.qualified_name.lower().split()[0]][1][
+                        command.qualified_name.lower().split()[1]]
                 if isinstance(raw_description, list):
                     raw_description = "\n".join(raw_description)
                 embed.description = raw_description
@@ -88,7 +92,8 @@ class HelpCommand(commands.HelpCommand):
             embed.description = embed.description.format(t=lang["word.times"])
 
         if command.aliases:
-            embed.description += "\n\n**" + lang["word.aliases"] + ":** " + ", ".join(f"`{alias}`" for alias in command.aliases)
+            embed.description += "\n\n**" + lang["word.aliases"] + ":** " + ", ".join(
+                f"`{alias}`" for alias in command.aliases)
 
         await self.get_destination().send(embed=embed)
 
@@ -105,16 +110,14 @@ class HelpCommand(commands.HelpCommand):
         embed.description = languages[config.lang][group.qualified_name.lower()][0]
 
         if group.aliases:
-            embed.description += "\n\n**" + lang["word.aliases"] + ":** " + ", ".join(f"`{alias}`" for alias in group.aliases)
+            embed.description += "\n\n**" + lang["word.aliases"] + ":** " + ", ".join(
+                f"`{alias}`" for alias in group.aliases)
 
         subcommands = []
         for command in group.commands:
             subcommands.append(self.get_command_signature(command, False))
 
-        embed.add_field(
-            name=lang["embed.group.subcommands"],
-            value="\n".join(subcommands)
-        )
+        embed.add_field(name=lang["embed.group.subcommands"], value="\n".join(subcommands))
 
         await self.get_destination().send(embed=embed)
 
@@ -133,11 +136,7 @@ class HelpCommand(commands.HelpCommand):
                     cmds.append("`" + command.qualified_name + "`")
 
             if len(cmds):
-                embed.add_field(
-                    name=cog.qualified_name,
-                    value=", ".join(cmds),
-                    inline=False
-                )
+                embed.add_field(name=cog.qualified_name, value=", ".join(cmds), inline=False)
 
         await self.get_destination().send(embed=embed)
 

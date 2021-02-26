@@ -113,10 +113,12 @@ class Leveling(commands.Cog):
 
             lvl_msg = formatMessage(config.message, author, current_lvl, add_role)
             if lvl_msg is not None:
-                if config.channel is not None:
-                    await config.channel.send(lvl_msg)
-                else:
+                if config.channelID == 0:
                     await msg.channel.send(lvl_msg)
+                elif config.channelID == 1:
+                    await msg.author.send(lvl_msg)
+                elif config.channelID is not None:
+                    await config.channel.send(lvl_msg)
 
     # --------------------------------commands--------------------------------
 

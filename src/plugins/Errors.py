@@ -18,7 +18,8 @@ class Errors(commands.Cog):
     async def on_command_error(self, ctx: Context, error):
         lang = await ctx.lang(module=self.qualified_name)
 
-        if hasattr(ctx.command, "on_error") or (ctx.command and hasattr(ctx.cog, f"_{ctx.command.cog_name}__error")):
+        if hasattr(ctx.command, "on_error") or \
+                (ctx.command and hasattr(ctx.cog, f"_{ctx.command.cog_name}__error")):
             return
 
         if isinstance(error, commands.BadArgument) or isinstance(error, commands.BadUnionArgument):
@@ -47,7 +48,9 @@ class Errors(commands.Cog):
 
         elif isinstance(error, commands.CommandOnCooldown):
             cooldown = error.cooldown
-            await ctx.error(lang["error.command.cooldown"].format(p=str(cooldown.per), r=str(cooldown.rate), rt=str(round(error.retry_after))))
+            await ctx.error(lang["error.command.cooldown"]
+                            .format(p=str(cooldown.per), r=str(cooldown.rate),
+                                    rt=str(round(error.retry_after))))
 
         elif isinstance(error, commands.NotOwner):
             await ctx.error(lang["error.command.owneronly"])
@@ -64,10 +67,12 @@ class Errors(commands.Cog):
                 try:
                     await ctx.error(lang["error.discord.forbidden"])
                 except discord.Forbidden:
-                    logging.warning(f"No permissions to write in {ctx.channel.mention} of guild {ctx.guild.name} [{ctx.guild.id}]")
+                    logging.warning(f"No permissions to write in {ctx.channel.mention} of guild "
+                                    f"{ctx.guild.name} [{ctx.guild.id}]")
 
             else:
-                user_embed = discord.Embed(color=std.error_color, title=f"{std.error_emoji} **__ERROR__**")
+                user_embed = discord.Embed(color=std.error_color,
+                                           title=f"{std.error_emoji} **__ERROR__**")
                 user_embed.add_field(name="Original Error", value=f'```py\n{error}```')
                 try:
                     await ctx.send(embed=user_embed)

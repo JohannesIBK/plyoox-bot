@@ -106,7 +106,8 @@ class Infos(commands.Cog):
         created = guild.created_at.strftime(lang["date.format.small"])
         days = datetime.datetime.utcnow() - guild.created_at
 
-        embed = discord.Embed(color=std.normal_color, title=lang["info.embed.title"].format(n=guild.name))
+        embed = discord.Embed(color=std.normal_color, title=lang["info.embed.title"].format(
+            n=guild.name))
         embed.set_thumbnail(url=guild.icon_url)
         embed.description = std.quote(lang["guild.embed.description"].format(g=guild))
         embed.add_field(
@@ -136,7 +137,8 @@ class Infos(commands.Cog):
         embed.add_field(
             name=std.arrow + lang["guild.embed.boosts.name"].format(l=str(guild.premium_tier)),
             value=std.quote(lang["guild.embed.boosts.value"]
-                            .format(b=str(guild.premium_subscription_count), m=str(boosts[min(guild.premium_tier + 1, 3)]))),
+                            .format(b=str(guild.premium_subscription_count),
+                                    m=str(boosts[min(guild.premium_tier + 1, 3)]))),
             inline=False
         )
         embed.add_field(
@@ -166,19 +168,29 @@ class Infos(commands.Cog):
         members.sort(key=sort)
         join_pos = members.index(user) + 1
 
-        embed = discord.Embed(title=lang["info.embed.title"].format(n=user.display_name), color=user.color)
+        embed = discord.Embed(title=lang["info.embed.title"].format(n=user.display_name),
+                              color=user.color)
         embed.set_thumbnail(url=user.avatar_url)
         embed.description = std.quote(lang["info.embed.description"].format(u=user))
         embed.add_field(name=std.arrow + lang["info.embed.account.name"],
-                        value=std.quote(lang["info.embed.account.value"].format(jd=joined_dc, dd=str(days_dc))),
+                        value=std.quote(lang["info.embed.account.value"].format(
+                            jd=joined_dc,
+                            dd=str(days_dc))),
                         inline=False)
         embed.add_field(name=std.arrow + lang["info.embed.server.name"],
-                        value=std.quote(lang["info.embed.server.value"].format(jg=joined_guild, sjg=str(since_joined_guild), jp=str(join_pos))),
+                        value=std.quote(lang["info.embed.server.value"].format(
+                            jg=joined_guild,
+                            sjg=str(since_joined_guild),
+                            jp=str(join_pos))),
                         inline=False)
-        embed.add_field(name=std.arrow + lang["info.embed.roles.name"].format(r=str(len(user.roles) - 1)),
+        embed.add_field(name=std.arrow + lang["info.embed.roles.name"].format(
+            r=str(len(user.roles) - 1)),
                         value=str(roles),
                         inline=False)
-        embed.add_field(name=std.arrow + lang["info.embed.falgs.name"].format(f=str(len(flags))), value=' '.join(flags) if flags else '-----', inline=False)
+        embed.add_field(name=std.arrow + lang["info.embed.falgs.name"].format(
+            f=str(len(flags))),
+                        value=' '.join(flags) if flags else '-----',
+                        inline=False)
 
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
@@ -187,7 +199,8 @@ class Infos(commands.Cog):
     async def todayJoined(self, ctx: context.Context):
         lang = await ctx.lang()
 
-        joined = len([user.id for user in ctx.guild.members if (datetime.datetime.now() - user.joined_at).seconds <= 86400])
+        joined = len([user.id for user in ctx.guild.members if
+                      (datetime.datetime.now() - user.joined_at).seconds <= 86400])
         await ctx.embed(lang["todayjoined.message"].format(j=str(joined)), signed=True)
 
     @cmd()
@@ -221,7 +234,10 @@ class Infos(commands.Cog):
 
         embed = discord.Embed(title=lang["joined.embed.title"], color=std.normal_color)
         embed.set_author(name=str(user), icon_url=user.avatar_url)
-        embed.description = std.quote(lang["info.embed.server.value"].format(jg=joined, sjg=str(days), jp=str(join_pos + 1)))
+        embed.description = std.quote(lang["info.embed.server.value"].format(
+            jg=joined,
+            sjg=str(days),
+            jp=str(join_pos + 1)))
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
@@ -234,17 +250,23 @@ class Infos(commands.Cog):
 
         embed = std.getEmbed()
         embed.title = f'{ctx.me}'
-        embed.add_field(name=std.arrow + lang["bot.embed.owner.name"], value="```JohannesIBK#9220```")
-        embed.add_field(name=std.arrow + lang["bot.embed.guilds.name"], value=f'```{len(self.bot.guilds)}```')
-        embed.add_field(name=std.arrow + lang["bot.embed.users.name"], value=f'```{len(list(self.bot.get_all_members()))}```')
+        embed.add_field(name=std.arrow + lang["bot.embed.owner.name"],
+                        value="```JohannesIBK#9220```")
+        embed.add_field(name=std.arrow + lang["bot.embed.guilds.name"],
+                        value=f'```{len(self.bot.guilds)}```')
+        embed.add_field(name=std.arrow + lang["bot.embed.users.name"],
+                        value=f'```{len(list(self.bot.get_all_members()))}```')
         embed.add_field(name=std.arrow + lang["bot.embed.versions.name"],
                         value=f'```Python: {python_version}\nDiscord.py: {discord.__version__}```')
         embed.add_field(name=f"{std.arrow}**Uptime**", value=f'```{uptime}```')
         embed.add_field(name="⠀",
                         value=f'[Vote](https://discordbots.org/bot/505433541916622850) | '
                               f'[{lang["bot.word.dashboard"]}](https://plyoox.net) | '
-                              f'[{lang["bot.word.invite"]}](https://discordapp.com/oauth2/authorize?client_id={ctx.me.id}&scope=bot&permissions=285600894) | '
-                              f'[{lang["bot.word.source"]}](https://github.com/JohannesIBK/plyoox-bot)', inline=False)
+                              f'[{lang["bot.word.invite"]}](https://discordapp.com/oauth2/authorize'
+                              f'?client_id={ctx.me.id}&scope=bot&permissions=285600894) | '
+                              f'[{lang["bot.word.source"]}]('
+                              f'https://github.com/JohannesIBK/plyoox-bot)',
+                        inline=False)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
         await ctx.send(embed=embed)
 
@@ -252,7 +274,8 @@ class Infos(commands.Cog):
     @checks.hasPerms(manage_guild=True)
     async def roleMembers(self, ctx: context.Context, role: discord.Role):
         lang = await ctx.lang()
-        await ctx.embed(lang["role.message"].format(m=role.mention, l=len(role.members)), signed=True)
+        await ctx.embed(lang["role.message"].format(m=role.mention, l=len(role.members)),
+                        signed=True)
 
     @cmd(aliases=["av"])
     async def avatar(self, ctx: context.Context, user: discord.Member = None):
@@ -276,7 +299,8 @@ class Infos(commands.Cog):
     @cmd()
     async def vote(self, ctx: context.Context):
         lang = await ctx.lang()
-        await ctx.embed(lang["vote.message"].format(l="https://top.gg/bot/505433541916622850/vote"), signed=True)
+        await ctx.embed(lang["vote.message"].format(l="https://top.gg/bot/505433541916622850/vote"),
+                        signed=True)
 
 
 def setup(bot):
