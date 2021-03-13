@@ -618,7 +618,7 @@ class Moderation(commands.Cog):
         try:
             args = parser.parse_args(shlex.split(args))
         except Exception as e:
-            return await ctx.send(str(e))
+            return await ctx.error(str(e))
 
         members = []
 
@@ -650,7 +650,12 @@ class Moderation(commands.Cog):
                 if all(p(message) for p in predicates):
                     members.append(message.author)
         else:
-            members = ctx.guild.members
+            if ctx.guild.chunked:
+                members = ctx.guild.members
+            else:
+                async with ctx.typing():
+                    await ctx.guild.chunk(cache=True)
+                members = ctx.guild.members
 
         # member filters
         predicates = [
@@ -660,14 +665,7 @@ class Moderation(commands.Cog):
             lambda m: m.discriminator != '0000',  # No deleted users
         ]
 
-        async def _resolve_member(member_id):
-            r = ctx.guild.get_member(member_id)
-            if r is None:
-                try:
-                    return await ctx.guild.fetch_member(member_id)
-                except discord.HTTPException:
-                    raise commands.MemberNotFound from None
-            return r
+        converter = commands.MemberConverter()
 
         if args.regex:
             try:
@@ -683,28 +681,32 @@ class Moderation(commands.Cog):
             predicates.append(lambda m: len(getattr(m, 'roles', [])) <= 1)
 
         now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow()
         if args.created:
-            def created(memb, *, offset=now - datetime.timedelta(minutes=args.created)):
-                return memb.created_at > offset
+            def created(_member, *, offset=now - datetime.timedelta(minutes=args.created)):
+                return _member.created_at > offset
 
             predicates.append(created)
         if args.joined:
-            def joined(memb, *, offset=now - datetime.timedelta(minutes=args.joined)):
-                return memb.joined_at and memb.joined_at > offset
+            def joined(_member, *, offset=now - datetime.timedelta(minutes=args.joined)):
+                if isinstance(_member, discord.User):
+                    # If the member is a user then they left already
+                    return True
+                return _member.joined_at and _member.joined_at > offset
 
             predicates.append(joined)
         if args.joined_after:
-            _joined_after_member = await _resolve_member(args.joined_after)
+            _joined_after_member = await converter.convert(ctx, str(args.joined_after))
 
-            def joined_after(memb, *, _other=_joined_after_member):
-                return memb.joined_at and _other.joined_at and memb.joined_at > _other.joined_at
+            def joined_after(_member, *, _other=_joined_after_member):
+                return _member.joined_at and _other.joined_at and _member.joined_at > _other.joined_at
 
             predicates.append(joined_after)
         if args.joined_before:
-            _joined_before_member = await _resolve_member(args.joined_before)
+            _joined_before_member = await converter.convert(ctx, str(args.joined_before))
 
-            def joined_before(memb, *, _other=_joined_before_member):
-                return memb.joined_at and _other.joined_at and memb.joined_at < _other.joined_at
+            def joined_before(_member, *, _other=_joined_before_member):
+                return _member.joined_at and _other.joined_at and _member.joined_at < _other.joined_at
 
             predicates.append(joined_before)
 
