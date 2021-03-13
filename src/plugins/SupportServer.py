@@ -24,6 +24,7 @@ class PlyooxSupport(commands.Cog):
         self.bot = bot
 
     @cmd()
+    @commands.has_role(443095214240956417)
     async def confirmbug(self, ctx: Context, message: discord.Message):
         data = {
             "key": key,
@@ -68,6 +69,7 @@ class PlyooxSupport(commands.Cog):
                 await ctx.error(f"Ein Fehler ist aufgetreten: API Response Code: {res.status}")
 
     @cmd()
+    @commands.has_role(443095214240956417)
     async def confirmsuggestion(self, ctx: Context, message: discord.Message):
         data = {
             "key"   : key,
