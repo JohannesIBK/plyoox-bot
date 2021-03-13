@@ -187,7 +187,7 @@ def dmEmbed(lang, *, reason, guildName, punishType,
             embed.description = lang['log.embed.mute.temp'] \
                 .format(n=guildName, r=reason, d=duration)
         else:
-            embed.description = lang['log.embed.mute.perma'] \
+            embed.description = lang['log.embed.mute.perm'] \
                 .format(n=guildName, r=reason)
 
     return embed
@@ -206,7 +206,7 @@ def automodUserEmbed(lang, reason, guildName, type: str, points=None, duration=N
         if type.startswith("temp"):
             message = lang["log.message.temp"].format(d=toTimedString(duration))
         else:
-            message = lang["log.message.perma"]
+            message = lang["log.message.perm"]
 
         message = message.format(t=lang["word." + type.replace("temp", "")])
     else:
