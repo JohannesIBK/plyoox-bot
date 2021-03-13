@@ -46,7 +46,6 @@ cogs = [
 intents = discord.Intents.none()
 intents.guild_messages = True
 intents.bans = True
-intents.presences = True
 intents.reactions = True
 intents.guilds = True
 intents.members = True
