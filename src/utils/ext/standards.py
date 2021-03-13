@@ -126,13 +126,13 @@ def toTimedString(timestamp):
         return divmod(div_seconds, 31536000)
 
     def days(_seconds=None):
-        return divmod(seconds if _seconds is not None else div_seconds, 86400)
+        return divmod(_seconds if _seconds is not None else div_seconds, 86400)
 
     def hours(_seconds=None):
-        return divmod(seconds if _seconds is not None else div_seconds, 3600)
+        return divmod(_seconds if _seconds is not None else div_seconds, 3600)
 
     def minutes(_seconds=None):
-        return divmod(seconds if _seconds is not None else div_seconds, 60)
+        return divmod(_seconds if _seconds is not None else div_seconds, 60)
 
     def seconds(_seconds=None):
         if _seconds is not None:
@@ -235,7 +235,7 @@ def cmdEmbed(action, reason, lang: dict[str, str], mod=None, user=None,
     if reason is not None:
         embed.add_field(name=arrow + lang["word.reason"], value=quote(reason))
     if duration is not None:
-        embed.add_field(name=arrow + lang["duration"],
+        embed.add_field(name=arrow + lang["word.duration"],
                         value=quote(duration.strftime(lang['date.format.large'])))
     if amount is not None:
         embed.add_field(name=arrow + lang["amount"], value=quote(amount))
