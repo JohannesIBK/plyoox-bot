@@ -217,32 +217,13 @@ class Events(commands.Cog):
         guild = member.guild
 
         data = await self.bot.db.fetchrow(
-            'SELECT joinmessage, joinroles, joinchannel, joinstate, modules.welcomer, '
-            'modules.globalbans FROM config.welcomer '
+            'SELECT joinmessage, joinroles, joinchannel, joinstate, modules.welcomer '
+            'FROM config.welcomer '
             'FULL OUTER JOIN config.modules ON welcomer.sid = modules.sid WHERE welcomer.sid = $1',
             guild.id)
 
         if not data or not data['welcomer']:
             return
-
-        if data['globalbans']:
-            ban_data = await self.bot.db.fetchrow(
-                'SELECT reason, userid FROM extra.globalbans WHERE userid = $1',
-                member.id)
-            if ban_data and ban_data['reason'] and ban_data['userid']:
-                reason = ban_data['reason']
-                await guild.ban(member, reason=f"Globalban:\n{reason}")
-
-                logchannel = await self.bot.db.fetchval(
-                    'SELECT logchannel FROM automod.config WHERE config.sid = $1',
-                    guild.id)
-                if logchannel:
-                    embed = std.getEmbed(f'Globalban: {reason}', member)
-                    embed.title = 'Automoderation [GLOBALBAN]'
-                    logchannel = member.guild.get_channel(logchannel)
-                    if logchannel is not None:
-                        await logchannel.send(embed=embed)
-                return
 
         if data["joinstate"] != "o" and data["joinmessage"]:
             msg = formatMessage(data["joinmessage"], member)
