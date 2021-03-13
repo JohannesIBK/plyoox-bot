@@ -65,5 +65,5 @@ def formatMessage(msg: str, user: discord.Member, lvl=None, role: discord.Role =
             return msg.format(guild=guild, user=member, lvl=level)
         else:
             return msg.format(guild=guild, user=member)
-    except KeyError:
+    except (KeyError, NoRoleReached):
         return None
