@@ -346,8 +346,8 @@ class Moderation(commands.Cog):
 
         if not isinstance(user, discord.Member):
             ban_data = await ctx.bot.db.fetchrow(
-                "SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempban'",
-                user.user.id, ctx.guild.id)
+                "SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = $3",
+                user.user.id, ctx.guild.id, TimerType.BAN.value)
             if ban_data is None:
                 return await ctx.embed(lang["check.ban.perma"].format(r=user.reason))
             else:
@@ -357,8 +357,8 @@ class Moderation(commands.Cog):
         else:
             embed = discord.Embed(color=std.normal_color)
             mute_data = await ctx.bot.db.fetchrow(
-                "SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = 'tempmute'",
-                user.id, ctx.guild.id)
+                "SELECT * FROM extra.timers WHERE objid = $1 AND sid = $2 AND type = $3",
+                user.id, ctx.guild.id, TimerType.MUTE.value)
             punishments = await ctx.bot.db.fetch(
                 "SELECT * FROM automod.users WHERE uid = $1 AND sid = $2",
                 user.id, ctx.guild.id)
