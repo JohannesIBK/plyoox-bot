@@ -11,6 +11,7 @@ from discord.ext import commands
 import main
 from utils.automod import add_points
 from utils.automod import automod
+from utils.enums.Timer import TimerType
 from utils.ext import checks
 from utils.ext import logs
 from utils.ext import standards as std
@@ -160,7 +161,8 @@ class Moderation(commands.Cog):
             return await ctx.error(lang["multi.error.nomuterole"])
 
         timers = self.bot.get_cog('Timers')
-        await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id, type='tempmute')
+        await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id,
+                                  type=TimerType.MUTE)
         await user.add_roles(config.automod.config.muterole)
 
         await ctx.embed(lang["mute.temp.message"].format(u=str(user), r=reason, d=time.delta),
@@ -184,8 +186,8 @@ class Moderation(commands.Cog):
             return await ctx.error(lang["multi.error.nomuterole"])
 
         mute = await ctx.db.fetchrow(
-            "SELECT objid FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 'tempmute'",
-            ctx.guild.id, user.id)
+            "SELECT objid FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = $3",
+            ctx.guild.id, user.id, TimerType.MUTE)
         if config.automod.config.muterole not in user.roles and mute is None:
             return ctx.error(lang["unmute.error.notmuted"])
 
@@ -214,7 +216,7 @@ class Moderation(commands.Cog):
             return await ctx.error(lang["multi.error.notallowed"])
 
         timers = self.bot.get_cog('Timers')
-        await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id, type='tempban')
+        await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id, type=TimerType.BAN)
         await ctx.guild.ban(user=user, reason=reason, delete_message_days=1)
 
         await ctx.embed(lang["ban.temp.message"].format(u=str(user), r=reason, d=time.delta),

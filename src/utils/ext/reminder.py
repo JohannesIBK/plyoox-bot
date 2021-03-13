@@ -1,11 +1,14 @@
 import json
 
+from utils.enums.Timer import TimerType
+
 
 class Timer:
     __slots__ = ("object_id", "sid", "data", "time", "type", "id")
 
     @classmethod
-    async def create_timer(cls, sid: int, *, time: int, object_id: int, type: str, data: dict = None):
+    async def create_timer(cls, sid: int, *, time: int, object_id: int, type: TimerType,
+                           data: dict = None):
         self = cls()
         self.sid = sid
         self.object_id = object_id

@@ -5,6 +5,7 @@ import time
 
 import discord
 
+from utils.enums.Timer import TimerType
 from utils.ext import checks
 from utils.ext import logs
 from utils.ext import standards as std
@@ -57,7 +58,7 @@ async def manage_punishment(ctx: Context, punishment, reason):
             await ctx.db.execute(
                 'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES '
                 '($1, $2, $3, $4, $5)',
-                ctx.guild.id, user.id, "tempban", unix_time, json.dumps({'reason': reason}))
+                ctx.guild.id, user.id, TimerType.BAN, unix_time, json.dumps({'reason': reason}))
             await ctx.guild.ban(user, reason=reason)
     elif punishment == 4:
         if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
@@ -70,7 +71,7 @@ async def manage_punishment(ctx: Context, punishment, reason):
             await ctx.db.execute(
                 'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES '
                 '($1, $2, $3, $4, $5)',
-                ctx.guild.id, user.id, "tempmute", unix_time, json.dumps({'reason': reason}))
+                ctx.guild.id, user.id, TimerType.MUTE, unix_time, json.dumps({'reason': reason}))
             await user.add_roles(config.muterole, reason=reason)
 
     mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason)

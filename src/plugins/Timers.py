@@ -9,6 +9,7 @@ import discord
 from discord.ext import commands
 
 import main
+from utils.enums.Timer import TimerType
 from utils.ext import checks
 from utils.ext import context
 from utils.ext import logs
@@ -17,12 +18,6 @@ from utils.ext.cmds import grp
 from utils.ext.context import Context
 from utils.ext.reminder import Timer
 from utils.ext.time import FutureTime
-
-
-# BAN       0
-# MUTE      1
-# GIVEAWAY  2
-# REMINDER  3
 
 
 class Timers(commands.Cog):
@@ -69,14 +64,21 @@ class Timers(commands.Cog):
 
     async def call_timer(self, timer):
         await self.bot.db.execute("DELETE FROM extra.timers WHERE id = $1", timer.id)
-        self.bot.dispatch(f'{timer.type}_end', timer)
+        if timer.type == TimerType.BAN:
+            self.bot.dispatch('tempban_end', timer)
+        elif timer.type == TimerType.MUTE:
+            self.bot.dispatch('tempmute_end', timer)
+        elif timer.type == TimerType.REMINDER:
+            self.bot.dispatch('timer_end', timer)
+        elif timer.type == TimerType.GIVEAWAY:
+            self.bot.dispatch("giveaway_end")
 
     async def short_timer(self, timer, delta):
         await asyncio.sleep(delta)
         self.bot.dispatch(f'{timer.type}_end', timer)
 
     async def create_timer(self, guild_id: int, *, date: datetime.datetime, object_id: int,
-                           type: str, data: dict = None):
+                           type: TimerType, data: dict = None):
         seconds = int(date.timestamp())
         delta = (date - datetime.datetime.utcnow()).total_seconds()
         timer = await Timer.create_timer(
@@ -275,7 +277,7 @@ class Timers(commands.Cog):
             ctx.guild.id,
             date=duration.dt,
             object_id=msg.id,
-            type='giveaway',
+            type=TimerType.GIVEAWAY,
             data=data)
 
     @giveaway.command()
@@ -344,7 +346,7 @@ class Timers(commands.Cog):
             ctx.guild.id,
             date=duration.dt,
             object_id=ctx.author.id,
-            type='timer',
+            type=TimerType.REMINDER,
             data={'message': reason, 'channel_id': ctx.channel.id})
 
         await ctx.embed(lang["reminder.message.created"], delete_after=10)
