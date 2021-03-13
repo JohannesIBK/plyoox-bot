@@ -164,7 +164,6 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
                     ctx.guild.id, punished_user.id, 1, unix_time_mute,
                     json.dumps({'reason': lang["word.automod"] + ": " + reason}))
 
-    print(punishment_str)
     if user is not None:
         mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason,
                                    f"{points}/{max_points}", punished_user)
