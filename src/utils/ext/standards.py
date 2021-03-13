@@ -7,7 +7,7 @@ yes_emoji = "<:yes:703900321465892914>"
 no_emoji = "<:no:703900335327936602>"
 ola_emoji = '<:ola:703928958063738910>'
 info_emoji = '<:info:703900394580869140>'
-error_emoji = '<:close:704087128346329148>'
+error_emoji = '<:close:820400830480908428>'
 law_emoji = '<:law:704432646356467814>'
 level_emoji = '<:level:704442402718482432>'
 question_emoji = '\u2754'
@@ -223,10 +223,13 @@ def automodUserEmbed(lang, reason, guildName, type: str, points=None, duration=N
 
 def cmdEmbed(action, reason, lang: dict[str, str], mod=None, user=None,
              amount=None, duration=None) -> discord.Embed:
+
+    current_user = mod or user
+
     reason = reason or lang['log.noreason']
     embed = discord.Embed(color=discord.Color.orange(), title=lang["word." + action].upper())
     embed.set_footer(text="Plyoox", icon_url=avatar_url)
-    embed.set_author(name=str(user), icon_url=user.avatar_url)
+    embed.set_author(name=str(current_user), icon_url=current_user.avatar_url)
 
     if user is not None:
         embed.add_field(name=arrow + lang["word.user"], value=f"```{user} [{user.id}]```")
@@ -239,7 +242,7 @@ def cmdEmbed(action, reason, lang: dict[str, str], mod=None, user=None,
         embed.add_field(name=arrow + lang["word.duration"],
                         value=quote(duration.strftime(lang['date.format.large'])))
     if amount is not None:
-        embed.add_field(name=arrow + lang["amount"], value=quote(amount))
+        embed.add_field(name=arrow + lang["word.amount"], value=quote(amount))
 
     return embed
 

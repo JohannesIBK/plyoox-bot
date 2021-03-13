@@ -379,7 +379,7 @@ class Moderation(commands.Cog):
     @grp(invoke_without_command=True, aliases=["remove", "purge", "p"])
     @checks.isMod(helper=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def clear(self, ctx: Context, amount: int, *, reason: str):
+    async def clear(self, ctx: Context, amount: int, *, reason: ActionReason = None):
         if ctx.invoked_subcommand is None:
             if amount is None:
                 return await ctx.send_help(ctx.command)
@@ -405,8 +405,8 @@ class Moderation(commands.Cog):
         deleted = len(deleted)
 
         await ctx.embed(lang['clear.message.deleted'].format(a=deleted), delete_after=5)
-        await logs.createCmdLog(ctx,
-                                std.cmdEmbed("clear", reason, lang, mod=ctx.author, amount=deleted))
+        await logs.createCmdLog(
+            ctx, std.cmdEmbed("clear", reason, lang, mod=ctx.author, amount=deleted))
 
     @clear.command()
     async def embeds(self, ctx, amount: int, *, reason: ActionReason = None):
