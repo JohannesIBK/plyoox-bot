@@ -279,7 +279,7 @@ class Moderation(commands.Cog):
                    reason: ActionReason = None):
         lang = await ctx.lang(utils=True)
 
-        if not self.can_punish_user(ctx, user):
+        if not await self.can_punish_user(ctx, user):
             return await ctx.error(lang["multi.error.notallowed"])
 
         if points <= 0 or points > 20:

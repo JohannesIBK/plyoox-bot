@@ -213,8 +213,9 @@ def automodUserEmbed(lang, reason, guildName, type: str, points=None, duration=N
         message = lang["log.message." + type]
 
     if type == "log":
-        message = message.format(p=points)
-    message = message.format(n=guildName, r=reason)
+        message = message.format(p=points, n=guildName, r=reason)
+    else:
+        message = message.format(n=guildName, r=reason)
 
     embed.description = message
     return embed
@@ -244,14 +245,14 @@ def cmdEmbed(action, reason, lang: dict[str, str], mod=None, user=None,
 
 
 def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime,
-               reason, points=None, extra_user: discord.Member = None):
-    user = ctx.author or extra_user
+               reason, points=None, extra_user: discord.Member = None, mod: discord.Member = None):
+    user = extra_user or ctx.author
     embed = discord.Embed(
         color=plyoox_color,
         title=lang["word." + action],
         timestamp=datetime.datetime.utcnow()
     )
-    embed.set_author(name=lang["word.automod"], icon_url=ctx.author.avatar_url)
+    embed.set_author(name=lang["word.automod"], icon_url=user.avatar_url)
     embed.set_footer(text=f'ID: {user.id}')
     embed.description = lang[action.replace("temp", "") + ".embed.description"].format(
         u=user,
@@ -259,7 +260,7 @@ def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime,
         r=reason.replace(lang["word.automod"] + ": ", "")
     )
 
-    if extra_user:
+    if mod:
         embed.add_field(name=arrow + lang["word.moderator"], value=ctx.author.mention)
 
     if duration is not None:
@@ -269,6 +270,7 @@ def automodLog(ctx, action, lang: dict[str, str], duration: datetime.datetime,
     if points is not None:
         embed.add_field(name=arrow + lang["word.points"], value=quote(points))
 
-    embed.add_field(name=arrow + lang["word.message"], value=quote(ctx.message.content))
+    if not mod:
+        embed.add_field(name=arrow + lang["word.message"], value=quote(ctx.message.content))
 
     return embed

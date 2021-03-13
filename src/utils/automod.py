@@ -87,16 +87,22 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
     except discord.NotFound:
         pass
 
-    lang = await ctx.lang(module="automod", utils=True)
+    lang = await ctx.lang(module=["automod", "moderation"], utils=True)
     config = await ctx.bot.cache.get(ctx.guild.id)
+
+    if user is not None and reason is not None:
+        reason = reason.replace(str(ctx.author) + ": ", "")
+
+    reason = reason or lang["log.noreason"][:-1]
+
     if not config.automod:
         return
     config = config.automod.config
 
-    if user is not None:
-        punished_user = user
-    else:
+    if user is None:
         punished_user = ctx.author
+    else:
+        punished_user = user
 
     await ctx.bot.db.execute(
         'INSERT INTO automod.users (uid, sid, points, time, reason) VALUES ($1, $2, $3, $4, $5)',
@@ -164,12 +170,12 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
                     ctx.guild.id, punished_user.id, 1, unix_time_mute,
                     json.dumps({'reason': lang["word.automod"] + ": " + reason}))
 
-    if user is not None:
-        mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason,
-                                   f"{points}/{max_points}", punished_user)
-    else:
+    if user is None:
         mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason,
                                    f"{points}/{max_points}")
+    else:
+        mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason,
+                                   f"{points}/{max_points}", punished_user, mod=ctx.author)
 
     user_embed = std.automodUserEmbed(lang, reason, ctx.guild.name, punishment_str,
                                       f"{points}/{max_points}", date)
