@@ -295,6 +295,6 @@
     "date.format.large": "%m. %d. %Y at %H:%M:%S",
     "word.user": "User",
     "word.moderator": "Moderator",
-    "word.reason": "reason"
+    "word.reason": "Reason"
   }
 }
