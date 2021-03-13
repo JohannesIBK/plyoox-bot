@@ -64,13 +64,13 @@ class Timers(commands.Cog):
 
     async def call_timer(self, timer):
         await self.bot.db.execute("DELETE FROM extra.timers WHERE id = $1", timer.id)
-        if timer.type == TimerType.BAN:
+        if timer.type == TimerType.BAN.value:
             self.bot.dispatch('tempban_end', timer)
-        elif timer.type == TimerType.MUTE:
+        elif timer.type == TimerType.MUTE.value:
             self.bot.dispatch('tempmute_end', timer)
-        elif timer.type == TimerType.REMINDER:
+        elif timer.type == TimerType.REMINDER.value:
             self.bot.dispatch('timer_end', timer)
-        elif timer.type == TimerType.GIVEAWAY:
+        elif timer.type == TimerType.GIVEAWAY.value:
             self.bot.dispatch("giveaway_end")
 
     async def short_timer(self, timer, delta):
@@ -277,7 +277,7 @@ class Timers(commands.Cog):
             ctx.guild.id,
             date=duration.dt,
             object_id=msg.id,
-            type=TimerType.GIVEAWAY,
+            type=TimerType.GIVEAWAY.value,
             data=data)
 
     @giveaway.command()
@@ -346,7 +346,7 @@ class Timers(commands.Cog):
             ctx.guild.id,
             date=duration.dt,
             object_id=ctx.author.id,
-            type=TimerType.REMINDER,
+            type=TimerType.REMINDER.value,
             data={'message': reason, 'channel_id': ctx.channel.id})
 
         await ctx.embed(lang["reminder.message.created"], delete_after=10)

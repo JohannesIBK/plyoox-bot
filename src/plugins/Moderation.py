@@ -162,7 +162,7 @@ class Moderation(commands.Cog):
 
         timers = self.bot.get_cog('Timers')
         await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id,
-                                  type=TimerType.MUTE)
+                                  type=TimerType.MUTE.value)
         await user.add_roles(config.automod.config.muterole)
 
         await ctx.embed(lang["mute.temp.message"].format(u=str(user), r=reason, d=time.delta),
@@ -187,7 +187,7 @@ class Moderation(commands.Cog):
 
         mute = await ctx.db.fetchrow(
             "SELECT objid FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = $3",
-            ctx.guild.id, user.id, TimerType.MUTE)
+            ctx.guild.id, user.id, TimerType.MUTE.value)
         if config.automod.config.muterole not in user.roles and mute is None:
             return ctx.error(lang["unmute.error.notmuted"])
 
@@ -216,7 +216,8 @@ class Moderation(commands.Cog):
             return await ctx.error(lang["multi.error.notallowed"])
 
         timers = self.bot.get_cog('Timers')
-        await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id, type=TimerType.BAN)
+        await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id,
+                                  type=TimerType.BAN.value)
         await ctx.guild.ban(user=user, reason=reason, delete_message_days=1)
 
         await ctx.embed(lang["ban.temp.message"].format(u=str(user), r=reason, d=time.delta),
