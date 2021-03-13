@@ -178,7 +178,7 @@ def dmEmbed(lang, *, reason, guildName, punishType,
             embed.description = lang['log.embed.ban.temp'] \
                 .format(n=guildName, r=reason, d=duration)
         else:
-            embed.description = lang['log.embed.ban.perma'] \
+            embed.description = lang['log.embed.ban.perm'] \
                 .format(n=guildName, r=reason)
     elif punishType == 'kick':
         embed.description = lang["log.embed.kick"].format(n=guildName, r=reason)
