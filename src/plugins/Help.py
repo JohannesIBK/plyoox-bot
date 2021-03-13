@@ -130,6 +130,9 @@ class HelpCommand(commands.HelpCommand):
         embed.set_footer(text=lang["embed.footer.args"])
 
         for cog in mapping:
+            if cog is None or cog.qualified_name.lower() == "newhelp":
+                continue
+
             cmds = []
             for command in mapping[cog]:
                 if not command.hidden:
