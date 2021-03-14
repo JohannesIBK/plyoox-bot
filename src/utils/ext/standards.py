@@ -25,9 +25,9 @@ bots_emoji = "<:bot:703924061004234752>"
 clyde_emoji = '<:clyde:703927804563030076>'
 
 # Badges
-balance_emoji = '<:balance:703906489538183179>'
-brilliance_emoji = '<:brilliance:703906573738836020>'
-bravery_emoji = '<:bravery:703906586141392897>'
+balance_emoji = '<:balance:820728032775372821>'
+brilliance_emoji = '<:brilliance:820728032590692373>'
+bravery_emoji = '<:bravery:820728032817709107>'
 booster_emoji = '<:booster:703906501382766612>'
 booster2_emoji = '<:booster2:703906512246145044>'
 booster3_emoji = '<:booster3:703906523092484177>'
