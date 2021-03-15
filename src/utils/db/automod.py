@@ -234,7 +234,7 @@ class Config:
             self.logchannelID = None
             self.bantime = 86400
             self.mutetime = 86400
-            self.modroles = None
+            self.modroles = []
             self._muterole = None
         else:
             self.logchannelID = record.get('logchannel')
@@ -271,7 +271,7 @@ class Config:
             self.logchannelID = None
             self.bantime = 86400
             self.mutetime = 86400
-            self.modroles = None
+            self.modroles = []
             self._muterole = None
         else:
             self.logchannelID = record.get('logchannel')
