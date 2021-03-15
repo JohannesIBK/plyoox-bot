@@ -58,7 +58,7 @@ async def manage_punishment(ctx: Context, punishment, reason):
             await ctx.db.execute(
                 'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES '
                 '($1, $2, $3, $4, $5)',
-                ctx.guild.id, user.id, TimerType.BAN.value, unix_time, json.dumps({'reason': reason}))
+                ctx.guild.id, user.id, TimerType.BAN.value, unix_time, json.dumps({ 'reason': reason }))
             await ctx.guild.ban(user, reason=reason)
     elif punishment == 4:
         if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
@@ -72,7 +72,7 @@ async def manage_punishment(ctx: Context, punishment, reason):
                 'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES '
                 '($1, $2, $3, $4, $5)',
                 ctx.guild.id, user.id, TimerType.MUTE.value, unix_time,
-                json.dumps({'reason': reason}))
+                json.dumps({ 'reason': reason }))
             await user.add_roles(config.muterole, reason=reason)
 
     mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason)
@@ -121,13 +121,11 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
     if config.bantime:
         unix_time_ban = time.time() + config.bantime
 
-    date = None
-    punishment_str = 'log'
-
     if points >= max_points and action is not None:
         if action == 1:
             if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
-                punishment_str = 'kick'
+                await createAutomodLog(ctx, reason, lang, points=f"{points}/{max_points}",
+                                       punished_user=punished_user, punishment="kick", user=user)
                 await ctx.guild.kick(punished_user, reason=lang["word.automod"] + ": " + reason)
                 await ctx.bot.db.execute(
                     "DELETE FROM automod.users WHERE uid = $1 AND sid = $2",
@@ -135,7 +133,8 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
 
         elif action == 2:
             if checks.hasPermsByName(ctx, ctx.me, 'kick_members'):
-                punishment_str = "ban"
+                await createAutomodLog(ctx, reason, lang, points=f"{points}/{max_points}",
+                                       punished_user=punished_user, punishment="ban", user=user)
                 await ctx.guild.ban(punished_user, reason=lang["word.automod"] + ": " + reason)
                 await ctx.bot.db.execute(
                     "DELETE FROM automod.users WHERE uid = $1 AND sid = $2",
@@ -144,13 +143,14 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
         elif action == 3:
             if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
                 date = datetime.datetime.utcfromtimestamp(unix_time_ban)
-                punishment_str = "tempban"
+                await createAutomodLog(ctx, reason, lang, points=f"{points}/{max_points}",
+                                       date=date, punished_user=punished_user, punishment="tempban", user=user)
                 await ctx.guild.ban(punished_user, reason=lang["word.automod"] + ": " + reason)
                 await ctx.db.execute(
                     'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES'
                     ' ($1, $2, $3, $4, $5)',
                     ctx.guild.id, punished_user.id, 0, unix_time_ban,
-                    json.dumps({'reason': lang["word.automod"] + ": " + lang["word.tempban"]}))
+                    json.dumps({ 'reason': lang["word.automod"] + ": " + lang["word.tempban"] }))
 
         elif action == 4:
             if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
@@ -158,7 +158,8 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
                     return
 
                 date = datetime.datetime.fromtimestamp(unix_time_mute)
-                punishment_str = "tempmute"
+                await createAutomodLog(ctx, reason, lang, points=f"{points}/{max_points}",
+                                       date=date, punished_user=punished_user, punishment="tempmute", user=user)
                 await punished_user.add_roles(config.muterole,
                                               reason=lang["word.automod"] + ": " + reason)
                 await ctx.bot.db.execute(
@@ -168,17 +169,23 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
                     'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES '
                     '($1, $2, $3, $4, $5)',
                     ctx.guild.id, punished_user.id, 1, unix_time_mute,
-                    json.dumps({'reason': lang["word.automod"] + ": " + reason}))
+                    json.dumps({ 'reason': lang["word.automod"] + ": " + reason }))
 
-    if user is None:
-        mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason,
-                                   f"{points}/{max_points}")
     else:
-        mod_embed = std.automodLog(ctx, punishment_str, lang, date, reason,
-                                   f"{points}/{max_points}", punished_user, mod=ctx.author)
+        await createAutomodLog(ctx, reason, lang, points=f"{points}/{max_points}",
+                               punished_user=punished_user, punishment="log", user=user)
 
-    user_embed = std.automodUserEmbed(lang, reason, ctx.guild.name, punishment_str,
-                                      f"{points}/{max_points}", date)
+
+async def createAutomodLog(ctx, reason, lang, *, points, punishment, date=None, user, punished_user):
+    if user is None:
+        mod_embed = std.automodLog(ctx, punishment, lang, date, reason,
+                                   points)
+    else:
+        mod_embed = std.automodLog(ctx, punishment, lang, date, reason,
+                                   points, punishment, mod=ctx.author)
+
+    user_embed = std.automodUserEmbed(lang, reason, ctx.guild.name, punishment,
+                                      points, date)
 
     await logs.createLog(ctx=ctx, mEmbed=mod_embed, uEmbed=user_embed,
                          user=punished_user, automod=True)
