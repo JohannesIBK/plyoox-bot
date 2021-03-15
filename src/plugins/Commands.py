@@ -7,8 +7,6 @@ from discord.ext import commands
 
 import main
 from utils.ext import standards as std
-
-
 # EVERYONE ROLE USER
 from utils.ext.context import Context
 
@@ -30,8 +28,7 @@ class Commands(commands.Cog):
 
         command = await self.bot.db.fetchrow(
             "SELECT c.*, m.commands FROM extra.commands c LEFT JOIN config.modules m "
-            "ON c.sid = m.sid WHERE c.sid = $1 AND c.name = $2",
-            ctx.guild.id, command_name)
+            "ON c.sid = m.sid WHERE c.sid = $1 AND c.name = $2", ctx.guild.id, command_name)
         if command is None or not command['commands']:
             return
 
@@ -44,21 +41,22 @@ class Commands(commands.Cog):
                     if bucket.update_rate_limit(current=current):
                         return await ctx.error(lang["error.cooldown"])
                 else:
-                    self.cooldowns[ctx.guild.id][command['name']] = commands.CooldownMapping\
-                        .from_cooldown(1, command['cooldown'], commands.BucketType.member)
-                    self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message)\
-                        .update_rate_limit(current=current)
+                    self.cooldowns[ctx.guild.id][
+                        command['name']] = commands.CooldownMapping.from_cooldown(1, command[
+                        'cooldown'], commands.BucketType.member)
+                    self.cooldowns[ctx.guild.id][command['name']].get_bucket(
+                        message=ctx.message).update_rate_limit(current=current)
             else:
-                self.cooldowns.update({ctx.guild.id: {command['name']: commands.CooldownMapping
-                    .from_cooldown(
-                    1, command['cooldown'], commands.BucketType.member)}})
-                self.cooldowns[ctx.guild.id][command['name']].get_bucket(message=ctx.message)\
-                    .update_rate_limit(current=current)
+                self.cooldowns.update({ ctx.guild.id: {
+                    command['name']: commands.CooldownMapping.from_cooldown(1, command['cooldown'],
+                                                                            commands.BucketType.member) } })
+                self.cooldowns[ctx.guild.id][command['name']].get_bucket(
+                    message=ctx.message).update_rate_limit(current=current)
 
         if command['ignoredroles']:
             user_roles = [role.id for role in ctx.author.roles]
             if any(role in user_roles for role in command['ignoredroles']):
-                return await ctx.error(lang["error.notallowed"])
+                return await ctx.error(lang["error.forbiddenrole"])
 
         if command['ignoredchannels']:
             if ctx.channel.id in command['ignoredchannels']:
