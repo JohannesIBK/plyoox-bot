@@ -130,7 +130,7 @@
     "info.embed.server.name": "Server",
     "info.embed.server.value": "Beigetreten: {jg}\nvor {sjg} Tagen\nPosition: {jp}",
     "info.embed.roles.name": "Rollen ({r})",
-    "info.embed.falgs.name": "Abzeichen ({f})",
+    "info.embed.flags.name": "Abzeichen ({f})",
     "todayjoined.message": "In den letzten 24 Stunden sind `{j}` User auf den Server gejoint.",
     "joined.error.invalidposition": "Kein User ist auf dieser Join Position.",
     "joined.embed.title": "Join Position",
