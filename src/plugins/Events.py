@@ -6,7 +6,6 @@ from discord.ext import commands
 
 import main
 from other import db
-from utils.ext import standards as std
 from utils.ext.formatter import formatMessage
 
 
@@ -80,7 +79,7 @@ class Events(commands.Cog):
 
         roles = await self.bot.db.fetchrow(
             'SELECT welcomer.joinroles, config.modroles, config.muterole, leveling.noxprole, '
-            'leveling.roles '
+            'leveling.roles, config.helperroles '
             'FROM automod.config LEFT JOIN config.leveling ON config.sid = leveling.sid '
             'LEFT JOIN config.welcomer ON config.sid =  welcomer.sid WHERE config.sid = $1',
             role.guild.id)
