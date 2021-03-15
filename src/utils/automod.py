@@ -260,7 +260,7 @@ async def automod(ctx: Context):
         if channel.id in links.whitelist:
             return
 
-        links_list = ['discord.gg', 'discord.com', 'discordapp.com', 'plyoox.net']
+        links_list = ['discord.gg', 'discord.com', 'plyoox.net', 'wiki.plyoox.net']
         links_list.extend(links.links)
 
         links_obj = linkRegex.findall(msg.content)
@@ -273,7 +273,7 @@ async def automod(ctx: Context):
                     else:
                         return await manage_punishment(ctx, links.state, lang["reason.link"])
             else:
-                if link in links:
+                if link in links_list:
                     if links.state == 5:
                         return await add_points(ctx, links.points, lang["reason.link"])
                     else:
