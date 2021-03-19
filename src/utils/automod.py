@@ -182,7 +182,7 @@ async def createAutomodLog(ctx, reason, lang, *, points, punishment, date=None, 
                                    points)
     else:
         mod_embed = std.automodLog(ctx, punishment, lang, date, reason,
-                                   points, punishment, mod=ctx.author)
+                                   points, extra_user=punished_user, mod=ctx.author)
 
     user_embed = std.automodUserEmbed(lang, reason, ctx.guild.name, punishment,
                                       points, date)
