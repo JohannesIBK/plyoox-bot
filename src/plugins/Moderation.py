@@ -196,8 +196,8 @@ class Moderation(commands.Cog):
 
         if mute is not None:
             await ctx.db.execute(
-                "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = 'tempmute'",
-                ctx.guild.id, user.id)
+                "DELETE FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = $3",
+                ctx.guild.id, user.id, TimerType.MUTE.value)
 
         await ctx.embed(lang["unmute.message"].format(u=str(user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
@@ -322,7 +322,7 @@ class Moderation(commands.Cog):
         await ctx.embed(lang["pointsreset.message"].format(u=str(user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
 
-        mod_embed = std.cmdEmbed("resetPoints", reason, lang, mod=ctx.author, user=user.user)
+        mod_embed = std.cmdEmbed("resetPoints", reason, lang, mod=ctx.author, user=user)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed)
 
     @cmd(aliases=['slow', 'sm'])
