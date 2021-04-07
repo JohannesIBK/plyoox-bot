@@ -41,35 +41,29 @@ class Fun(commands.Cog):
     @cmd()
     @checks.isActive('fun')
     async def minesweeper(self, ctx: context.Context):
-        columns = 10
-        rows = 10
-        bombs = 10
+        columns = 9
+        rows = 9
+        bombs = 15.
 
-        grid: list = [[0 for _ in range(columns)] for _ in range(rows)]
+        grid = [[0 for _ in range(columns)] for _ in range(rows)]
 
         loop_count = 0
         while loop_count < bombs:
             x = random.randint(0, columns - 1)
             y = random.randint(0, rows - 1)
-
             if grid[y][x] == 0:
                 grid[y][x] = 'B'
                 loop_count = loop_count + 1
-
             if grid[y][x] == 'B':
                 pass
 
         pos_x = 0
         pos_y = 0
         while pos_x * pos_y < columns * rows and pos_y < rows:
-
             adj_sum = 0
-            for (adj_y, adj_x) in [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, 1), (1, -1),
-                                   (-1, -1)]:
-
+            for (adj_y, adj_x) in [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1)]:
                 try:
-                    if grid[adj_y + pos_y][adj_x + pos_x] == 'B' and adj_y + pos_y > -1 and\
-                            adj_x + pos_x > -1:
+                    if grid[adj_y + pos_y][adj_x + pos_x] == 'B' and adj_y + pos_y > -1 and adj_x + pos_x > -1:
                         adj_sum = adj_sum + 1
                 except Exception:
                     pass
@@ -84,10 +78,10 @@ class Fun(commands.Cog):
                 pos_x = pos_x + 1
 
         string_builder = []
-        for reihen in grid:
-            string_builder.append(''.join(map(str, reihen)))
-
+        for the_rows in grid:
+            string_builder.append(''.join(map(str, the_rows)))
         string_builder = '\n'.join(string_builder)
+
         string_builder = string_builder.replace('0', '||:zero:||')
         string_builder = string_builder.replace('1', '||:one:||')
         string_builder = string_builder.replace('2', '||:two:||')
@@ -98,8 +92,7 @@ class Fun(commands.Cog):
         string_builder = string_builder.replace('7', '||:seven:||')
         string_builder = string_builder.replace('8', '||:eight:||')
         final = string_builder.replace('B', '||:bomb:||')
-
-        await ctx.send(content=f'\U0000FEFF\n{final}')
+        await ctx.send(final)
 
     @cmd()
     @checks.isActive('fun')
@@ -208,7 +201,7 @@ class Fun(commands.Cog):
         gifs = self.gifData['pat']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed(lang["pat.message"].fomat(u1=ctx.author.mention, u2=user.mention))
+        embed = std.getEmbed(lang["pat.message"].format(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
@@ -223,7 +216,7 @@ class Fun(commands.Cog):
         gifs = self.gifData['hug']
         gif = random.choice(gifs)
 
-        embed = std.getEmbed(lang["hug.message"].fomat(u1=ctx.author.mention, u2=user.mention))
+        embed = std.getEmbed(lang["hug.message"].format(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
         await ctx.send(embed=embed)
 
