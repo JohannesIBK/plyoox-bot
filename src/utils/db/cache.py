@@ -22,6 +22,9 @@ class GuildConfig:
         if records[0] is not None:
             self._prefix = records[0]["prefix"]
             self._language = records[0]["lang"]
+        else:
+            self._prefix = "+"
+            self._language = "en"
 
         self._automod = automod.Automod(self.bot, self.sid, records[1])
         self._leveling = leveling.Leveling(self.bot, self.sid, records[2])
@@ -73,7 +76,7 @@ class BotCache:
     fetching: list[int] = []
 
     def __init__(self, bot):
-        self.bot = bot
+        suser=member,elf.bot = bot
 
     async def get(self, sid) -> GuildConfig or None:
         cache = self.cache.get(sid)
