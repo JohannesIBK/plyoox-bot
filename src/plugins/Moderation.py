@@ -374,7 +374,7 @@ class Moderation(commands.Cog):
                                 value='\n'.join(punishment_list))
             else:
                 return await ctx.embed(lang["check.nopunish"])
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed)
 
     @grp(invoke_without_command=True, aliases=["remove", "purge", "p"])
     @checks.isMod(helper=True)
@@ -438,7 +438,7 @@ class Moderation(commands.Cog):
     async def contains(self, ctx, amount: int, *, string: str):
         lang = await ctx.lang(utils=True)
         if len(string) < 3:
-            return await ctx.send(lang["remove.error.minlength"])
+            return await ctx.reply(lang["remove.error.minlength"])
 
         await self.do_removal(ctx, amount, lambda m: string in m.content, lang)
 
@@ -527,7 +527,7 @@ class Moderation(commands.Cog):
         try:
             args = parser.parse_args(shlex.split(args))
         except Exception as e:
-            await ctx.send(str(e))
+            await ctx.reply(str(e))
             return
 
         predicates = []
@@ -555,7 +555,7 @@ class Moderation(commands.Cog):
                     user = await converter.convert(ctx, u)
                     users.append(user)
                 except Exception as e:
-                    await ctx.send(str(e))
+                    await ctx.reply(str(e))
                     return
 
             predicates.append(lambda m: m.author in users)
@@ -721,7 +721,7 @@ class Moderation(commands.Cog):
                             members)
             content = f'{lang["massban.word.usercount"]}: {len(members)}\n{fmt}'
             file = discord.File(io.BytesIO(content.encode('utf-8')), filename='members.txt')
-            return await ctx.send(file=file)
+            return await ctx.reply(file=file)
 
         if args.reason is None:
             return await ctx.error(lang["massban.error.noreason"])

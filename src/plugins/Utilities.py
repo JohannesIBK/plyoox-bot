@@ -6,7 +6,8 @@ import discord
 from discord.ext import commands
 
 import main
-from utils.ext import standards as std, context
+from utils.ext import context
+from utils.ext import standards as std
 from utils.ext.cmds import cmd
 
 
@@ -21,10 +22,11 @@ class Utilities(commands.Cog):
         embed = std.getEmbed(signed=ctx.author)
 
         embed.title = lang["someone.embed.title"]
-        embed.description = std.quote(lang["someone.embed.description"].format(d=str((datetime.datetime.now() - user.joined_at).days), u=user))
+        embed.description = std.quote(
+            lang["someone.embed.description"].format(d=str((datetime.datetime.now() - user.joined_at).days), u=user))
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     async def invite(self, ctx: context.Context):
@@ -33,7 +35,7 @@ class Utilities(commands.Cog):
                               url=f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=822471806",
                               color=std.normal_color)
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     async def ping(self, ctx: context.Context):
@@ -41,13 +43,14 @@ class Utilities(commands.Cog):
         start = time.perf_counter()
         message = await ctx.embed('Pong!')
         end = time.perf_counter()
-        embed = std.getEmbed(f'```Bot: {round((end - start) * 1000, 2)}ms\nWebsocket: {round(ping, 2)}ms```', signed=ctx.author)
+        embed = std.getEmbed(f'```Bot: {round((end - start) * 1000, 2)}ms\nWebsocket: {round(ping, 2)}ms```',
+                             signed=ctx.author)
         await message.edit(embed=embed)
 
     @cmd()
     async def bin(self, ctx: context.Context, number: int):
         lang = await ctx.lang()
-        if number > 10000**10:
+        if number > 10000 ** 10:
             return await ctx.error(lang["bin.error.tolarge"])
         await ctx.embed(lang["bin.message"].format(n=number, b=str(bin(number))[2:]), signed=True)
 
@@ -81,7 +84,7 @@ class Utilities(commands.Cog):
                               'Wenn du einen Vorschlag hast oder dir beim Bot noch etwas fehlt, kannst du die Funktion hier vorschlagen. '
                               'Schau aber vorher nach ob es noch nicht vorgeschlagen wurde.')
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
 
 def setup(bot):

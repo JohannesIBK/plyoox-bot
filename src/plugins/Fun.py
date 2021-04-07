@@ -34,7 +34,7 @@ class Fun(commands.Cog):
             rgbs.append(random.choice(range(256)))
         color = discord.Colour.from_rgb(rgbs[0], rgbs[1], rgbs[2])
         color_hex = "#%02x%02x%02x" % (rgbs[0], rgbs[1], rgbs[2])
-        await ctx.send(embed=discord.Embed(color=color,
+        await ctx.reply(embed=discord.Embed(color=color,
                                            description=lang["color.message"].format(
                                                r=rgbs, h=color_hex)))
 
@@ -92,13 +92,13 @@ class Fun(commands.Cog):
         string_builder = string_builder.replace('7', '||:seven:||')
         string_builder = string_builder.replace('8', '||:eight:||')
         final = string_builder.replace('B', '||:bomb:||')
-        await ctx.send(final)
+        await ctx.reply(final)
 
     @cmd()
     @checks.isActive('fun')
     async def dice(self, ctx: context.Context):
         zahl = random.choice([":one:", ":two:", ":three:", ":four:", ":five:", ":six:"])
-        await ctx.send(zahl)
+        await ctx.reply(zahl)
 
     @cmd()
     @checks.isActive('fun')
@@ -119,7 +119,7 @@ class Fun(commands.Cog):
         embed.title = f"{user1.display_name} ❤ {user2.display_name}"
         embed.description = f"`{counter}` **{score}%** "
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
@@ -141,7 +141,7 @@ class Fun(commands.Cog):
     async def coinflip(self, ctx: context.Context):
         flip = ['<:coin:718169101821804564>', '<:supporter:703906781859938364>']
         emoji = random.choice(flip)
-        await ctx.send(emoji)
+        await ctx.reply(emoji)
 
     @cmd(aliases=['slots'])
     @checks.isActive('fun')
@@ -203,7 +203,7 @@ class Fun(commands.Cog):
 
         embed = std.getEmbed(lang["pat.message"].format(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
@@ -218,7 +218,7 @@ class Fun(commands.Cog):
 
         embed = std.getEmbed(lang["hug.message"].format(u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
@@ -234,7 +234,7 @@ class Fun(commands.Cog):
         embed = discord.Embed(color=std.normal_color, description=lang["highfive.message"].format(
             u1=ctx.author.mention, u2=user.mention))
         embed.set_image(url=gif)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
@@ -246,7 +246,7 @@ class Fun(commands.Cog):
 
         embed = std.getEmbed(lang["rage.message"].format(u=ctx.author.mention))
         embed.set_image(url=gif)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
@@ -258,7 +258,7 @@ class Fun(commands.Cog):
 
         embed = std.getEmbed(lang["cry.message"].format(u=ctx.author.mention))
         embed.set_image(url=gif)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd(name='8ball')
     @checks.isActive('fun')
@@ -275,7 +275,7 @@ class Fun(commands.Cog):
 
         embed = discord.Embed(color=std.normal_color)
         embed.set_image(url=gif)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     @checks.isActive('fun')
@@ -287,7 +287,7 @@ class Fun(commands.Cog):
 
         embed = std.getEmbed(lang["laugh.message"].format(u=ctx.author.mention))
         embed.set_image(url=gif)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
 
 def setup(bot):

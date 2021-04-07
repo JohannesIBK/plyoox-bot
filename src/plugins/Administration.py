@@ -197,7 +197,7 @@ class Administration(commands.Cog):
     @checks.isAdmin()
     async def rules(self, ctx: context.Context):
         await ctx.message.delete()
-        await ctx.send(rules)
+        await ctx.reply(rules)
 
     @cmd()
     @checks.isAdmin()
@@ -255,7 +255,7 @@ class Administration(commands.Cog):
                         value="**»** Moderatoren haben immer Recht. Kein Moderator muss sein "
                               "Handeln vor einem User rechtfertigen. ")
         embed.set_footer(text="by JohannesIBK")
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     @checks.isAdmin()

@@ -24,9 +24,9 @@ class Context(commands.Context):
         if len(content) > 2000:
             fp = io.BytesIO(content.encode())
             kwargs.pop('file', None)
-            return await self.send(file=discord.File(fp, filename='message_to_long.txt'), **kwargs)
+            return await self.reply(file=discord.File(fp, filename='message_to_long.txt'), **kwargs)
         else:
-            return await self.send(content)
+            return await self.reply(content)
 
     @property
     def db(self) -> Pool:
@@ -55,14 +55,14 @@ class Context(commands.Context):
             self._db = None
 
     async def error(self, message: str, **kwargs):
-        return await self.send(embed=std.getErrorEmbed(message), **kwargs)
+        return await self.reply(embed=std.getErrorEmbed(message), **kwargs)
 
     async def embed(self, message: str, signed=False, **kwargs):
         embed = std.getEmbed(message)
         if signed:
             embed.set_footer(icon_url=self.author.avatar_url, text=f'Requested by {self.author}')
 
-        return await self.send(embed=embed, **kwargs)
+        return await self.reply(embed=embed, **kwargs)
 
     async def prompt(self, message, *, timeout=60.0, delete_after=True, reacquire=True,
                      author_id=None):
@@ -73,7 +73,7 @@ class Context(commands.Context):
               f'um abzubrechen. '
 
         author_id = author_id or self.author.id
-        msg = await self.send('Ping!', embed=discord.Embed(color=std.normal_color, description=fmt))
+        msg = await self.reply('Ping!', embed=discord.Embed(color=std.normal_color, description=fmt))
 
         confirm = None
 

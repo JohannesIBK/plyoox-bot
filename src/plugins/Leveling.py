@@ -114,11 +114,11 @@ class Leveling(commands.Cog):
             lvl_msg = formatMessage(config.message, author, current_lvl, add_role)
             if lvl_msg is not None:
                 if config.channelID == 0:
-                    await msg.channel.send(lvl_msg)
+                    await msg.channel.reply(lvl_msg)
                 elif config.channelID == 1:
-                    await msg.author.send(lvl_msg)
+                    await msg.author.reply(lvl_msg)
                 elif config.channelID is not None:
-                    await config.channel.send(lvl_msg)
+                    await config.channel.reply(lvl_msg)
 
     # --------------------------------commands--------------------------------
 
@@ -157,7 +157,7 @@ class Leveling(commands.Cog):
         embed.add_field(name=std.arrow + lang["level.embed.rank.name"],
                         value=f'```#{user_data["count"]}```')
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd()
     @checks.isActive('leveling')
@@ -183,7 +183,7 @@ class Leveling(commands.Cog):
             description='\n'.join(f'{lvlRole[0].mention} | {lvlRole[1]}' for lvlRole in lvl_roles)
         )
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd(aliases=["top10"])
     @checks.isActive('leveling')
@@ -219,7 +219,7 @@ class Leveling(commands.Cog):
             embed.add_field(name=f"{count}. {member.display_name}", value=std.quote(
                 lang["top.embed.user.value"].format(l=lvl, c=current_xp, x=lvl_xp)))
         embed.set_footer(icon_url=ctx.author.avatar_url, text=f'Requested by {ctx.author}')
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @cmd(aliases=["rl"])
     @checks.isMod()

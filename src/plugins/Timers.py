@@ -160,7 +160,7 @@ class Timers(commands.Cog):
 
         message = lang["reminder.event.timermessage"].format(u=member.mention,
                                                              m=std.quote(timer.data["message"]))
-        await channel.send(
+        await channel.reply(
             message,
             allowed_mentions=discord.AllowedMentions(
                 everyone=False,
@@ -195,7 +195,7 @@ class Timers(commands.Cog):
                 break
 
         if len(winners) == 0:
-            await channel.send(lang["giveaway.event.nowinners"].format(w=win))
+            await channel.reply(lang["giveaway.event.nowinners"].format(w=win))
             embed = discord.Embed(
                 color=std.normal_color,
                 title=win,
@@ -205,7 +205,7 @@ class Timers(commands.Cog):
         else:
             winner_mention = ' '.join(member.mention for member in winners)
             if len(winners) == 1:
-                await channel.send(lang["giveaway.event.message.single"].format(w=win,
+                await channel.reply(lang["giveaway.event.message.single"].format(w=win,
                                                                                 m=winner_mention),
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
@@ -214,7 +214,7 @@ class Timers(commands.Cog):
                                         description=lang["giveaway.event.edit.single"]
                                         .format(m=winner_mention)))
             else:
-                await channel.send(lang["giveaway.event.message.multiple"].format(w=win,
+                await channel.reply(lang["giveaway.event.message.multiple"].format(w=win,
                                                                                   m=winner_mention),
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
@@ -263,9 +263,9 @@ class Timers(commands.Cog):
             color=std.normal_color,
             title=lang["giveaway.embed.title"],
             description=lang["giveaway.embed.startdescription"])
-        msg = await channel.send(embed=embed)
+        msg = await channel.reply(embed=embed)
         await msg.add_reaction('🎉')
-        await ctx.send(embed=std.getEmbed(lang["giveaway.message.started"]))
+        await ctx.reply(embed=std.getEmbed(lang["giveaway.message.started"]))
         embed = discord.Embed(color=std.normal_color, title=prize,
                               description=lang["giveaway.embed.description"])
         embed.set_footer(text=lang["giveaway.embed.footer"].format(g=str(winner), id=str(msg.id)))
@@ -376,7 +376,7 @@ class Timers(commands.Cog):
             reason = json.loads(timer['data'])['message']
             timer_list_embed.add_field(name='TimerID: ' + str(timer['id']), value=f'```{reason}```')
 
-        await ctx.send(embed=timer_list_embed)
+        await ctx.reply(embed=timer_list_embed)
 
     @reminder.command(alias=["delete"])
     async def remove(self, ctx: context.Context, ID: int):
