@@ -41,5 +41,5 @@ Die Regeln gelten für dein ganzes Erscheinen, also Chatnachrichten, Name, Avata
 
 Du stimmst beim Betreten des Servers automatisch den obenstehenden Regeln zu.
 
-***Unwissenheit schützt  __nicht__ vor Strafe***
+***Unwissenheit schützt __nicht__ vor Strafe***
 """
