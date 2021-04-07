@@ -76,7 +76,7 @@ class BotCache:
     fetching: list[int] = []
 
     def __init__(self, bot):
-        suser=member,elf.bot = bot
+        self.bot = bot
 
     async def get(self, sid) -> GuildConfig or None:
         cache = self.cache.get(sid)
