@@ -69,7 +69,8 @@ class Errors(commands.Cog):
                 except discord.Forbidden:
                     logging.warning(f"No permissions to write in {ctx.channel.mention} of guild "
                                     f"{ctx.guild.name} [{ctx.guild.id}]")
-
+            elif isinstance(error, discord.NotFound):
+                pass
             else:
                 user_embed = discord.Embed(color=std.error_color,
                                            title=f"{std.error_emoji} **__ERROR__**")
