@@ -87,7 +87,7 @@
   },
   "fun": {
     "color.message": "Es wurde eine zufällige Farbe generiert:\nFarbcode in RGB `{r}` und HEX `{h}`",
-    "multi.error.sameuser": "Du kannst dicht zweimal den gleichen User nennen.",
+    "multi.error.sameuser": "Du kannst nicht zweimal den gleichen User nennen.",
     "thisorthat.error.needmultiple": "Nur eine Frage gefunden. Trenne Fragen mit `|`.",
     "thisorthat.message": "Ich wähle: `{c}`.",
     "slot.message.win": "{s}\nDu hast gewonnen! \uD83C\uDF89",
