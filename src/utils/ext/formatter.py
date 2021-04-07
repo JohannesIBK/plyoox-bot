@@ -60,6 +60,9 @@ def formatMessage(msg: str, user: discord.Member, lvl=None, role: discord.Role =
     member = __Member(user)
     level = __Level(lvl, role)
 
+    if msg is None:
+        return None
+
     try:
         if lvl is not None:
             return msg.format(guild=guild, user=member, lvl=level)
