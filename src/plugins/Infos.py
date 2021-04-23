@@ -146,9 +146,9 @@ class Infos(commands.Cog):
         if user is None:
             user = ctx.message.author
         joined_dc = user.created_at.strftime(lang["date.format.small"])
-        days_dc = (datetime.datetime.now() - user.created_at).days
+        days_dc = (datetime.datetime.utcnow() - user.created_at).days
         joined_guild = user.joined_at.strftime(lang["date.format.small"])
-        since_joined_guild = (datetime.datetime.now() - user.joined_at).days
+        since_joined_guild = (datetime.datetime.utcnow() - user.joined_at).days
         roles = self._getRoles(user.roles)
         members = ctx.guild.members
         flags = self._get_badges(user.public_flags)
@@ -178,7 +178,7 @@ class Infos(commands.Cog):
         lang = await ctx.lang()
 
         joined = len([user.id for user in ctx.guild.members if
-                      (datetime.datetime.now() - user.joined_at).seconds <= 86400])
+                      (datetime.datetime.utcnow() - user.joined_at).seconds <= 86400])
         await ctx.embed(lang["todayjoined.message"].format(j=str(joined)), signed=True)
 
     @cmd()
@@ -196,7 +196,7 @@ class Infos(commands.Cog):
 
         if isinstance(user, discord.Member):
             join_pos = members.index(user)
-            days = (datetime.datetime.now() - user.joined_at).days
+            days = (datetime.datetime.utcnow() - user.joined_at).days
 
         else:
             try:
@@ -204,7 +204,7 @@ class Infos(commands.Cog):
                     raise IndexError
                 join_pos = user - 1
                 user = members[join_pos]
-                days = (datetime.datetime.now() - user.joined_at).days
+                days = (datetime.datetime.utcnow() - user.joined_at).days
             except IndexError:
                 return await ctx.error(lang["joined.error.invalidposition"])
 
