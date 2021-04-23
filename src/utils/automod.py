@@ -53,12 +53,11 @@ async def manage_punishment(ctx: Context, punishment, reason):
     elif punishment == 3:
         if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
             punishment_str = "tempban"
-            unix_time = time.time() + config.bantime
-            date = datetime.datetime.utcfromtimestamp(unix_time)
+            date = datetime.timedelta(seconds=config.bantime)
             await ctx.db.execute(
                 'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES '
                 '($1, $2, $3, $4, $5)',
-                ctx.guild.id, user.id, TimerType.BAN.value, unix_time, json.dumps({ 'reason': reason }))
+                ctx.guild.id, user.id, TimerType.BAN.value, config.bantime, json.dumps({ 'reason': reason }))
             await ctx.guild.ban(user, reason=reason)
     elif punishment == 4:
         if checks.hasPermsByName(ctx, ctx.me, 'manage_roles'):
@@ -66,12 +65,11 @@ async def manage_punishment(ctx: Context, punishment, reason):
                 return
 
             punishment_str = "tempmute"
-            unix_time = time.time() + config.mutetime
-            date = datetime.datetime.utcfromtimestamp(unix_time)
+            date = datetime.timedelta(seconds=config.mutetime)
             await ctx.db.execute(
                 'INSERT INTO extra.timers (sid, objid, type, time, data) VALUES '
                 '($1, $2, $3, $4, $5)',
-                ctx.guild.id, user.id, TimerType.MUTE.value, unix_time,
+                ctx.guild.id, user.id, TimerType.MUTE.value, config.mutetime,
                 json.dumps({ 'reason': reason }))
             await user.add_roles(config.muterole, reason=reason)
 
@@ -142,7 +140,7 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
 
         elif action == 3:
             if checks.hasPermsByName(ctx, ctx.me, 'ban_members'):
-                date = datetime.datetime.utcfromtimestamp(unix_time_ban)
+                date = datetime.timedelta(seconds=unix_time_ban)
                 await createAutomodLog(ctx, reason, lang, points=f"{points}/{max_points}",
                                        date=date, punished_user=punished_user, punishment="tempban", user=user)
                 await ctx.guild.ban(punished_user, reason=lang["word.automod"] + ": " + reason)
@@ -157,7 +155,7 @@ async def add_points(ctx: Context, new_points, reason, user: discord.Member = No
                 if config.muterole is None:
                     return
 
-                date = datetime.datetime.fromtimestamp(unix_time_mute)
+                date = datetime.timedelta(seconds=unix_time_ban)
                 await createAutomodLog(ctx, reason, lang, points=f"{points}/{max_points}",
                                        date=date, punished_user=punished_user, punishment="tempmute", user=user)
                 await punished_user.add_roles(config.muterole,
