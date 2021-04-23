@@ -223,6 +223,20 @@ class Owner(commands.Cog):
 
         await ctx.send("Level gespeichert")
 
+    @cmd(hidden=True)
+    @commands.is_owner()
+    async def reloadlang(self, ctx):
+        available_langs = ["de", "en"]
+        loaded_langs = {}
+
+        for _lang in available_langs:
+            with open(f"utils/languages/{_lang}/commands_{_lang}.json", 'r') as f:
+                lang = dict(json.load(f))
+                loaded_langs.update({_lang: lang})
+        self.bot._lang = loaded_langs
+
+        await ctx.send("Die Sprachen wurden reloadet.")
+
 
 def setup(bot):
     bot.add_cog(Owner(bot))
