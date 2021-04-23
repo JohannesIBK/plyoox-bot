@@ -25,7 +25,7 @@ class Timer:
         self.object_id = record["objid"]
         self.time = record["time"]
         self.type = record["type"]
-        self.data = json.loads(record["data"])
+        self.data = json.loads(record["data"]) if record["data"] else {}
         self.sid = record["sid"]
 
         return self
