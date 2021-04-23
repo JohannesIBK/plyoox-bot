@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 import time
-import os
 import traceback
 
 import aiohttp
@@ -14,9 +13,7 @@ from discord.ext import commands
 from utils.db.cache import BotCache
 from utils.ext.context import Context
 
-
 logger = logging.getLogger(__name__)
-
 
 available_langs = ["de", "en"]
 loaded_langs = {}
@@ -80,7 +77,7 @@ class Plyoox(commands.Bot):
         )
 
         self.startTime = time.time()
-        self.version = 'v2.7.0'
+        self.version = 'v3.0.0'
         self.owner_id = 263347878150406144
         self.commandsCount = {}
         self.cache: BotCache = BotCache(self)
@@ -149,7 +146,7 @@ class Plyoox(commands.Bot):
             user='plyoox',
             password='1',
             port=port,
-            host=os.getenv('DB_HOST') or "localhost"
+            host="localhost"
         )
 
     async def on_error(self, event_method, *args, **kwargs):
