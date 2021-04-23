@@ -30,9 +30,7 @@ class Timers(commands.Cog):
     async def get_active_timer(self, *, connection=None, days=7):
         con = connection or self.bot.db
 
-        record = await con.fetchrow(
-            "SELECT * FROM extra.timers WHERE time < $1 ORDER BY time LIMIT 1",
-            time.time() + days + 86400)
+        record = await con.fetchrow("SELECT * FROM extra.timers WHERE time < $1 ORDER BY time LIMIT 1", time.time() + 3600 * 24 * days)
         return Timer.load_timer(record=record) if record else None
 
     async def wait_for_active_timers(self, *, days=7):
@@ -50,7 +48,7 @@ class Timers(commands.Cog):
     async def dispatch_timers(self):
         try:
             while not self.bot.is_closed():
-                timer = self._current_timer = await self.wait_for_active_timers(days=40)
+                timer = self._current_timer = await self.wait_for_active_timers(days=30)
                 now = datetime.datetime.utcnow().timestamp()
 
                 if timer.time >= now:
@@ -64,6 +62,7 @@ class Timers(commands.Cog):
 
     async def call_timer(self, timer):
         await self.bot.db.execute("DELETE FROM extra.timers WHERE id = $1", timer.id)
+
         if timer.type == TimerType.BAN.value:
             self.bot.dispatch('tempban_end', timer)
         elif timer.type == TimerType.MUTE.value:
@@ -92,10 +91,13 @@ class Timers(commands.Cog):
             self.bot.loop.create_task(self.short_timer(timer, delta))
             return timer
 
+        if data is not None:
+            data = json.dumps(data) or None
+
         timer_id = await self.bot.db.execute(
             "INSERT INTO extra.timers (sid, objid, time, type, data) VALUES ($1, $2, $3, $4, $5) "
             "RETURNING id",
-            guild_id, object_id, seconds, type, json.dumps(data))
+            guild_id, object_id, seconds, type, data)
 
         timer.id = timer_id
 
@@ -160,7 +162,7 @@ class Timers(commands.Cog):
 
         message = lang["reminder.event.timermessage"].format(u=member.mention,
                                                              m=std.quote(timer.data["message"]))
-        await channel.reply(
+        await channel.send(
             message,
             allowed_mentions=discord.AllowedMentions(
                 everyone=False,
@@ -195,7 +197,7 @@ class Timers(commands.Cog):
                 break
 
         if len(winners) == 0:
-            await channel.reply(lang["giveaway.event.nowinners"].format(w=win))
+            await channel.send(lang["giveaway.event.nowinners"].format(w=win))
             embed = discord.Embed(
                 color=std.normal_color,
                 title=win,
@@ -205,7 +207,7 @@ class Timers(commands.Cog):
         else:
             winner_mention = ' '.join(member.mention for member in winners)
             if len(winners) == 1:
-                await channel.reply(lang["giveaway.event.message.single"].format(w=win,
+                await channel.send(lang["giveaway.event.message.single"].format(w=win,
                                                                                 m=winner_mention),
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
@@ -214,7 +216,7 @@ class Timers(commands.Cog):
                                         description=lang["giveaway.event.edit.single"]
                                         .format(m=winner_mention)))
             else:
-                await channel.reply(lang["giveaway.event.message.multiple"].format(w=win,
+                await channel.send(lang["giveaway.event.message.multiple"].format(w=win,
                                                                                   m=winner_mention),
                                    allowed_mentions=discord.AllowedMentions(users=True))
 
@@ -263,9 +265,9 @@ class Timers(commands.Cog):
             color=std.normal_color,
             title=lang["giveaway.embed.title"],
             description=lang["giveaway.embed.startdescription"])
-        msg = await channel.reply(embed=embed)
+        msg = await channel.send(embed=embed)
         await msg.add_reaction('🎉')
-        await ctx.reply(embed=std.getEmbed(lang["giveaway.message.started"]))
+        await ctx.send(embed=std.getEmbed(lang["giveaway.message.started"]))
         embed = discord.Embed(color=std.normal_color, title=prize,
                               description=lang["giveaway.embed.description"])
         embed.set_footer(text=lang["giveaway.embed.footer"].format(g=str(winner), id=str(msg.id)))
@@ -376,7 +378,7 @@ class Timers(commands.Cog):
             reason = json.loads(timer['data'])['message']
             timer_list_embed.add_field(name='TimerID: ' + str(timer['id']), value=f'```{reason}```')
 
-        await ctx.reply(embed=timer_list_embed)
+        await ctx.send(embed=timer_list_embed)
 
     @reminder.command(alias=["delete"])
     async def remove(self, ctx: context.Context, ID: int):
