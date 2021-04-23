@@ -5,13 +5,21 @@ from utils.ext.context import Context
 
 
 class ActionReason(commands.Converter):
+    reason: str
+    raw_reason: str
+
     async def convert(self, ctx: Context, argument):
         lang = await ctx.lang()
         if len(argument) > 510 - len(str(ctx.author)):
             raise commands.BadArgument(lang["converters.error.reasontolong"].format(a=str(len(argument)), m=str(len(str(ctx.author)))))
 
-        argument = str(ctx.author) + ": " + argument
-        return argument
+        reason = str(ctx.author) + ": " + argument
+        self.reason = reason
+        self.raw_reason = argument
+        return self
+
+    def __str__(self):
+        return self.raw_reason
 
 
 class BannedMember(commands.Converter):

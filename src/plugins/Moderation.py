@@ -83,7 +83,7 @@ class Moderation(commands.Cog):
         if not await self.can_punish_user(ctx, user):
             return await ctx.error(lang['multi.error.notallowed'])
 
-        await ctx.guild.ban(user=user, reason=reason, delete_message_days=1)
+        await ctx.guild.ban(user=user, reason=reason.reason if reason is not None else None, delete_message_days=1)
         await ctx.embed(lang['ban.message'].format(u=str(user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
 
@@ -99,7 +99,7 @@ class Moderation(commands.Cog):
         if not await self.can_punish_user(ctx, user):
             return await ctx.error(lang['multi.error.notallowed'])
 
-        await ctx.guild.kick(user, reason=reason)
+        await ctx.guild.kick(user, reason=reason.reason if reason is not None else None)
         await ctx.embed(lang['kick.message'].format(u=str(user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
 
@@ -115,7 +115,7 @@ class Moderation(commands.Cog):
         if not await self.can_punish_user(ctx, user):
             return await ctx.error(lang['multi.error.notallowed'])
 
-        await ctx.guild.ban(user=user, reason=reason, delete_message_days=1)
+        await ctx.guild.ban(user=user, reason=reason.reason if reason is not None else None, delete_message_days=1)
         await ctx.guild.unban(user=user, reason=lang['softban.reason'])
 
         await ctx.embed(lang['kick.message'].format(u=str(user), r=reason), delete_after=5)
@@ -139,7 +139,7 @@ class Moderation(commands.Cog):
             return await ctx.error(lang["multi.error.nomuterole"])
 
         await user.add_roles(config.automod.config.muterole)
-        await ctx.embed(lang["mute.success"].format(u=str(user), r=reason), delete_after=5)
+        await ctx.embed(lang["mute.perm.message"].format(u=str(user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
 
         mod_embed = std.cmdEmbed("mute", reason, lang, mod=ctx.author, user=user)
@@ -165,14 +165,14 @@ class Moderation(commands.Cog):
                                   type=TimerType.MUTE.value)
         await user.add_roles(config.automod.config.muterole)
 
-        await ctx.embed(lang["mute.temp.message"].format(u=str(user), r=reason, d=time.delta),
+        await ctx.embed(lang["mute.temp.message"].format(u=str(user), r=reason, d=std.fixTimeDelta(time.delta)),
                         delete_after=5)
         await ctx.message.delete(delay=5)
 
         mod_embed = std.cmdEmbed("tempmute", reason, lang, mod=ctx.author, user=user,
-                                 duration=time.dt)
+                                 duration=time.delta)
         user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='mute',
-                                 duration=time.dt)
+                                 duration=time.delta)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
@@ -189,7 +189,7 @@ class Moderation(commands.Cog):
             "SELECT objid FROM extra.timers WHERE sid = $1 AND objid = $2 AND type = $3",
             ctx.guild.id, user.id, TimerType.MUTE.value)
         if config.automod.config.muterole not in user.roles and mute is None:
-            return ctx.error(lang["unmute.error.notmuted"])
+            return await ctx.error(lang["unmute.error.notmuted"])
 
         if config.automod.config.muterole in user.roles:
             await user.remove_roles(config.automod.config.muterole, reason=lang["word.unmute"])
@@ -218,16 +218,16 @@ class Moderation(commands.Cog):
         timers = self.bot.get_cog('Timers')
         await timers.create_timer(ctx.guild.id, date=time.dt, object_id=user.id,
                                   type=TimerType.BAN.value)
-        await ctx.guild.ban(user=user, reason=reason, delete_message_days=1)
+        await ctx.guild.ban(user=user, reason=reason.reason if reason is not None else None, delete_message_days=1)
 
-        await ctx.embed(lang["ban.temp.message"].format(u=str(user), r=reason, d=time.delta),
+        await ctx.embed(lang["ban.temp.message"].format(u=str(user), r=reason.reason if reason is not None else None, d=std.fixTimeDelta(time.delta)),
                         delete_after=5)
         await ctx.message.delete(delay=5)
 
         mod_embed = std.cmdEmbed("tempban", reason, lang, mod=ctx.author, user=user,
-                                 duration=time.dt)
+                                 duration=time.delta)
         user_embed = std.dmEmbed(lang, reason=reason, guildName=ctx.guild.name, punishType='ban',
-                                 duration=time.dt)
+                                 duration=time.delta)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed, uEmbed=user_embed)
 
     @cmd()
@@ -235,7 +235,7 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(ban_members=True)
     async def unban(self, ctx: Context, user: BannedMember, *, reason: ActionReason = None):
         lang = await ctx.lang(utils=True)
-        await ctx.guild.unban(user.user, reason=reason)
+        await ctx.guild.unban(user.user, reason=reason.reason if reason is not None else None)
 
         await ctx.embed(lang["unban.message"].format(u=str(user.user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
@@ -260,7 +260,7 @@ class Moderation(commands.Cog):
         count = 0
         for user in users:
             try:
-                await ctx.guild.ban(user, reason=reason)
+                await ctx.guild.ban(user, reason=reason.reason if reason is not None else None)
                 count += 1
             except discord.HTTPException:
                 pass
@@ -286,7 +286,7 @@ class Moderation(commands.Cog):
             return await ctx.error(lang["warn.error.points"])
 
         await add_points(ctx, points, reason, user=user)
-        await ctx.embed(lang["warn.message"].format(u=str(user), r=reason, p=str(points)),
+        await ctx.embed(lang["warn.message"].format(u=str(user), r=reason.reason if reason is not None else None, p=str(points)),
                         delete_after=5)
         await ctx.message.delete(delay=5)
 
@@ -322,7 +322,7 @@ class Moderation(commands.Cog):
         await ctx.embed(lang["pointsreset.message"].format(u=str(user), r=reason), delete_after=5)
         await ctx.message.delete(delay=5)
 
-        mod_embed = std.cmdEmbed("resetPoints", reason, lang, mod=ctx.author, user=user)
+        mod_embed = std.cmdEmbed("resetPoints", reason.reason if reason is not None else None, lang, mod=ctx.author, user=user)
         await logs.createLog(ctx, user=user, mEmbed=mod_embed)
 
     @cmd(aliases=['slow', 'sm'])
@@ -374,7 +374,7 @@ class Moderation(commands.Cog):
                                 value='\n'.join(punishment_list))
             else:
                 return await ctx.embed(lang["check.nopunish"])
-            await ctx.reply(embed=embed)
+            await ctx.send(embed=embed)
 
     @grp(invoke_without_command=True, aliases=["remove", "purge", "p"])
     @checks.isMod(helper=True)
@@ -390,6 +390,11 @@ class Moderation(commands.Cog):
     @staticmethod
     async def do_removal(ctx: Context, limit: int, predicate, lang, reason=None, *, before=None,
                          after=None):
+        try:
+            await ctx.message.delete()
+        except discord.NotFound:
+            pass
+
         if limit > 2000 or limit < 1:
             return await ctx.error(lang['clear.error.amount'])
 
@@ -438,7 +443,7 @@ class Moderation(commands.Cog):
     async def contains(self, ctx, amount: int, *, string: str):
         lang = await ctx.lang(utils=True)
         if len(string) < 3:
-            return await ctx.reply(lang["remove.error.minlength"])
+            return await ctx.send(lang["remove.error.minlength"])
 
         await self.do_removal(ctx, amount, lambda m: string in m.content, lang)
 
@@ -527,7 +532,7 @@ class Moderation(commands.Cog):
         try:
             args = parser.parse_args(shlex.split(args))
         except Exception as e:
-            await ctx.reply(str(e))
+            await ctx.send(str(e))
             return
 
         predicates = []
@@ -555,7 +560,7 @@ class Moderation(commands.Cog):
                     user = await converter.convert(ctx, u)
                     users.append(user)
                 except Exception as e:
-                    await ctx.reply(str(e))
+                    await ctx.send(str(e))
                     return
 
             predicates.append(lambda m: m.author in users)
@@ -721,12 +726,12 @@ class Moderation(commands.Cog):
                             members)
             content = f'{lang["massban.word.usercount"]}: {len(members)}\n{fmt}'
             file = discord.File(io.BytesIO(content.encode('utf-8')), filename='members.txt')
-            return await ctx.reply(file=file)
+            return await ctx.send(file=file)
 
         if args.reason is None:
             return await ctx.error(lang["massban.error.noreason"])
         else:
-            reason = await ActionReason().convert(ctx, args.reason)
+            reason: ActionReason = await ActionReason().convert(ctx, args.reason)
 
         confirm = await ctx.prompt(lang["massban.message.prompt"].format(m=str(len(members))))
         if not confirm:
@@ -735,7 +740,7 @@ class Moderation(commands.Cog):
         count = 0
         for member in members:
             try:
-                await ctx.guild.ban(member, reason=reason)
+                await ctx.guild.ban(member, reason=reason.reason if reason is not None else None)
             except discord.HTTPException:
                 pass
             else:
