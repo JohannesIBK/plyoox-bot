@@ -219,8 +219,8 @@
   "multiban": [
     "Bans multiple users from the guild."
   ],
-  "remove": [
-    "Durchsucht die angegebenen Nachrichten nach den Kriterien und löscht diese.",
+  "clear": [
+    "Searches the specified messages according to the criteria and deletes them.",
     {
       "embeds": "Deletes all messages that contain embeds.",
       "files": "Deletes all messages that contain files.",

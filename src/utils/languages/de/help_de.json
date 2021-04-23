@@ -219,7 +219,7 @@
   "multiban": [
     "Bannt mehrere User vom Server."
   ],
-  "remove": [
+  "clear": [
     "Durchsucht die angegebenen Nachrichten nach den Kriterien und löscht diese.",
     {
       "embeds": "Löscht alle Nachrichten die Embeds enthalten.",
