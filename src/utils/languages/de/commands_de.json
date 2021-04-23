@@ -34,7 +34,7 @@
     "mute.temp.reason.unmute": "Mute abgelaufen",
     "mute.temp.message": "Der User `{u}` wurde erfolgreich `{d}` für `{r}` gemutet.",
     "ban.temp.message": "Der User `{u}` wurde erfolgreich `{d}` für `{r}` gebannt.",
-    "mute.message": "Der User `{u}` wurde erfolgreich für `{r}` gemutet",
+    "mute.perm.message": "Der User `{u}` wurde erfolgreich für `{r}` gemutet",
     "unmute.error.notmuted": "Der User ist nicht gemutet.",
     "unmute.message": "Der User `{u}` wurde für `{r}` entmutet.",
     "unban.message": "Der User `{u}` wurde erfolgreich für `{r}` entbannt.",
@@ -280,7 +280,6 @@
 
     "word.log.ban": "gebannt",
     "word.log.mute": "gemutet",
-
     "log.message.perm": "Du wurdest permanent vom Server `{n}` {t}, da du die maximale Anzahl von Warn-Punkten erreicht hast.",
     "log.message.temp": "Du wurdest für `{d}` vom Server `{n}` {t}, da du die maximale Anzahl von Warn-Punkten erreicht hast.",
     "log.message.log": "Du wurdest auf dem Server `{n}` wegen `{r}` gewarnt. Du hast nun `{p}` Warn-Punkte.",
