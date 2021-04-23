@@ -67,7 +67,7 @@ class Logging(commands.Cog):
 
         since_joined_guild = '-'
         if isinstance(user, discord.Member):
-            since_joined_guild = (datetime.datetime.now() - user.joined_at).days
+            since_joined_guild = (datetime.datetime.utcnow() - user.joined_at).days
 
         embed = discord.Embed(color=discord.Color.red())
         embed.timestamp = datetime.datetime.utcnow()
@@ -96,7 +96,7 @@ class Logging(commands.Cog):
         if not data or not data['logging'] or not data['memberunban']:
             return
 
-        account_age = (datetime.datetime.now() - user.created_at).days
+        account_age = (datetime.datetime.utcnow() - user.created_at).days
 
         embed = discord.Embed(color=discord.Color.green())
         embed.timestamp = datetime.datetime.utcnow()
@@ -124,7 +124,7 @@ class Logging(commands.Cog):
         if not data or not data['logging'] or not data['memberjoin']:
             return
 
-        account_age = (datetime.datetime.now() - user.created_at).days
+        account_age = (datetime.datetime.utcnow() - user.created_at).days
 
         embed = discord.Embed(color=discord.Color.green())
         embed.set_author(name=lang["join.embed.title"], icon_url=user.avatar_url)
@@ -152,7 +152,7 @@ class Logging(commands.Cog):
         if not data or not data['memberleave'] or not data['memberleave']:
             return
 
-        since_joined_guild = (datetime.datetime.now() - user.joined_at).days
+        since_joined_guild = (datetime.datetime.utcnow() - user.joined_at).days
         embed = discord.Embed(color=discord.Color.red())
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_author(name=lang["remove.embed.title"], icon_url=user.avatar_url)
@@ -232,6 +232,9 @@ class Logging(commands.Cog):
 
         guild = self.bot.get_guild(int(payload.data["guild_id"]))
         user = guild.get_member(int(payload_message['author']['id']))
+        if user is None:
+            return
+
         cached_message = payload.cached_message
 
         embed = discord.Embed(color=discord.Color.orange())
