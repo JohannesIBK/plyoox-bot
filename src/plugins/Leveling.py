@@ -86,7 +86,7 @@ class Leveling(commands.Cog):
             add_role = None
 
             roles = config.roles
-            add_role_id = list(filter(lambda role: role[1] == current_lvl, roles))
+            add_role_id = list(filter(lambda role: role[1] == current_lvl if role else False, roles))
 
             if add_role_id:
                 add_role = guild.get_role(add_role_id[0][0])
@@ -116,7 +116,7 @@ class Leveling(commands.Cog):
                 await author.add_roles(*add_lvl_roles)
 
             lvl_msg = formatMessage(config.message, author, current_lvl, add_role)
-            if lvl_msg is not None:
+            if lvl_msg:
                 if config.channelID == 0:
                     await msg.channel.send(lvl_msg)
                 elif config.channelID == 1:
